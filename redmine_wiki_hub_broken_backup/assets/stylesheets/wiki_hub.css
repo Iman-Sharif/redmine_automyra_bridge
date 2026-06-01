@@ -1,0 +1,57 @@
+/* Wiki Hub CSS - Scope-Fidelity Remediation
+ * Oracle directive: Remove all broad ordinary-page styling.
+ * Kept: Only narrow behavior hooks for interaction support.
+ */
+
+/* Toggle Icon Rotation - essential behavior hook */
+.project-tree-toggle .toggle-icon {
+  display: inline-block;
+}
+
+.project-tree-toggle[aria-expanded='true'] .toggle-icon {
+  transform: rotate(90deg);
+}
+
+/* Search Suggestions Positioning - essential popup behavior */
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.suggestion-item + .suggestion-item,
+.related-page-item + .related-page-item {
+  border-top: 1px solid currentColor;
+  border-color: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+/* Preview Content Wrapping - essential text formatting */
+.preview-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Related Page Item Layout - minimal structural hook */
+.related-page-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+/* Filters Form Hidden State - essential accessibility hook */
+@media (max-width: 768px) {
+  .wiki-hub-filters-form[hidden] {
+    display: none;
+  }
+}

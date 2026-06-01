@@ -1,0 +1,85 @@
+# Database and backups
+db/
+*.sql
+*.tar.gz
+backups/
+staging-files/
+redmine_task_hub_broken_backup/
+redmine_wiki_hub_broken_backup/
+
+# Docker runtime
+.env
+
+# Logs
+log/
+*.log
+
+# Node modules
+node_modules/
+
+# Python cache
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# Playwright
+.playwright-mcp/
+
+# Temp/junk files
+tmp/
+CSSEOF
+EOF
+ERBEOF
+LEARN_EOF
+LEARNINGS
+SCRIPT
+RUBY
+1
+
+# Screenshots (artifacts, not config)
+*.png
+
+# Sisyphus runtime state
+.sisyphus/
+.sisphus/
+
+# Debug scripts
+debug_wiki_hub.rb
+.tmp_erb_check.rb
+.tmp_wiki_audit.py
+
+# Docker artifacts
+dir:*/
+git:*/
+
+# Large binary data
+db_data.tar.gz
+redmine_backup.sql
+kanban_board.png
+kanban_dom.txt
+check_hub_route_docs_parity
+
+# Test results
+test-results/
+tests/
+
+# Redmine uploaded files (attachments - not config)
+files/
+
+# Redmine repositories (mirrored locally)
+repositories/
+
+# Plugin embedded git dirs - track only their working content
+_disabled_redmine_pcs_intelligence_hub/
+redmine-mcp-server-src/
+
+# Redmine themes (vendored, not our config)
+themes/
+
+# Package artifacts
+package.json
+package-lock.json
+
+# Misc junk
+en.yml
+login-snapshot.yml

@@ -1,0 +1,15 @@
+---
+hub_reader_a_agreements_role:
+  id: 6901
+  member_id: 6801
+  role_id: 6601
+
+hub_reader_a_procurement_role:
+  id: 6902
+  member_id: 6802
+  role_id: 6601
+
+hub_reader_b_process_docs_role:
+  id: 6903
+  member_id: 6803
+  role_id: 6601

@@ -1,0 +1,277 @@
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'wiki_hub_accessibility', plugin: 'redmine_wiki_hub' %>
+  <%= javascript_include_tag 'wiki_hub_bulk', plugin: 'redmine_wiki_hub' %>
+  <%= javascript_include_tag 'wiki_hub', plugin: 'redmine_wiki_hub' %>
+<% end %>
+
+<% content_for :page_title do %><%= l(:wiki_hub_title) %><% end %>
+
+<a href="#wiki-hub-main-content" class="skip-link"><%= l(:wiki_hub_skip_to_content) %></a>
+
+<h2 data-testid="wiki-hub-title"><%= l(:wiki_hub_title) %></h2>
+
+<%= link_to quick_create_knowledge_hub_path,
+            class: 'icon icon-add',
+            data: { testid: 'wiki-hub-create-page' },
+            aria: { label: l(:wiki_hub_create_page) } do %>
+  <%= l(:wiki_hub_create_page) %>
+<% end %>
+<%= link_to create_from_hub_knowledge_hub_templates_path,
+            class: 'icon icon-copy',
+            data: { testid: 'wiki-hub-create-template' },
+            aria: { label: l(:wiki_hub_create_template) } do %>
+  <%= l(:wiki_hub_create_template) %>
+<% end %>
+
+<%= link_to l(:wiki_hub_filter_all), knowledge_hub_path, class: 'icon icon-projects' %>
+<%= link_to l(:wiki_hub_filter_templates), knowledge_hub_templates_path, class: 'icon icon-wiki' %>
+<%= link_to l(:wiki_hub_filter_lessons), knowledge_hub_lessons_path, class: 'icon icon-time' %>
+
+<div class="splitcontent" data-testid="wiki-hub-page" role="main" aria-label="<%= l(:wiki_hub_title) %>">
+    <div class="splitcontentleft">
+    <div class="box" data-testid="wiki-hub-navigation">
+      <h3><%= l(:wiki_hub_navigation) %></h3>
+      <ul>
+          <li data-testid="wiki-hub-nav-all">
+            <%= link_to knowledge_hub_path, class: 'icon icon-projects' do %>
+              <%= l(:wiki_hub_all_pages) %>
+            <% end %>
+          </li>
+          <li data-testid="wiki-hub-nav-templates">
+            <%= link_to knowledge_hub_templates_path, class: 'icon icon-wiki' do %>
+              <%= l(:wiki_hub_templates_title) %>
+            <% end %>
+          </li>
+          <li data-testid="wiki-hub-nav-lessons">
+            <%= link_to knowledge_hub_lessons_path, class: 'icon icon-time' do %>
+              <%= l(:wiki_hub_lessons_title) %>
+            <% end %>
+          </li>
+          <li data-testid="wiki-hub-nav-graph">
+            <%= link_to knowledge_hub_graph_path, class: 'icon icon-workflow' do %>
+              <%= l(:wiki_hub_graph_title) %>
+            <% end %>
+          </li>
+          <li data-testid="wiki-hub-nav-backlinks">
+            <%= link_to knowledge_hub_backlinks_path, class: 'icon icon-link' do %>
+              <%= l(:wiki_hub_backlinks_title) %>
+            <% end %>
+          </li>
+          <% if User.current.admin? %>
+            <li data-testid="wiki-hub-nav-admin">
+              <%= link_to admin_wiki_hub_path, class: 'icon icon-settings' do %>
+                <%= l(:wiki_hub_admin_title) %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+
+      <!-- Project Directory - Enhanced with Expandable Tree -->
+      <div class="box" data-testid="wiki-hub-project-groups">
+        <h3><%= l(:wiki_hub_projects) %></h3>
+        <% visible_projects = @projects || [] %>
+        
+        <% if visible_projects.any? %>
+          <div data-testid="wiki-hub-project-tree">
+            <% visible_projects.each do |project| %>
+              <% page_count = (@project_page_counts || {})[project.id].to_i %>
+              <% recent_count = (@project_recent_counts || {})[project.id].to_i %>
+              
+              <div class="project-tree-item" data-testid="wiki-hub-project-item" data-project-id="<%= project.id %>">
+                <div class="project-tree-header">
+                  <%= link_to project_wiki_hub_path(project_id: project.identifier), 
+                              class: 'project-tree-link', 
+                              data: { testid: 'wiki-hub-project-link' } do %>
+                    <span class="project-tree-name"><%= project.name %></span>
+                    <span class="project-tree-badge" title="<%= l(:wiki_hub_pages_count) %>">
+                      <%= page_count %>
+                    </span>
+                  <% end %>
+                  <button class="project-tree-toggle" data-testid="wiki-hub-project-toggle" aria-expanded="false" aria-label="<%= l(:wiki_hub_expand_project) %>">
+                    <span class="toggle-icon">▶</span>
+                  </button>
+                </div>
+                
+                <div class="project-tree-content is-hidden" data-testid="wiki-hub-project-content">
+                  <div class="project-tree-stats">
+                    <span class="stat-item">
+                      <strong><%= page_count %></strong> <%= l(:wiki_hub_pages_count) %>
+                    </span>
+                    <% if recent_count > 0 %>
+                      <span class="stat-item stat-recent">
+                        <strong>+<%= recent_count %></strong> <%= l(:wiki_hub_recent_updates) %>
+                      </span>
+                    <% end %>
+                  </div>
+                  
+                  <div class="project-tree-actions">
+                    <%= link_to l(:wiki_hub_view_wiki), 
+                                project_wiki_path(project_id: project.identifier), 
+                                class: 'button-small',
+                                data: { testid: 'wiki-hub-view-wiki' } %>
+                    <%= link_to l(:wiki_hub_new_page), 
+                                quick_create_knowledge_hub_path(project_id: project.id), 
+                                class: 'button-small',
+                                data: { testid: 'wiki-hub-new-page' } %>
+                  </div>
+                  
+                  <% recent_pages = Array((@project_recent_pages || {})[project.id]).first(3) %>
+                  <% if recent_pages.any? %>
+                    <ul class="project-tree-pages">
+                      <% recent_pages.each do |page| %>
+                        <li class="project-tree-page-item">
+                          <%= link_to page.title, 
+                                      project_wiki_page_path(project_id: project.identifier, id: page.title),
+                                      class: 'project-tree-page-link' %>
+                          <span class="page-update-time"><%= time_ago_in_words(page.updated_at) %> ago</span>
+                        </li>
+                      <% end %>
+                    </ul>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          
+          <% if visible_projects.count > 5 %>
+            <p class="wiki-hub-more-projects">
+              <%= link_to l(:wiki_hub_more_projects, count: visible_projects.count - 5), 
+                          knowledge_hub_path(view: 'all_projects') %>
+            </p>
+          <% end %>
+        <% else %>
+          <p class="wiki-hub-no-projects"><%= l(:wiki_hub_no_projects) %></p>
+        <% end %>
+      </div>
+      <!-- Recent Changes -->
+      <div class="box" data-testid="wiki-hub-recent-changes">
+        <h3><%= l(:wiki_hub_recent_changes) %></h3>
+        <% recent_pages = @recent_pages || [] %>
+        <% if recent_pages.any? %>
+          <ul class="wiki-hub-recent-list" data-testid="wiki-hub-recent-list">
+            <% recent_pages.limit(5).each do |page| %>
+              <li data-testid="wiki-hub-recent-change" data-page-id="<%= page.wiki_page_id %>">
+                <%= link_to page.title, project_wiki_page_path(page.project_id, page.title) %>
+                <span class="wiki-hub-recent-date"><%= format_time(page.updated_at) %></span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="nodata" data-testid="wiki-hub-no-recent"><%= l(:wiki_hub_no_recent_changes) %></p>
+        <% end %>
+      </div>
+  </div>
+
+  <div class="splitcontentright" id="wiki-hub-main-content" data-testid="wiki-hub-main" tabindex="-1">
+      <h1 data-testid="wiki-hub-title"><%= l(:wiki_hub_title) %></h1>
+
+      <div class="box" data-testid="wiki-hub-search">
+        <h3><%= l(:wiki_hub_search_title) %></h3>
+        <%= form_with url: knowledge_hub_search_path, method: :get, local: true, data: { testid: 'wiki-hub-search-form' } do |f| %>
+        <p>
+          <%= f.text_field :q, placeholder: l(:wiki_hub_search_placeholder), value: params[:q], id: 'wiki-hub-search-input', data: { testid: 'wiki-hub-search-input' } %>
+          <%= f.submit l(:wiki_hub_search_submit), name: nil, data: { testid: 'wiki-hub-search-submit' } %>
+        </p>
+        <% end %>
+      </div>
+
+      <div class="box" data-testid="wiki-hub-filters">
+        <h3><%= l(:wiki_hub_filters) %></h3>
+        <%= form_with url: knowledge_hub_path, method: :get, local: true, data: { testid: 'wiki-hub-filter-form' } do |f| %>
+        <p>
+          <label for="wiki-hub-filter-category"><%= l(:wiki_hub_filter_category) %></label>
+          <%= f.select :category,
+                      options_for_select([['', '']] + Array(@category_options).map { |category| [category.humanize, category] }, params[:category]),
+                      {},
+                      id: 'wiki-hub-filter-category',
+                      data: { testid: 'wiki-hub-filter-category' } %>
+        </p>
+        <p>
+          <label for="wiki-hub-filter-kind"><%= l(:wiki_hub_filter_kind) %></label>
+          <%= f.select :page_kind,
+                      options_for_select([['', '']] + WikiHub::PageProfile.page_kinds.keys.map { |k| [k.humanize, k] }, params[:page_kind]),
+                      {},
+                      id: 'wiki-hub-filter-kind',
+                      data: { testid: 'wiki-hub-filter-kind' } %>
+        </p>
+        <p>
+          <label for="wiki-hub-filter-tag"><%= l(:wiki_hub_filter_tag) %></label>
+          <%= f.text_field :tag, value: params[:tag], id: 'wiki-hub-filter-tag', data: { testid: 'wiki-hub-filter-tag' } %>
+        </p>
+        <p class="buttons">
+          <%= f.submit l(:wiki_hub_filter_apply), data: { testid: 'wiki-hub-filter-submit' } %>
+          <%= link_to l(:wiki_hub_filter_clear), knowledge_hub_path, class: 'button', data: { testid: 'wiki-hub-filter-clear' } %>
+        </p>
+        <% end %>
+      </div>
+
+      <!-- Bulk Operations Toolbar -->
+    <div class="box wiki-hub-bulk-toolbar is-hidden" data-testid="wiki-hub-bulk-toolbar">
+      <p class="bulk-toolbar-info">
+        <span class="bulk-selected-count">0</span> <%= l(:wiki_hub_items_selected) %>
+      </p>
+      <p class="buttons bulk-toolbar-actions">
+          <%= link_to l(:button_delete), '#', class: 'button button-danger bulk-action-delete', data: { confirm: l(:wiki_hub_bulk_delete_confirm) } %>
+          <%= link_to l(:wiki_hub_bulk_tag), '#', class: 'button bulk-action-tag' %>
+          <%= link_to l(:wiki_hub_bulk_categorize), '#', class: 'button bulk-action-categorize' %>
+          <%= link_to l(:button_duplicate), '#', class: 'button bulk-action-duplicate' %>
+          <%= link_to l(:button_cancel), '#', class: 'button bulk-action-clear' %>
+      </p>
+    </div>
+
+    <% pages = @pages || [] %>
+        <% if pages.any? %>
+          <%= form_with url: bulk_action_knowledge_hub_path, method: :post, id: 'wiki-hub-bulk-form', data: { testid: 'wiki-hub-bulk-form' } do |f| %>
+            <table class="list wiki-page-list" data-testid="wiki-hub-pages-table">
+              <thead>
+                <tr>
+                  <th class="checkbox hide-when-print"><%= check_box_tag 'check_all', '', false, id: 'wiki-hub-check-all' %></th>
+                  <th><%= l(:label_wiki_page) %></th>
+                  <th><%= l(:field_project) %></th>
+                  <th><%= l(:wiki_hub_filter_kind) %></th>
+                  <th><%= l(:wiki_hub_filter_category) %></th>
+                  <th><%= l(:description) %></th>
+                  <th><%= l(:field_updated_on) %></th>
+                  <th class="buttons"><%= l(:label_action_plural) %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% pages.each do |page| %>
+                  <% profile = page.wiki_page_profile %>
+                  <tr class="wiki-hub-page-row" data-testid="wiki-hub-page-row" data-page-id="<%= page.wiki_page_id %>">
+                    <td class="checkbox hide-when-print">
+                      <%= check_box_tag 'page_ids[]', page.wiki_page_id, false,
+                                        class: 'page-card-checkbox',
+                                        id: "page_#{page.wiki_page_id}",
+                                        data: { page_id: page.wiki_page_id } %>
+                    </td>
+                    <td class="name">
+                      <strong data-testid="wiki-hub-page-title"><%= link_to page.title, project_wiki_page_path(page.project.identifier, page.title) %></strong>
+                      <% if page.respond_to?(:searchable_text) && page.searchable_text.present? %>
+                        <div class="wiki-hub-page-summary" data-testid="wiki-hub-page-summary"><%= truncate(page.searchable_text, length: 150) %></div>
+                      <% end %>
+                    </td>
+                    <td data-testid="wiki-hub-page-project"><%= link_to page.project.name, project_path(page.project.identifier) if page.project %></td>
+                    <td data-testid="wiki-hub-page-kind"><%= profile&.page_kind.to_s.presence || '-' %></td>
+                    <td data-testid="wiki-hub-page-category"><%= profile&.category.to_s.presence || '-' %></td>
+                    <td><%= truncate(page.searchable_text.to_s, length: 100) %></td>
+                    <td data-testid="wiki-hub-page-date"><%= format_time(page.updated_at) %></td>
+                    <td class="buttons">
+                      <%= link_to l(:button_edit), edit_project_wiki_page_path(page.project.identifier, page.title), class: 'icon icon-edit' %>
+                      <%= link_to l(:button_duplicate), '#', class: 'icon icon-copy btn-duplicate-page', data: { page_id: page.wiki_page_id } %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          <% end %>
+        <% else %>
+          <div data-testid="wiki-hub-empty">
+            <p class="nodata"><%= l(:wiki_hub_no_pages) %></p>
+            <p><%= link_to l(:wiki_hub_create_first_page), new_project_wiki_page_path(project_id: ''), class: 'button' %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>

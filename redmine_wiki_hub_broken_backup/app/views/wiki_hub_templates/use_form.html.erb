@@ -1,0 +1,141 @@
+<div class="contextual">
+  <%= link_to l(:button_cancel), knowledge_hub_template_path(@template.id), class: 'icon icon-cancel' %>
+</div>
+
+<h2><%= l(:wiki_hub_use_template) %>: <%= @template.title %></h2>
+
+<table class="attributes">
+  <tbody>
+    <tr>
+      <th><%= l(:field_project) %></th>
+      <td><%= @template.project.name %></td>
+    </tr>
+    <% if @profile&.summary.present? %>
+      <tr>
+        <th><%= l(:wiki_hub_metadata_summary) %></th>
+        <td><%= @profile.summary %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= form_with url: use_knowledge_hub_template_path(@template.id), method: :post, local: true,
+              data: { testid: 'wiki-hub-use-template-form' }, class: 'tabular' do |f| %>
+  <div class="box">
+    <p>
+      <%= f.label :project_id, l(:field_project) %>
+      <%= f.select :project_id,
+                   options_from_collection_for_select(@projects, :id, :name, params[:project_id]),
+                   { prompt: l(:wiki_hub_select_project) },
+                   { required: true, data: { testid: 'wiki-hub-use-template-project' } } %>
+    </p>
+
+    <p>
+      <%= f.label :title, l(:field_title) %>
+      <%= f.text_field :title,
+                       value: params[:title] || @template.title.to_s.gsub(/\[Template\]/i, '').strip,
+                       placeholder: l(:wiki_hub_page_title_placeholder),
+                       required: true,
+                       data: { testid: 'wiki-hub-use-template-title' } %>
+    </p>
+  </div>
+
+  <% if @variables.any? %>
+    <fieldset class="box" data-testid="wiki-hub-template-variables">
+      <legend><%= l(:wiki_hub_template_variables) %></legend>
+      <p class="info"><%= l(:wiki_hub_template_variables_hint) %></p>
+
+      <% @variables.each do |var| %>
+        <p>
+          <%= f.label "variables[#{var[:name]}]", var[:name].humanize + (var[:required] ? ' *' : '') %>
+
+          <% if var[:name].downcase.match?(/description|content|body|text/) %>
+            <%= f.text_area "variables[#{var[:name]}]",
+                            value: params.dig(:variables, var[:name]) || var[:default],
+                            placeholder: var[:default] || l(:wiki_hub_variable_placeholder, name: var[:name]),
+                            rows: 4,
+                            required: var[:required],
+                            data: { variable: var[:name] } %>
+          <% else %>
+            <%= f.text_field "variables[#{var[:name]}]",
+                             value: params.dig(:variables, var[:name]) || var[:default],
+                             placeholder: var[:default] || l(:wiki_hub_variable_placeholder, name: var[:name]),
+                             required: var[:required],
+                             data: { variable: var[:name] } %>
+          <% end %>
+
+          <% if var[:default].present? %>
+            <em class="info"><%= l(:wiki_hub_default_value) %>: <%= var[:default] %></em>
+          <% end %>
+        </p>
+      <% end %>
+    </fieldset>
+
+    <div class="box" data-testid="wiki-hub-template-preview">
+      <h3><%= l(:wiki_hub_preview) %></h3>
+      <div id="template-preview-content">
+        <p class="nodata"><%= l(:wiki_hub_preview_placeholder) %></p>
+      </div>
+    </div>
+  <% end %>
+
+  <p class="buttons">
+    <%= f.submit l(:wiki_hub_create_page_from_template), class: 'button',
+                 data: { testid: 'wiki-hub-use-template-submit' } %>
+    <%= link_to l(:button_cancel), knowledge_hub_template_path(@template.id), class: 'icon icon-cancel' %>
+  </p>
+<% end %>
+
+<% if @variables.any? %>
+<script>
+// Live preview functionality
+(function() {
+  const form = document.querySelector('[data-testid="wiki-hub-use-template-form"]');
+  const previewContent = document.getElementById('template-preview-content');
+  const variableInputs = form.querySelectorAll('[data-variable]');
+  
+  let debounceTimer;
+  
+  function updatePreview() {
+    const variables = {};
+    variableInputs.forEach(function(input) {
+      variables[input.dataset.variable] = input.value;
+    });
+    
+    fetch('<%= preview_knowledge_hub_template_path(@template.id) %>', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+      },
+      body: JSON.stringify({ variables: variables })
+    })
+    .then(response => response.json())
+    .then(data => {
+      previewContent.innerHTML = '<pre>' + escapeHtml(data.preview) + '</pre>';
+    })
+    .catch(error => {
+      console.error('Preview error:', error);
+    });
+  }
+  
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  
+  variableInputs.forEach(function(input) {
+    input.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(updatePreview, 500);
+    });
+  });
+  
+  // Initial preview
+  if (variableInputs.length > 0) {
+    updatePreview();
+  }
+})();
+</script>
+<% end %>

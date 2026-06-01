@@ -1,0 +1,244 @@
+en:
+  wiki_hub_title: "Wiki Hub"
+  wiki_hub_menu: "Wiki Hub"
+  wiki_hub_back_to_hub: "Back to Hub"
+  wiki_hub_back_to_wiki: "Back to Wiki"
+  wiki_hub_cancel: "Cancel"
+  wiki_hub_yes: "Yes"
+  wiki_hub_no: "No"
+
+  # Navigation
+  wiki_hub_navigation: "Navigation"
+  wiki_hub_projects: "Projects"
+  wiki_hub_more_projects: "and %{count} more..."
+  wiki_hub_no_projects: "No projects available"
+  wiki_hub_recent_changes: "Recent Changes"
+  wiki_hub_no_recent_changes: "No recent changes"
+
+  # Filters
+  wiki_hub_filters: "Filters"
+  wiki_hub_filter_category: "Category"
+  wiki_hub_filter_kind: "Page Kind"
+  wiki_hub_filter_tag: "Tag"
+  wiki_hub_filter_apply: "Apply Filters"
+  wiki_hub_filter_clear: "Clear Filters"
+
+  # Search
+  wiki_hub_search_placeholder: "Search wiki pages..."
+  wiki_hub_search_submit: "Search"
+  wiki_hub_search_title: "Search Wiki Pages"
+  wiki_hub_search_results_for: "Search results for \"%{query}\""
+  wiki_hub_search_results_count: "results"
+  wiki_hub_search_no_results: "No results found for \"%{query}\""
+  wiki_hub_search_prompt: "Enter a search term to find wiki pages."
+
+  # Hub Landing
+  wiki_hub_no_pages: "No wiki pages found"
+  wiki_hub_create_first_page: "Create First Page"
+
+  # Quick Actions (Phase 1)
+  wiki_hub_create_page: "New Page"
+  wiki_hub_create_template: "New Template"
+  wiki_hub_all_pages: "All Pages"
+  wiki_hub_pages_count: "pages"
+  wiki_hub_view_wiki: "View Wiki"
+  wiki_hub_new_page: "New Page"
+
+  # Filter Chips
+  wiki_hub_filter_all: "All"
+  wiki_hub_filter_templates: "Templates"
+  wiki_hub_filter_lessons: "Lessons"
+  wiki_hub_filter_recent: "Recent"
+
+  # Card Actions
+  button_duplicate: "Duplicate"
+
+  # Quick Create (Phase 2)
+  wiki_hub_select_project: "Select a project"
+  wiki_hub_page_title_placeholder: "Enter page title..."
+  wiki_hub_use_template: "Use Template (optional)"
+  wiki_hub_template_optional: "Optional: Start from a template"
+  wiki_hub_page_created: "Page created successfully. You can now edit the content."
+  
+  # Quick Template Creation (Phase 2)
+  wiki_hub_source_page: "Source Page"
+  wiki_hub_source_project: "Source Project"
+  wiki_hub_source_page_not_found: "Source page not found"
+  wiki_hub_template_created: "Template created successfully"
+  wiki_hub_template_title_placeholder: "Enter template title..."
+  wiki_hub_template_summary_placeholder: "Brief description of what this template is for..."
+  wiki_hub_template_summary_hint: "This helps users understand when to use this template"
+
+  # Bulk Operations (Phase 2)
+  wiki_hub_items_selected: "items selected"
+  wiki_hub_no_pages_selected: "No pages selected"
+  wiki_hub_bulk_tag: "Tag"
+  wiki_hub_bulk_categorize: "Categorize"
+  wiki_hub_bulk_delete_confirm: "Are you sure you want to delete the selected pages?"
+  wiki_hub_bulk_deleted: "%{count} pages deleted successfully"
+  wiki_hub_bulk_tagged: "%{count} pages tagged successfully"
+  wiki_hub_bulk_categorized: "%{count} pages categorized successfully"
+  wiki_hub_bulk_duplicated: "%{count} pages duplicated successfully"
+  wiki_hub_bulk_action_failed: "Bulk action failed: %{message}"
+  wiki_hub_unknown_action: "Unknown bulk action"
+
+  # Project Directory (Phase 2)
+  wiki_hub_expand_project: "Expand project details"
+  wiki_hub_recent_updates: "this week"
+  wiki_hub_collapse: "Collapse"
+  wiki_hub_expand: "Expand"
+
+  # Phase 3: Faceted Search
+  wiki_hub_filter_by: "Filter By"
+  wiki_hub_clear_filters: "Clear All Filters"
+  wiki_hub_filtered_results: "Filtered results"
+  wiki_hub_active_filters: "Active filters"
+  wiki_hub_your_filters: "your filters"
+  wiki_hub_date_from: "From"
+  wiki_hub_date_to: "To"
+  wiki_hub_sort_by: "Sort By"
+  wiki_hub_sort_relevance: "Relevance"
+  wiki_hub_sort_date: "Date Updated"
+  wiki_hub_sort_title: "Title"
+
+  # Phase 3: Search Suggestions & Related Pages
+  wiki_hub_related_pages: "Related Pages"
+  wiki_hub_pages_like_this: "Pages like this"
+  wiki_hub_same_category: "Same category"
+  wiki_hub_similar_title: "Similar title"
+  wiki_hub_linked_page: "Linked page"
+  wiki_hub_same_project: "Same project"
+  wiki_hub_recent_searches: "Recent searches"
+
+  # Phase 4: Template Library & Analytics
+  wiki_hub_template_analytics: "Template Analytics"
+  wiki_hub_total_templates: "Total Templates"
+  wiki_hub_total_template_uses: "Total Uses"
+  wiki_hub_templates_this_week: "New This Week"
+  wiki_hub_templates_by_category: "By Category"
+  wiki_hub_template_usage_count: "Times this template has been used"
+  wiki_hub_uses: "uses"
+  wiki_hub_view_analytics: "Analytics"
+  wiki_hub_view_detailed_analytics: "View Detailed Analytics"
+  wiki_hub_template_usage_stats: "Usage Statistics"
+  wiki_hub_times_used: "Times Used"
+  wiki_hub_copies_created: "Copies Created"
+  wiki_hub_use_template: "Use Template"
+  wiki_hub_use_template_confirm: "Create a new page from this template?"
+  wiki_hub_preview_template: "Preview"
+  wiki_hub_create_first_template: "Create First Template"
+  
+  # Phase 4: Template Variables
+  wiki_hub_template_variables: "Template Variables"
+  wiki_hub_template_variables_hint: "Fill in the variables below. They will replace the {{variable_name}} placeholders in the template."
+  wiki_hub_variable_placeholder: "Enter %{name}..."
+  wiki_hub_default_value: "Default"
+  wiki_hub_preview: "Live Preview"
+  wiki_hub_preview_placeholder: "Fill in variables above to see a preview..."
+  wiki_hub_create_page_from_template: "Create Page from Template"
+  wiki_hub_page_created_from_template: "Page created successfully from template. You can now edit it."
+
+  # Phase 5: Accessibility & Polish
+  wiki_hub_skip_to_content: "Skip to main content"
+  wiki_hub_toolbar: "Quick actions toolbar"
+  wiki_hub_items_selected_count: "%{count} items selected"
+  wiki_hub_loading: "Loading..."
+  wiki_hub_error_loading: "Error loading content"
+  wiki_hub_try_again: "Try again"
+
+  # Templates
+  wiki_hub_templates_title: "Templates"
+  wiki_hub_templates_description: "Reusable wiki page templates that can be copied to your projects."
+  wiki_hub_templates_empty: "No templates available"
+  wiki_hub_template_copy: "Copy Template"
+  wiki_hub_template_copy_confirm: "Copy this template to your project?"
+  wiki_hub_templates_gallery: "Template Gallery"
+  wiki_hub_templates_preview: "Preview"
+  wiki_hub_templates_use_template: "Use Template"
+
+  # Lessons
+  wiki_hub_lessons_title: "Lessons Learned"
+  wiki_hub_lessons_description: "Documented lessons and insights from project experiences."
+  wiki_hub_lessons_empty: "No lessons learned available"
+  wiki_hub_lessons_no_date: "No date"
+  wiki_hub_lesson_updated: "Updated: %{date}"
+  wiki_hub_lessons_timeline: "Timeline"
+  wiki_hub_lessons_date_format: "%Y-%m-%d"
+  wiki_hub_lessons_month_format: "%B %Y"
+
+  # Graph
+  wiki_hub_graph_title: "Knowledge Graph"
+  wiki_hub_graph_description: "Visualize connections between wiki pages."
+  wiki_hub_graph_root_page: "Root Page ID"
+  wiki_hub_graph_root_placeholder: "Enter page ID..."
+  wiki_hub_graph_load: "Load Graph"
+  wiki_hub_graph_zoom_in: "Zoom In"
+  wiki_hub_graph_zoom_out: "Zoom Out"
+  wiki_hub_graph_reset: "Reset View"
+  wiki_hub_graph_legend: "Legend"
+  wiki_hub_graph_nodes: "nodes"
+  wiki_hub_graph_edges: "edges"
+  wiki_hub_graph_loading: "Loading graph data..."
+  wiki_hub_graph_no_data: "No graph data available"
+  wiki_hub_graph_error: "Unable to load graph data"
+
+  # Page Kinds
+  wiki_hub_page_kind_standard: "Standard"
+  wiki_hub_page_kind_template: "Template"
+  wiki_hub_page_kind_lesson: "Lesson Learned"
+
+  # Admin
+  wiki_hub_admin_title: "Wiki Hub Administration"
+  wiki_hub_admin_health: "Health Status"
+  wiki_hub_admin_health_ok: "OK"
+  wiki_hub_admin_health_error: "Error"
+  wiki_hub_admin_stats: "Index Statistics"
+  wiki_hub_admin_snapshots: "Page Snapshots"
+  wiki_hub_admin_links: "Page Links"
+  wiki_hub_admin_orphans: "Orphan Links"
+  wiki_hub_admin_rebuild: "Rebuild Index"
+  wiki_hub_admin_maintenance: "Maintenance"
+  wiki_hub_admin_last_rebuild: "Last Rebuild"
+  wiki_hub_admin_rebuild_description: "Rebuild the entire wiki index. This may take a while for large wikis."
+  wiki_hub_admin_rebuild_button: "Rebuild Index"
+  wiki_hub_admin_rebuild_confirm: "Are you sure you want to rebuild the index? This may take several minutes."
+  wiki_hub_admin_index_runs: "Recent Index Runs"
+  wiki_hub_admin_index_run_date: "Date"
+  wiki_hub_admin_index_run_status: "Status"
+  wiki_hub_admin_index_run_pages: "Pages"
+  wiki_hub_admin_index_run_links: "Links"
+  wiki_hub_admin_no_index_runs: "No index runs recorded"
+
+  # Metadata
+  wiki_hub_metadata_title: "Metadata for %{page}"
+  wiki_hub_metadata_category: "Category"
+  wiki_hub_metadata_page_kind: "Page Kind"
+  wiki_hub_metadata_tags: "Tags"
+  wiki_hub_metadata_tags_placeholder: "Enter tags separated by commas"
+  wiki_hub_metadata_tags_hint: "Separate multiple tags with commas"
+  wiki_hub_metadata_summary: "Summary"
+  wiki_hub_metadata_summary_placeholder: "Brief description of this page"
+  wiki_hub_metadata_featured: "Featured"
+  wiki_hub_metadata_save: "Save Metadata"
+  wiki_hub_metadata_edit: "Edit Metadata"
+  wiki_hub_metadata_updated: "Metadata updated successfully"
+  wiki_hub_metadata_current: "Current Metadata"
+  wiki_hub_metadata_not_set: "Not set"
+  wiki_hub_metadata_no_tags: "No tags"
+  wiki_hub_metadata_lesson_date: "Lesson Date"
+  wiki_hub_metadata_lesson_date_hint: "Date when this lesson was learned (only applies to Lessons Learned pages)"
+
+  wiki_hub_backlinks_title: "Backlinks"
+  wiki_hub_backlinks_for_page: "Pages linking to %{page}"
+  wiki_hub_backlinks_empty: "No backlinks found"
+  wiki_hub_backlinks_select_page: "Select a page to view backlinks"
+
+  # Homepage
+  wiki_hub_homepage_title: "Wiki Hub Homepage Settings"
+  wiki_hub_homepage_description: "Configure your Wiki Hub homepage preferences."
+  wiki_hub_homepage_enable: "Enable Wiki Hub as homepage"
+  wiki_hub_homepage_enable_hint: "When enabled, Wiki Hub will be shown as your default homepage instead of the standard Redmine homepage."
+  wiki_hub_homepage_save: "Save Settings"
+  wiki_hub_homepage_current_status: "Current Status"
+  wiki_hub_homepage_enabled: "Wiki Hub homepage is enabled"
+  wiki_hub_homepage_disabled: "Wiki Hub homepage is disabled"

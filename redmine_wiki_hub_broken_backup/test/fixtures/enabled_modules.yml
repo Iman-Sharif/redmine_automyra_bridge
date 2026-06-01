@@ -1,0 +1,15 @@
+---
+agreements_wiki:
+  id: 6701
+  project_id: 6201
+  name: wiki
+
+procurement_kb_wiki:
+  id: 6702
+  project_id: 6202
+  name: wiki
+
+process_docs_wiki:
+  id: 6703
+  project_id: 6203
+  name: wiki

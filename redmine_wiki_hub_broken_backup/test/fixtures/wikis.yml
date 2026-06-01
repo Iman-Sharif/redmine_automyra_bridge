@@ -1,0 +1,18 @@
+---
+agreements_wiki:
+  id: 6301
+  project_id: 6201
+  start_page: Master Playbook
+  status: 1
+
+procurement_kb_wiki:
+  id: 6302
+  project_id: 6202
+  start_page: Contract Boilerplate
+  status: 1
+
+process_docs_wiki:
+  id: 6303
+  project_id: 6203
+  start_page: Supplier Onboarding
+  status: 1

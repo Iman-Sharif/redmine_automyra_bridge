@@ -1,0 +1,76 @@
+<div class="contextual">
+  <%= link_to l(:wiki_hub_back_to_templates), knowledge_hub_templates_path, class: 'icon icon-cancel' %>
+  <%= link_to l(:button_edit), edit_project_wiki_page_path(@template.project.identifier, @template.title), class: 'icon icon-edit' %>
+  <%= link_to l(:wiki_hub_preview_template),
+              project_wiki_page_path(@template.project.identifier, @template.title),
+              class: 'icon icon-wiki' %>
+</div>
+
+<h2 data-testid="wiki-hub-template-detail-title">
+  <%= @template.title %>
+</h2>
+
+<table class="attributes" data-testid="wiki-hub-template-detail">
+  <tbody>
+    <tr>
+      <th><%= l(:field_project) %></th>
+      <td><%= link_to @template.project.name, project_path(@template.project.identifier) %></td>
+    </tr>
+    <% if @profile&.category.present? %>
+      <tr>
+        <th><%= l(:wiki_hub_metadata_category) %></th>
+        <td><%= @profile.category %></td>
+      </tr>
+    <% end %>
+    <% if @profile&.summary.present? %>
+      <tr>
+        <th><%= l(:wiki_hub_metadata_summary) %></th>
+        <td><%= @profile.summary %></td>
+      </tr>
+    <% end %>
+    <tr>
+      <th><%= l(:field_updated_on) %></th>
+      <td><%= format_time(@template.updated_at) %></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="box" data-testid="wiki-hub-template-usage-stats">
+  <h3><%= l(:wiki_hub_template_usage_stats) %></h3>
+  <table class="list">
+    <tbody>
+      <tr>
+        <th><%= l(:wiki_hub_times_used) %></th>
+        <td><%= @usage_count %></td>
+      </tr>
+      <tr>
+        <th><%= l(:wiki_hub_copies_created) %></th>
+        <td><%= @copies_created %></td>
+      </tr>
+    </tbody>
+  </table>
+  <p><%= link_to l(:wiki_hub_view_detailed_analytics), analytics_knowledge_hub_template_path(@template.id), class: 'icon icon-stats' %></p>
+</div>
+
+<% if @related_templates.any? %>
+  <div class="box" data-testid="wiki-hub-related-templates">
+    <h3><%= l(:wiki_hub_related_templates) %></h3>
+    <table class="list">
+      <thead>
+        <tr>
+          <th><%= l(:label_wiki_page) %></th>
+          <th><%= l(:field_project) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @related_templates.each do |related| %>
+          <tr>
+            <td><%= link_to related.title, knowledge_hub_template_path(related.wiki_page_id) %></td>
+            <td><%= related.project.name %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+

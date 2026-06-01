@@ -1,0 +1,77 @@
+services:
+  redmica:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        REDMICA_REF: ${REDMICA_REF:-v3.2.6}
+        RUBY_VERSION: ${RUBY_VERSION:-3.3}
+    image: my-redmica:v3.2.6-staging
+    container_name: redmica-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-redmica}
+      DB_USER: ${DB_USER:-redmica}
+      DB_PASSWORD: ${DB_PASSWORD:-redmica}
+      RAILS_ENV: ${RAILS_ENV:-production}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      REDMINE_MAX_ATTACHMENT_SIZE: ${REDMINE_MAX_ATTACHMENT_SIZE:-200}
+      REDMINE_LANG: ${REDMINE_LANG:-en}
+      WAIT_FOR_DB_TIMEOUT: ${WAIT_FOR_DB_TIMEOUT:-60}
+      RUN_DB_MIGRATIONS: ${RUN_DB_MIGRATIONS:-1}
+      RUN_PLUGIN_MIGRATIONS: ${RUN_PLUGIN_MIGRATIONS:-1}
+      BUNDLE_INSTALL_AT_STARTUP: ${BUNDLE_INSTALL_AT_STARTUP:-0}
+    ports:
+      - "${REDMICA_PORT:-4000}:3000"
+    volumes:
+      - ./files:/usr/src/redmica/files
+      - ./plugins:/usr/src/redmica/plugins
+      - ./themes:/usr/src/redmica/public/themes
+      - ./config/database.yml:/usr/src/redmica/config/database.yml:ro
+      - ./docker/entrypoint.sh:/usr/local/bin/redmica-entrypoint:ro
+      - /root/.openclaw:/root/.openclaw:ro
+      - ./patches/app/controllers/repositories_controller.rb:/usr/src/redmica/app/controllers/repositories_controller.rb:ro
+      - ./patches/app/views/layouts/base.html.erb:/usr/src/redmica/app/views/layouts/base.html.erb:ro
+      - ./repositories:/usr/src/redmica/repositories
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - redmica-internal
+
+  db:
+    image: postgres:16-bookworm
+    container_name: redmica-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER:-redmica}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-redmica}
+      POSTGRES_DB: ${DB_NAME:-redmica}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      # IMPORTANT: This historically named volume is the ACTIVE production
+      # Redmica PostgreSQL data volume. Do not prune, remove, recreate, or
+      # "rename" it without following scripts/verify-redmica-redmine-dbs.sh
+      # and the database management runbook.
+      - migration_redmica_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-redmica} -d ${DB_NAME:-redmica}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - redmica-internal
+
+volumes:
+  migration_redmica_postgres_data:
+    external: true
+
+networks:
+  redmica-internal:
+    driver: bridge

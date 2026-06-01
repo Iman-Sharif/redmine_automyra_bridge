@@ -1,0 +1,527 @@
+#!/usr/bin/env python3
+"""Small production adapter for Redmica Automyra Bridge /improve calls.
+
+The Redmica plugin expects a stable HTTP endpoint that accepts Automyra Bridge
+JSON and returns JSON. This adapter intentionally does not mutate Redmica; it
+only returns a response/proposal payload for the bridge worker to post back.
+"""
+
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import json
+import os
+import hashlib
+import re
+import sys
+import time
+import urllib.error
+import urllib.request
+
+
+HOST = os.environ.get("AUTOMYRA_BRIDGE_ADAPTER_HOST", "0.0.0.0")
+PORT = int(os.environ.get("AUTOMYRA_BRIDGE_ADAPTER_PORT", "4567"))
+TOKEN = os.environ.get("AUTOMYRA_BRIDGE_ADAPTER_TOKEN", "")
+ALLOW_INSECURE_TOKEN = os.environ.get("AUTOMYRA_BRIDGE_ADAPTER_ALLOW_INSECURE_TOKEN") == "1"
+STARTED_AT = time.time()
+MAX_BODY_BYTES = int(os.environ.get("AUTOMYRA_BRIDGE_ADAPTER_MAX_BODY_BYTES", "1048576"))
+DOWNSTREAM_URL = os.environ.get("AUTOMYRA_DOWNSTREAM_URL", "")
+DOWNSTREAM_TOKEN = os.environ.get("AUTOMYRA_DOWNSTREAM_TOKEN", "")
+DOWNSTREAM_TIMEOUT = float(os.environ.get("AUTOMYRA_DOWNSTREAM_TIMEOUT", "15"))
+OPENAI_BASE_URL = os.environ.get("AUTOMYRA_OPENAI_BASE_URL", "").rstrip("/")
+OPENAI_API_KEY = os.environ.get("AUTOMYRA_OPENAI_API_KEY", "")
+OPENAI_MODEL = os.environ.get("AUTOMYRA_OPENAI_MODEL", "manifest/auto")
+
+
+class Handler(BaseHTTPRequestHandler):
+    server_version = "AutomyraBridgeAdapter/1.0"
+
+    def log_message(self, fmt, *args):
+        log_event("http", remote=self.address_string(), message=fmt % args)
+
+    def do_GET(self):
+        if self.path == "/health":
+            self.respond_json(200, {"status": "ok"})
+            return
+        if self.path == "/ready":
+            self.respond_json(
+                200 if TOKEN else 503,
+                {
+                    "status": "ready" if TOKEN else "not_ready",
+                    "token_configured": bool(TOKEN),
+                    "downstream_configured": bool(DOWNSTREAM_URL),
+                    "openai_downstream_configured": bool(OPENAI_BASE_URL and OPENAI_API_KEY),
+                    "uptime_seconds": int(time.time() - STARTED_AT),
+                },
+            )
+            return
+        self.respond_json(404, {"error": "not_found"})
+
+    def do_POST(self):
+        if self.path != "/improve":
+            self.respond_json(404, {"error": "not_found"})
+            return
+
+        started = time.time()
+        context = request_context(self)
+        expected = "Bearer %s" % TOKEN
+        if self.headers.get("Authorization") != expected:
+            self.respond_json(401, error("unauthorized", "Invalid Automyra Bridge bearer token.", context))
+            log_request(context, "unknown", 401, started, error_code="unauthorized")
+            return
+
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            if length > MAX_BODY_BYTES:
+                self.respond_json(413, error("request_too_large", "Request body exceeds Automyra Bridge adapter limit.", context))
+                log_request(context, "unknown", 413, started, error_code="request_too_large")
+                return
+            body = self.rfile.read(length).decode("utf-8")
+            payload = json.loads(body or "{}")
+        except Exception:
+            self.respond_json(400, error("invalid_json", "Request body must be valid JSON.", context))
+            log_request(context, "unknown", 400, started, error_code="invalid_json")
+            return
+
+        if not isinstance(payload, dict):
+            self.respond_json(400, error("invalid_request", "Request body must be a JSON object.", context))
+            log_request(context, "unknown", 400, started, error_code="invalid_request")
+            return
+
+        action = str(payload.get("action") or "")
+
+        if not DOWNSTREAM_URL and not OPENAI_BASE_URL:
+            self.respond_json(503, error("downstream_not_configured", "Automyra downstream is not configured. Set AUTOMYRA_DOWNSTREAM_URL or AUTOMYRA_OPENAI_BASE_URL.", context))
+            log_request(context, action, 503, started, error_code="downstream_not_configured")
+            return
+
+        downstream_result = downstream_response(payload, context)
+        if isinstance(downstream_result, AdapterError):
+            self.respond_json(downstream_result.status, error(downstream_result.code, downstream_result.message, context))
+            log_request(context, action, downstream_result.status, started, error_code=downstream_result.code)
+            return
+        if downstream_result is not None:
+            self.respond_json(200, with_context(downstream_result, context))
+            log_request(context, action, 200, started, proposal_count=len(downstream_result.get("proposals", [])))
+            return
+
+        self.respond_json(502, error("invalid_downstream_response", "Automyra downstream returned an empty response.", context))
+        log_request(context, action, 502, started, error_code="invalid_downstream_response")
+
+    def respond_json(self, status, payload):
+        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+
+class AdapterError:
+    def __init__(self, status, code, message):
+        self.status = status
+        self.code = code
+        self.message = message
+
+
+def request_context(handler):
+    return {
+        "correlation_id": handler.headers.get("X-Correlation-ID") or "",
+        "idempotency_key": handler.headers.get("Idempotency-Key") or "",
+    }
+
+
+def with_context(payload, context):
+    if context.get("correlation_id"):
+        payload["correlation_id"] = context["correlation_id"]
+    return payload
+
+
+def error(code, message, context=None):
+    payload = {"error": code, "message": message}
+    return with_context(payload, context or {})
+
+
+def downstream_response(payload, context):
+    if OPENAI_BASE_URL:
+        return openai_downstream_response(payload, context)
+
+    if not DOWNSTREAM_URL:
+        return None
+
+    data = json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(DOWNSTREAM_URL, data=data, headers={"Content-Type": "application/json"})
+    if DOWNSTREAM_TOKEN:
+        request.add_header("Authorization", "Bearer %s" % DOWNSTREAM_TOKEN)
+    if context.get("correlation_id"):
+        request.add_header("X-Correlation-ID", context["correlation_id"])
+    if context.get("idempotency_key"):
+        request.add_header("Idempotency-Key", context["idempotency_key"])
+
+    try:
+        with urllib.request.urlopen(request, timeout=DOWNSTREAM_TIMEOUT) as response:
+            parsed = json.loads(response.read().decode("utf-8") or "{}")
+    except urllib.error.HTTPError as exc:
+        return AdapterError(exc.code, "downstream_http_error", "Downstream Automyra returned HTTP %s." % exc.code)
+    except Exception as exc:
+        return AdapterError(502, "downstream_unreachable", "Downstream Automyra is unreachable: %s" % exc)
+
+    normalized = normalize_downstream_payload(payload, parsed)
+    if isinstance(normalized, AdapterError):
+        return normalized
+    return normalized
+
+
+def openai_downstream_response(payload, context):
+    if not OPENAI_API_KEY:
+        return AdapterError(503, "downstream_not_configured", "OpenAI-compatible Automyra downstream requires AUTOMYRA_OPENAI_API_KEY.")
+
+    url = "%s/v1/chat/completions" % OPENAI_BASE_URL
+    messages = [
+        {
+            "role": "system",
+            "content": (
+        "You are Automyra, a Redmica assistant. Return ONLY a JSON object matching the Automyra Bridge contract. "
+                "For task_improve return {\"task\":{...}}. For mention_response return {\"response\":string,\"intent\":string,\"confidence\":number,\"tool_calls\":array}. "
+                "Use only tools supplied in the user payload. Tool calls must be objects like {\"tool\":\"task.cancel\",\"input\":{...}}. "
+                "If no supplied tool fits, return a response with an empty tool_calls array. Do not invent Redmica writes."
+            ),
+        },
+        {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+    ]
+    request_payload = {"model": OPENAI_MODEL, "messages": messages, "temperature": 0.2, "response_format": {"type": "json_object"}}
+    data = json.dumps(request_payload).encode("utf-8")
+    request = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json", "Authorization": "Bearer %s" % OPENAI_API_KEY})
+    if context.get("correlation_id"):
+        request.add_header("X-Correlation-ID", context["correlation_id"])
+        request.add_header("X-Session-Key", context["correlation_id"])
+    if context.get("idempotency_key"):
+        request.add_header("Idempotency-Key", context["idempotency_key"])
+
+    try:
+        with urllib.request.urlopen(request, timeout=DOWNSTREAM_TIMEOUT) as response:
+            outer = json.loads(response.read().decode("utf-8") or "{}")
+    except urllib.error.HTTPError as exc:
+        return AdapterError(exc.code, "downstream_http_error", "OpenAI-compatible Automyra downstream returned HTTP %s." % exc.code)
+    except Exception as exc:
+        return AdapterError(502, "downstream_unreachable", "OpenAI-compatible Automyra downstream is unreachable: %s" % exc)
+
+    content = extract_openai_content(outer)
+    if isinstance(content, AdapterError):
+        return content
+    try:
+        parsed = json.loads(content)
+    except Exception:
+        parsed = {"response": content.strip(), "intent": "downstream_response", "confidence": None, "proposals": []}
+    return normalize_downstream_payload(payload, parsed)
+
+
+def extract_openai_content(payload):
+    if not isinstance(payload, dict):
+        return AdapterError(502, "invalid_downstream_response", "OpenAI-compatible response must be a JSON object.")
+    choices = payload.get("choices")
+    if not isinstance(choices, list) or not choices:
+        return AdapterError(502, "invalid_downstream_response", "OpenAI-compatible response requires choices.")
+    message = choices[0].get("message") if isinstance(choices[0], dict) else None
+    content = message.get("content") if isinstance(message, dict) else None
+    if not isinstance(content, str) or not content.strip():
+        return AdapterError(502, "invalid_downstream_response", "OpenAI-compatible response requires message.content.")
+    return content
+
+
+def normalize_downstream_payload(original, parsed):
+    if not isinstance(parsed, dict):
+        return AdapterError(502, "invalid_downstream_response", "Downstream Automyra response must be a JSON object.")
+    action = original.get("action")
+    if action == "task_improve":
+        task = parsed.get("task")
+        if not isinstance(task, dict):
+            return AdapterError(502, "invalid_downstream_response", "task_improve response requires task object.")
+        return {"task": clean_task(task)}
+    if action == "mention_response":
+        response = str(parsed.get("response") or "").strip()
+        tool_calls = parsed.get("tool_calls") or []
+        proposals = parsed.get("proposals") or []
+        if not response or not isinstance(proposals, list) or not isinstance(tool_calls, list):
+            return AdapterError(502, "invalid_downstream_response", "mention_response requires response and proposals/tool_calls arrays.")
+        safe_proposals = [item for item in proposals if isinstance(item, dict) and item.get("action_type")]
+        safe_tool_calls = [normalize_tool_call(item) for item in tool_calls if isinstance(item, dict) and (item.get("tool") or item.get("name"))]
+        safe_tool_calls = [item for item in safe_tool_calls if item]
+
+        return {"response": response, "intent": parsed.get("intent") or "downstream_response", "confidence": parsed.get("confidence"), "proposals": safe_proposals, "tool_calls": safe_tool_calls}
+    return AdapterError(400, "unsupported_action", "Unsupported Automyra action.")
+
+
+def log_event(event, **fields):
+    fields = {key: value for key, value in fields.items() if value not in (None, "")}
+    fields["event"] = event
+    fields["ts"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    sys.stdout.write(json.dumps(fields, sort_keys=True) + "\n")
+    sys.stdout.flush()
+
+
+def log_request(context, action, status, started, proposal_count=0, error_code=""):
+    log_event(
+        "request",
+        action=action,
+        status=status,
+        duration_ms=int((time.time() - started) * 1000),
+        correlation_id=context.get("correlation_id"),
+        idempotency_key_prefix=str(context.get("idempotency_key") or "")[:16],
+        proposal_count=proposal_count,
+        error_code=error_code,
+    )
+
+
+def task_improve_response(payload, context):
+    task = payload.get("task") or {}
+    if not isinstance(task, dict):
+        return AdapterError(400, "invalid_request", "task_improve requires task to be an object.")
+
+    title = str(task.get("title") or "").strip()
+    notes = str(task.get("notes") or task.get("body") or "").strip()
+    if not (title or notes):
+        return AdapterError(400, "invalid_request", "task_improve requires task.title or task.notes.")
+
+    return {
+        "task": {
+            "title": title or "Untitled task",
+            "notes": notes or "Captured by Automyra Bridge.",
+            "tags": normalize_tags(task.get("tags")),
+            "category_id": task.get("category_id") or "",
+        }
+    }
+
+
+def mention_response(payload, context):
+    request = payload.get("request") or {}
+    if not isinstance(request, dict):
+        return AdapterError(400, "invalid_request", "mention_response requires request to be an object.")
+
+    body = str(request.get("body") or request.get("notes") or request.get("content") or "").strip()
+    if not body:
+        return AdapterError(400, "invalid_request", "mention_response requires request.body.")
+
+    source = str(request.get("source") or "").strip()
+    if source and source not in ("task_hub_comment", "issue_journal"):
+        return AdapterError(422, "unsupported_source", "mention_response source is not supported.")
+
+    nested_error = validate_nested_context(request)
+    if nested_error:
+        return nested_error
+
+    intent = classify_intent(request)
+    proposals = build_proposals(request, context, intent)
+
+    text = response_text_for(request, proposals)
+
+    return {"response": text, "intent": intent["intent"], "confidence": intent["confidence"], "proposals": proposals}
+
+
+def enrich_mention_result(original, result):
+    return result
+
+
+def response_text_for(request, proposals):
+    if proposals:
+        action = proposals[0].get("action_type", "proposal").replace("_", " ")
+        return "I prepared a %s for human review." % action
+    source = request.get("source") or "request"
+    return "Automyra reviewed the %s and processed the request successfully." % str(source).replace("_", " ")
+
+
+def classify_intent(request):
+    body = str(request.get("body") or "")
+    lowered = body.lower()
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("cancel this task", "delete this task", "remove this task")):
+        return {"intent": "cancel_task", "confidence": 0.95}
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("complete this task", "finish this task", "mark this task done", "mark this done")):
+        return {"intent": "complete_task", "confidence": 0.9}
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("reopen this task", "re-open this task")):
+        return {"intent": "reopen_task", "confidence": 0.9}
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("assign this task", "assign task")):
+        return {"intent": "assign_task", "confidence": 0.85}
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("set priority", "change priority")):
+        return {"intent": "set_task_priority", "confidence": 0.85}
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("set due date", "change due date", "due date")):
+        return {"intent": "set_task_due_date", "confidence": 0.8}
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("add task comment", "comment on this task")):
+        return {"intent": "add_task_comment", "confidence": 0.8}
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("link this task to issue", "link task to issue")):
+        return {"intent": "link_task_issue", "confidence": 0.8}
+    if request.get("source") == "task_hub_comment" and any(phrase in lowered for phrase in ("promote this task", "convert this task to issue")):
+        return {"intent": "promote_task", "confidence": 0.8}
+    if any(phrase in lowered for phrase in ("search tasks", "find tasks")):
+        return {"intent": "search_tasks", "confidence": 0.75}
+    if any(word in lowered for word in ("delete", "remove")):
+        return {"intent": "destructive_action", "confidence": 0.9}
+    if any(phrase in lowered for phrase in ("assign this to me", "assign to me", "assign it to me")):
+        return {"intent": "assign_issue_to_requester", "confidence": 0.9}
+    if any(phrase in lowered for phrase in ("summarize", "add a comment", "comment summarizing")):
+        return {"intent": "add_issue_comment", "confidence": 0.8}
+    if any(word in lowered for word in ("create issue", "new issue", "file issue")):
+        return {"intent": "create_issue", "confidence": 0.75}
+    if any(word in lowered for word in ("wiki draft", "draft wiki", "update wiki", "wiki page")):
+        return {"intent": "update_wiki", "confidence": 0.75}
+    if any(word in lowered for word in ("create task", "new task", "follow-up task", "follow up task")):
+        return {"intent": "create_task", "confidence": 0.8}
+    if request.get("source") == "task_hub_comment" and any(word in lowered for word in ("update task", "change task", "revise task", "rename task")):
+        return {"intent": "update_task", "confidence": 0.8}
+    return {"intent": "response_only", "confidence": 0.5}
+
+
+def build_proposals(request, context, intent):
+    body = str(request.get("body") or "")
+    action = intent["intent"]
+    if action == "cancel_task":
+        return [proposal("cancel_task", request, context, {"task": {"status": "cancelled"}})]
+    if action == "complete_task":
+        return [proposal("complete_task", request, context, {"task": {"status": "done"}})]
+    if action == "reopen_task":
+        return [proposal("reopen_task", request, context, {"task": {"status": "todo"}})]
+    if action == "assign_task":
+        requester = request.get("user") or {}
+        assigned_to_id = requester.get("id") or request.get("user_id")
+        return [proposal("assign_task", request, context, {"assignment": {"assigned_to_id": assigned_to_id}})]
+    if action == "set_task_priority":
+        priority = extract_priority(body)
+        return [proposal("set_task_priority", request, context, {"task": {"priority": priority}})]
+    if action == "set_task_due_date":
+        due_date = extract_date(body)
+        return [proposal("set_task_due_date", request, context, {"task": {"due_date": due_date}})]
+    if action == "add_task_comment":
+        comment = extract_after(body, ("add task comment", "comment on this task")) or body
+        return [proposal("add_task_comment", request, context, {"comment": {"body": comment}})]
+    if action == "link_task_issue":
+        return [proposal("link_task_issue", request, context, {"target": {"issue_id": extract_first_int(body)}})]
+    if action == "promote_task":
+        return [proposal("promote_task", request, context, {"issue": {}})]
+    if action == "search_tasks":
+        query = extract_after(body, ("search tasks", "find tasks")) or body
+        return [proposal("search_tasks", request, context, {"query": query, "limit": 5})]
+    if action == "destructive_action":
+        if request.get("source") == "task_hub_comment":
+            return [proposal("cancel_task", request, context, {"task": {"status": "cancelled"}})]
+        return [proposal("destructive_action", request, context, {"reason": "User requested deletion/removal."})]
+    if action == "assign_issue_to_requester":
+        issue_id = request.get("issue_id") or (request.get("context") or {}).get("issue", {}).get("id")
+        return [proposal("assign_issue_to_requester", request, context, {"target": {"issue_id": issue_id}})]
+    if action == "add_issue_comment":
+        issue_id = request.get("issue_id") or (request.get("context") or {}).get("issue", {}).get("id")
+        return [proposal("add_issue_comment", request, context, {"target": {"issue_id": issue_id}, "comment": {"body": summarize_context(request)}})]
+    if action == "create_issue":
+        subject = extract_after(body, ("create issue", "new issue", "file issue")) or "Automyra issue draft"
+        return [proposal("create_issue", request, context, {"issue": {"subject": subject, "description": body}})]
+    if action == "update_wiki":
+        title = extract_after(body, ("wiki draft", "draft wiki", "update wiki", "wiki page")) or "Automyra wiki draft"
+        return [proposal("update_wiki", request, context, {"wiki": {"title": title, "text": body}})]
+    if action == "create_task":
+        title = extract_after(body, ("create task", "new task", "follow-up task", "follow up task")) or "Follow-up task"
+        return [proposal("create_task", request, context, {"task": clean_task({"title": title, "notes": body, "status": "todo", "priority": 2, "tags": ["automyra"]})})]
+    if action == "update_task":
+        title = extract_after(body, ("to", "as", ":")) or request.get("task_title") or "Updated task"
+        return [proposal("update_task", request, context, {"task": clean_task({"title": title, "notes": request.get("task_notes") or body})})]
+    return []
+
+
+def normalize_tool_call(item):
+    tool_name = str(item.get("tool") or item.get("name") or "").strip()
+    if not tool_name:
+        return None
+    input_payload = item.get("input") if isinstance(item.get("input"), dict) else {}
+    result = {"tool": tool_name, "input": input_payload}
+    if item.get("idempotency_key"):
+        result["idempotency_key"] = str(item.get("idempotency_key"))
+    return result
+
+
+def validate_nested_context(request):
+    for key in ("comment_id", "task_id", "issue_id"):
+        if key in request and request[key] not in (None, ""):
+            try:
+                int(request[key])
+            except (TypeError, ValueError):
+                return AdapterError(400, "invalid_request", "%s must be numeric when provided." % key)
+    return None
+
+
+def summarize_context(request):
+    context = request.get("context") or {}
+    issue = context.get("issue") or {}
+    journals = context.get("journals") or []
+    comments = context.get("comments") or []
+    title = issue.get("subject") or (context.get("task") or {}).get("title") or "current item"
+    items = journals or comments
+    snippets = []
+    for item in items[-5:]:
+        text = item.get("notes") or item.get("body") or ""
+        if text:
+            snippets.append("- " + str(text).strip().replace("\n", " ")[:180])
+    if snippets:
+        return "Automyra summary for %s:\n%s" % (title, "\n".join(snippets))
+    return "Automyra reviewed %s. No additional blockers were visible in the provided context." % title
+
+
+def proposal(action_type, request, context, data):
+    item = {"action_type": action_type, "idempotency_key": proposal_key(action_type, request, context)}
+    item.update(data)
+    return item
+
+
+def proposal_key(action_type, request, context):
+    seed = context.get("idempotency_key") or context.get("correlation_id") or json.dumps(request, sort_keys=True)
+    digest = hashlib.sha256((seed + ":" + action_type + ":" + json.dumps(request, sort_keys=True)).encode("utf-8")).hexdigest()
+    return "automyra-adapter:%s:%s" % (action_type, digest[:24])
+
+
+def clean_task(task):
+    return {key: value for key, value in task.items() if value not in (None, "", [])}
+
+
+def extract_after(text, markers):
+    lowered = text.lower()
+    for marker in markers:
+        idx = lowered.find(marker)
+        if idx >= 0:
+            value = text[idx + len(marker):].strip(" :.-\n\t")
+            return value[:120].strip() or ""
+    return ""
+
+
+def extract_first_int(text):
+    match = re.search(r"\d+", text)
+    return int(match.group(0)) if match else None
+
+
+def extract_priority(text):
+    lowered = text.lower()
+    if "urgent" in lowered:
+        return 4
+    if "high" in lowered:
+        return 3
+    if "low" in lowered:
+        return 1
+    value = extract_first_int(text)
+    return min(max(value, 1), 4) if value else 2
+
+
+def extract_date(text):
+    match = re.search(r"\b\d{4}-\d{2}-\d{2}\b", text)
+    return match.group(0) if match else ""
+
+
+def normalize_tags(value):
+    if isinstance(value, list):
+        values = value
+    elif isinstance(value, str):
+        values = value.split(",")
+    else:
+        values = []
+    return sorted({str(item).strip() for item in values if str(item).strip()})
+
+
+if __name__ == "__main__":
+    if not TOKEN and not ALLOW_INSECURE_TOKEN:
+        sys.stderr.write("AUTOMYRA_BRIDGE_ADAPTER_TOKEN is required. Set AUTOMYRA_BRIDGE_ADAPTER_ALLOW_INSECURE_TOKEN=1 only for development.\n")
+        sys.exit(78)
+    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    print("Automyra Bridge adapter listening on %s:%s" % (HOST, PORT), flush=True)
+    server.serve_forever()

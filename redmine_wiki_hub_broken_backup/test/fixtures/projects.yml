@@ -1,0 +1,39 @@
+---
+agreements:
+  id: 6201
+  name: Agreements
+  description: Deterministic agreements knowledge project
+  homepage: ""
+  is_public: false
+  identifier: agreements
+  parent_id:
+  lft: 100
+  rgt: 101
+  created_on: 2026-04-01 00:00:00 +00:00
+  updated_on: 2026-04-01 00:00:00 +00:00
+
+procurement_kb:
+  id: 6202
+  name: Procurement KB
+  description: Deterministic procurement knowledge base
+  homepage: ""
+  is_public: false
+  identifier: procurement-kb
+  parent_id:
+  lft: 102
+  rgt: 103
+  created_on: 2026-04-01 00:00:00 +00:00
+  updated_on: 2026-04-01 00:00:00 +00:00
+
+process_docs:
+  id: 6203
+  name: Process Docs
+  description: Deterministic process documentation
+  homepage: ""
+  is_public: false
+  identifier: process-docs
+  parent_id:
+  lft: 104
+  rgt: 105
+  created_on: 2026-04-01 00:00:00 +00:00
+  updated_on: 2026-04-01 00:00:00 +00:00

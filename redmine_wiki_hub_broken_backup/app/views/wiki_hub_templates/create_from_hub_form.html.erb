@@ -1,0 +1,72 @@
+<div class="contextual">
+  <%= link_to l(:button_cancel), knowledge_hub_templates_path, class: 'icon icon-cancel' %>
+</div>
+
+<h1><%= l(:wiki_hub_create_template) %></h1>
+
+<% if @source_page %>
+  <table class="attributes">
+    <tbody>
+      <tr>
+        <th><%= l(:wiki_hub_source_page) %></th>
+        <td><%= @source_page.title %></td>
+      </tr>
+      <tr>
+        <th><%= l(:wiki_hub_source_project) %></th>
+        <td><%= @source_page.project.name %></td>
+      </tr>
+    </tbody>
+  </table>
+<% end %>
+
+<%= form_with url: create_from_hub_knowledge_hub_templates_path, method: :post, local: true,
+              data: { testid: 'wiki-hub-create-template-form' }, class: 'tabular' do |f| %>
+  <%= f.hidden_field :source_page_id, value: @source_page&.id %>
+
+  <fieldset class="box">
+    <legend><%= l(:wiki_hub_create_template) %></legend>
+
+    <p>
+      <%= f.label :title, l(:field_title) %>
+      <%= f.text_field :title,
+                       value: @source_page ? "[Template] #{@source_page.title}" : params[:title],
+                       placeholder: l(:wiki_hub_template_title_placeholder),
+                       required: true,
+                       data: { testid: 'wiki-hub-create-template-title' } %>
+    </p>
+
+    <p>
+      <%= f.label :project_id, l(:field_project) %>
+      <%= f.select :project_id,
+                   options_from_collection_for_select(@projects, :id, :name, params[:project_id] || @source_page&.project_id),
+                   {},
+                   { required: true, data: { testid: 'wiki-hub-create-template-project' } } %>
+    </p>
+
+    <p>
+      <%= f.label :category, l(:wiki_hub_metadata_category) %>
+      <%= f.select :category,
+                   options_for_select(Array(@category_options).map { |category| [category.humanize, category] },
+                                      params[:category] || 'General'),
+                   {},
+                   { data: { testid: 'wiki-hub-create-template-category' } } %>
+    </p>
+
+    <p>
+      <%= f.label :summary, l(:wiki_hub_metadata_summary) %>
+      <%= f.text_area :summary,
+                      value: params[:summary],
+                      placeholder: l(:wiki_hub_template_summary_placeholder),
+                      rows: 3,
+                      data: { testid: 'wiki-hub-create-template-summary' } %>
+      <em class="info"><%= l(:wiki_hub_template_summary_hint) %></em>
+    </p>
+  </fieldset>
+
+  <p class="buttons">
+    <%= f.submit l(:wiki_hub_create_template), class: 'button',
+                 data: { testid: 'wiki-hub-create-template-submit' } %>
+    <%= link_to l(:button_cancel), knowledge_hub_templates_path, class: 'icon icon-cancel' %>
+  </p>
+<% end %>
+

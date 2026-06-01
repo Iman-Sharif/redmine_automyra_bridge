@@ -1,0 +1,94 @@
+<h2 data-testid="wiki-hub-admin-title">
+  <%= l(:wiki_hub_admin_title) %>
+</h2>
+
+<div class="contextual">
+  <%= link_to l(:wiki_hub_back_to_hub), knowledge_hub_path, class: 'icon icon-cancel' %>
+</div>
+
+<div class="box" data-testid="wiki-hub-admin-health">
+  <h3><%= l(:wiki_hub_admin_health) %></h3>
+  <table class="list">
+    <tbody>
+      <tr>
+        <th><%= l(:label_status) %></th>
+        <td data-testid="wiki-hub-health-status">
+          <% if @health[:status] == 'ok' %>
+            <span class="icon icon-ok"><%= l(:wiki_hub_admin_health_ok) %></span>
+          <% else %>
+            <span class="icon icon-error"><%= l(:wiki_hub_admin_health_error) %></span>
+          <% end %>
+        </td>
+      </tr>
+      <% if @health[:details] %>
+        <% @health[:details].each do |key, value| %>
+          <tr>
+            <th><%= key.to_s.humanize %></th>
+            <td data-testid="wiki-hub-health-<%= key %>"><%= value %></td>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="box" data-testid="wiki-hub-admin-stats">
+  <h3><%= l(:wiki_hub_admin_stats) %></h3>
+  <table class="list">
+    <tbody>
+      <tr>
+        <th><%= l(:wiki_hub_admin_snapshots) %></th>
+        <td data-testid="wiki-hub-admin-snapshots"><%= WikiHub::PageSnapshot.count %></td>
+      </tr>
+      <tr>
+        <th><%= l(:wiki_hub_admin_links) %></th>
+        <td data-testid="wiki-hub-admin-links"><%= WikiHub::PageLink.count %></td>
+      </tr>
+      <tr>
+        <th><%= l(:wiki_hub_admin_orphans) %></th>
+        <td data-testid="wiki-hub-admin-orphans"><%= @orphan_count %></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="box" data-testid="wiki-hub-admin-rebuild">
+  <h3><%= l(:wiki_hub_admin_rebuild) %></h3>
+  <p><%= l(:wiki_hub_admin_rebuild_description) %></p>
+  <%= button_to l(:wiki_hub_admin_rebuild_button),
+                admin_wiki_hub_rebuild_path,
+                method: :post,
+                class: 'icon icon-reload',
+                data: { confirm: l(:wiki_hub_admin_rebuild_confirm), testid: 'wiki-hub-rebuild-submit' } %>
+</div>
+
+<div class="box" data-testid="wiki-hub-admin-index-runs">
+  <h3><%= l(:wiki_hub_admin_index_runs) %></h3>
+  <% index_runs = WikiHub::IndexRun.order(created_at: :desc).limit(10) %>
+  <% current_link_count = WikiHub::PageLink.count %>
+  <% if index_runs.any? %>
+    <table class="list wiki-hub-index-runs-table">
+      <thead>
+        <tr>
+          <th><%= l(:wiki_hub_admin_index_run_date) %></th>
+          <th><%= l(:wiki_hub_admin_index_run_status) %></th>
+          <th><%= l(:wiki_hub_admin_index_run_pages) %></th>
+          <th><%= l(:wiki_hub_admin_index_run_links) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% index_runs.each do |run| %>
+          <tr data-testid="wiki-hub-index-run-<%= run.id %>">
+            <td><%= format_time(run.created_at) %></td>
+            <td><%= run.status %></td>
+            <td><%= run.pages_processed %></td>
+            <td><%= current_link_count %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="nodata" data-testid="wiki-hub-admin-no-index-runs"><%= l(:wiki_hub_admin_no_index_runs) %></p>
+  <% end %>
+</div>
+

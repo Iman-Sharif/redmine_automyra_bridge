@@ -1,0 +1,246 @@
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'wiki_hub_graph', plugin: 'redmine_wiki_hub' %>
+<% end %>
+
+<div class="wiki-hub-graph" data-testid="wiki-hub-graph-page">
+  <div class="contextual">
+    <%= link_to l(:wiki_hub_back_to_hub), knowledge_hub_path, class: 'icon icon-cancel' %>
+  </div>
+
+  <h2 data-testid="wiki-hub-graph-title">
+    <%= l(:wiki_hub_graph_title) %>
+  </h2>
+
+  <p class="subtitle" data-testid="wiki-hub-graph-description">
+    <%= l(:wiki_hub_graph_description) %>
+  </p>
+
+  <div class="wiki-hub-graph-controls box" data-testid="wiki-hub-graph-controls">
+    <div class="wiki-hub-graph-search">
+      <label for="wiki-hub-graph-root-page"><%= l(:wiki_hub_graph_root_page) %>:</label>
+      <input type="text" id="wiki-hub-graph-root-page" name="root_page_id" value="<%= @root_page_id %>" placeholder="<%= l(:wiki_hub_graph_root_placeholder) %>" data-testid="wiki-hub-graph-root-input" />
+      <button type="button" id="wiki-hub-graph-load" data-testid="wiki-hub-graph-load-button" class="button">
+        <%= l(:wiki_hub_graph_load) %>
+      </button>
+    </div>
+    <div class="wiki-hub-graph-zoom">
+      <button type="button" id="wiki-hub-graph-zoom-in" data-testid="wiki-hub-graph-zoom-in" class="icon icon-zoom-in" title="<%= l(:wiki_hub_graph_zoom_in) %>"></button>
+      <button type="button" id="wiki-hub-graph-zoom-out" data-testid="wiki-hub-graph-zoom-out" class="icon icon-zoom-out" title="<%= l(:wiki_hub_graph_zoom_out) %>"></button>
+      <button type="button" id="wiki-hub-graph-reset" data-testid="wiki-hub-graph-reset" class="icon icon-reload" title="<%= l(:wiki_hub_graph_reset) %>"></button>
+    </div>
+  </div>
+
+  <div class="wiki-hub-graph-container box" data-testid="wiki-hub-graph-container">
+    <canvas id="wiki-hub-graph-canvas" data-testid="wiki-hub-graph-canvas"></canvas>
+    <div id="wiki-hub-graph-tooltip" class="wiki-hub-graph-tooltip is-hidden" data-testid="wiki-hub-graph-tooltip"></div>
+  </div>
+
+
+  <div class="wiki-hub-graph-legend" data-testid="wiki-hub-graph-legend">
+    <h4><%= l(:wiki_hub_graph_legend) %></h4>
+    <ul>
+      <li><span class="wiki-hub-legend-node wiki-hub-legend-standard"></span> <%= l(:wiki_hub_page_kind_standard) %></li>
+      <li><span class="wiki-hub-legend-node wiki-hub-legend-template"></span> <%= l(:wiki_hub_page_kind_template) %></li>
+      <li><span class="wiki-hub-legend-node wiki-hub-legend-lesson"></span> <%= l(:wiki_hub_page_kind_lesson) %></li>
+    </ul>
+  </div>
+
+  <div class="wiki-hub-graph-stats" data-testid="wiki-hub-graph-stats">
+    <span id="wiki-hub-graph-node-count" data-testid="wiki-hub-graph-node-count">0</span> <%= l(:wiki_hub_graph_nodes) %>
+    <span id="wiki-hub-graph-edge-count" data-testid="wiki-hub-graph-edge-count">0</span> <%= l(:wiki_hub_graph_edges) %>
+  </div>
+</div>
+
+<script>
+(function() {
+  var canvas = document.getElementById('wiki-hub-graph-canvas');
+  var ctx = canvas.getContext('2d');
+  var tooltip = document.getElementById('wiki-hub-graph-tooltip');
+  var initialGraph = <%= raw(json_escape(@graph.to_json)) %>;
+  var nodes = initialGraph.nodes || [];
+  var edges = initialGraph.edges || [];
+  var scale = 1;
+  var offsetX = 0;
+  var offsetY = 0;
+  var isDragging = false;
+  var lastX = 0;
+  var lastY = 0;
+
+  var colors = {
+    standard: 'currentColor',
+    template: 'currentColor',
+    lesson_learned: 'currentColor'
+  };
+
+  function resizeCanvas() {
+    var container = canvas.parentElement;
+    canvas.width = container.clientWidth;
+    canvas.height = Math.max(400, window.innerHeight - 300);
+    if (nodes.length > 0) {
+      layoutNodes();
+    }
+    draw();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+    ctx.scale(scale, scale);
+
+    // Draw edges
+    ctx.strokeStyle = 'currentColor';
+    ctx.lineWidth = 1 / scale;
+    edges.forEach(function(edge) {
+      var fromNode = nodes.find(function(n) { return n.id === edge.from; });
+      var toNode = nodes.find(function(n) { return n.id === edge.to; });
+      if (fromNode && toNode) {
+        ctx.beginPath();
+        ctx.moveTo(fromNode.x, fromNode.y);
+        ctx.lineTo(toNode.x, toNode.y);
+        ctx.stroke();
+      }
+    });
+
+    // Draw nodes
+    nodes.forEach(function(node) {
+      var color = colors[node.page_kind] || colors.standard;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, 20, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = 'currentColor';
+      ctx.lineWidth = 2 / scale;
+      ctx.stroke();
+
+      // Draw label
+      ctx.fillStyle = 'currentColor';
+      ctx.font = (12 / scale) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(node.title.substring(0, 20), node.x, node.y + 35);
+    });
+
+    ctx.restore();
+  }
+
+  function loadGraph(rootPageId) {
+    var url = '<%= knowledge_hub_graph_path(format: :json) %>?root_page_id=' + encodeURIComponent(rootPageId);
+    fetch(url, { credentials: 'same-origin' })
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        nodes = data.nodes || [];
+        edges = data.edges || [];
+        layoutNodes();
+        draw();
+        updateStats();
+      })
+      .catch(function(error) {
+        console.error('Failed to load graph:', error);
+      });
+  }
+
+  function layoutNodes() {
+    var centerX = canvas.width / 2;
+    var centerY = canvas.height / 2;
+    var radius = Math.min(canvas.width, canvas.height) / 3;
+
+    nodes.forEach(function(node, i) {
+      var angle = (2 * Math.PI * i) / nodes.length;
+      node.x = centerX + radius * Math.cos(angle);
+      node.y = centerY + radius * Math.sin(angle);
+      node.page_kind = node.page_kind || 'standard';
+    });
+  }
+
+  function updateStats() {
+    document.getElementById('wiki-hub-graph-node-count').textContent = nodes.length;
+    document.getElementById('wiki-hub-graph-edge-count').textContent = edges.length;
+  }
+
+  function getNodeAtPosition(x, y) {
+    var transformedX = (x - offsetX) / scale;
+    var transformedY = (y - offsetY) / scale;
+
+    return nodes.find(function(node) {
+      var dx = transformedX - node.x;
+      var dy = transformedY - node.y;
+      return Math.sqrt(dx * dx + dy * dy) < 20;
+    });
+  }
+
+  // Event handlers
+  canvas.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  });
+
+  canvas.addEventListener('mousemove', function(e) {
+    if (isDragging) {
+      offsetX += e.clientX - lastX;
+      offsetY += e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      draw();
+    } else {
+      var node = getNodeAtPosition(e.offsetX, e.offsetY);
+      if (node) {
+        tooltip.style.display = 'block';
+        tooltip.style.left = (e.offsetX + 10) + 'px';
+        tooltip.style.top = (e.offsetY + 10) + 'px';
+        tooltip.textContent = node.title;
+      } else {
+        tooltip.style.display = 'none';
+      }
+    }
+  });
+
+  canvas.addEventListener('mouseup', function() {
+    isDragging = false;
+  });
+
+  canvas.addEventListener('mouseleave', function() {
+    isDragging = false;
+    tooltip.classList.remove('is-visible');
+    tooltip.classList.add('is-hidden');
+  });
+
+  canvas.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var delta = e.deltaY > 0 ? 0.9 : 1.1;
+    scale *= delta;
+    scale = Math.max(0.1, Math.min(5, scale));
+    draw();
+  });
+
+  document.getElementById('wiki-hub-graph-load').addEventListener('click', function() {
+    var input = document.getElementById('wiki-hub-graph-root-page');
+    if (input.value) {
+      loadGraph(input.value);
+    }
+  });
+
+  document.getElementById('wiki-hub-graph-zoom-in').addEventListener('click', function() {
+    scale *= 1.2;
+    scale = Math.min(5, scale);
+    draw();
+  });
+
+  document.getElementById('wiki-hub-graph-zoom-out').addEventListener('click', function() {
+    scale *= 0.8;
+    scale = Math.max(0.1, scale);
+    draw();
+  });
+
+  document.getElementById('wiki-hub-graph-reset').addEventListener('click', function() {
+    scale = 1;
+    offsetX = 0;
+    offsetY = 0;
+    draw();
+  });
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  updateStats();
+})();
+</script>

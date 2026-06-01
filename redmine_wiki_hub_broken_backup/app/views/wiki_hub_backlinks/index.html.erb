@@ -1,0 +1,46 @@
+<div class="contextual">
+  <%= link_to l(:wiki_hub_back_to_hub), knowledge_hub_path, class: 'icon icon-cancel' %>
+</div>
+
+<h2 data-testid="wiki-hub-backlinks-title"><%= l(:wiki_hub_backlinks_title) %></h2>
+
+<% if @target_page.present? %>
+  <table class="attributes">
+    <tbody>
+      <tr>
+        <th><%= l(:label_wiki_page) %></th>
+        <td><%= link_to @target_page.title, project_wiki_page_path(@target_page.project.identifier, @target_page.title) %></td>
+      </tr>
+      <tr>
+        <th><%= l(:field_project) %></th>
+        <td><%= link_to @target_page.project.name, project_path(@target_page.project.identifier) %></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <% if @backlinks.any? %>
+    <table class="list" data-testid="wiki-hub-backlinks-list">
+      <thead>
+        <tr>
+          <th><%= l(:label_wiki_page) %></th>
+          <th><%= l(:field_project) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @backlinks.each do |row| %>
+          <% project_identifier = row.respond_to?(:project) && row.project ? row.project.identifier : row.try(:project_id) %>
+          <% project_name = row.respond_to?(:project) && row.project ? row.project.name : row.try(:project_id) %>
+          <tr data-testid="wiki-hub-backlink-row-<%= row.source_page_id %>">
+            <td><%= link_to row.title, project_wiki_page_path(project_identifier, row.title) %></td>
+            <td><%= project_name %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="nodata" data-testid="wiki-hub-backlinks-empty"><%= l(:wiki_hub_backlinks_empty) %></p>
+  <% end %>
+<% else %>
+  <p class="nodata" data-testid="wiki-hub-backlinks-select-page"><%= l(:wiki_hub_backlinks_select_page) %></p>
+<% end %>
+

@@ -1,0 +1,76 @@
+.wiki-hub-graph-controls,
+.wiki-hub-graph-search,
+.wiki-hub-graph-zoom {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.wiki-hub-graph-controls,
+.wiki-hub-graph-legend {
+  margin-bottom: 1rem;
+}
+
+.wiki-hub-graph-search input[type='text'] {
+  flex: 1 1 18rem;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0 0.875rem;
+}
+
+.wiki-hub-graph-stats {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.wiki-hub-graph-container {
+  position: relative;
+  min-height: 26rem;
+  border: 1px solid currentColor;
+  border-color: color-mix(in srgb, currentColor 18%, transparent);
+  background: transparent;
+}
+
+#wiki-hub-graph-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wiki-hub-graph-tooltip {
+  position: absolute;
+  display: none;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid currentColor;
+  background: Canvas;
+  color: CanvasText;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.wiki-hub-graph-tooltip.is-visible {
+  display: block;
+}
+
+.wiki-hub-graph-tooltip.is-hidden {
+  display: none;
+}
+
+.wiki-hub-graph-legend ul {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wiki-hub-legend-node {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background: transparent;
+}

@@ -1,0 +1,64 @@
+---
+hub_admin:
+  id: 6101
+  login: hub_admin
+  firstname: Hub
+  lastname: Admin
+  admin: true
+  status: 1
+  language: en
+  auth_source_id:
+  mail_notification: all
+  type: User
+  salt: 82090c953c4a0000a7db253b0691a6b4
+  hashed_password: b5b6ff9543bf1387374cdfa27a54c96d236a7150
+  created_on: 2026-04-01 00:00:00 +00:00
+  updated_on: 2026-04-01 00:00:00 +00:00
+
+hub_reader_a:
+  id: 6102
+  login: hub_reader_a
+  firstname: Hub
+  lastname: ReaderA
+  admin: false
+  status: 1
+  language: en
+  auth_source_id:
+  mail_notification: selected
+  type: User
+  salt: 67eb4732624d5a7753dcea7ce0bb7d7d
+  hashed_password: bfbe06043353a677d0215b26a5800d128d5413bc
+  created_on: 2026-04-01 00:00:00 +00:00
+  updated_on: 2026-04-01 00:00:00 +00:00
+
+hub_reader_b:
+  id: 6103
+  login: hub_reader_b
+  firstname: Hub
+  lastname: ReaderB
+  admin: false
+  status: 1
+  language: en
+  auth_source_id:
+  mail_notification: selected
+  type: User
+  salt: 7599f9963ec07b5a3b55b354407120c0
+  hashed_password: 8f659c8d7c072f189374edacfa90d6abbc26d8ed
+  created_on: 2026-04-01 00:00:00 +00:00
+  updated_on: 2026-04-01 00:00:00 +00:00
+
+hub_no_wiki:
+  id: 6104
+  login: hub_no_wiki
+  firstname: Hub
+  lastname: NoWiki
+  admin: false
+  status: 1
+  language: en
+  auth_source_id:
+  mail_notification: none
+  type: User
+  salt: 3126f764c3c5ac61cbfc103f25f934cf
+  hashed_password: 9e4dd7eeb172c12a0691a6d9d3a269f7e9fe671b
+  created_on: 2026-04-01 00:00:00 +00:00
+  updated_on: 2026-04-01 00:00:00 +00:00

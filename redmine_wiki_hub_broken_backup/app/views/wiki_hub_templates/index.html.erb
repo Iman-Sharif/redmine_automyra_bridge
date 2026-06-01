@@ -1,0 +1,104 @@
+<div class="contextual">
+  <%= link_to l(:wiki_hub_create_template), create_from_hub_knowledge_hub_templates_path, class: 'icon icon-add' %>
+  <%= link_to l(:wiki_hub_back_to_hub), knowledge_hub_path, class: 'icon icon-cancel' %>
+</div>
+
+<h2 data-testid="wiki-hub-templates-title">
+  <%= l(:wiki_hub_templates_title) %>
+</h2>
+
+<p class="subtitle" data-testid="wiki-hub-templates-description">
+  <%= l(:wiki_hub_templates_description) %>
+</p>
+
+<% if @template_stats.present? %>
+  <div class="box" data-testid="wiki-hub-template-analytics">
+    <h3><%= l(:wiki_hub_template_analytics) %></h3>
+    <table class="list">
+      <tbody>
+        <tr>
+          <th><%= l(:wiki_hub_total_templates) %></th>
+          <td><%= @template_stats[:total_templates] || 0 %></td>
+        </tr>
+        <tr>
+          <th><%= l(:wiki_hub_total_template_uses) %></th>
+          <td><%= @template_stats[:total_usage] || 0 %></td>
+        </tr>
+        <tr>
+          <th><%= l(:wiki_hub_templates_this_week) %></th>
+          <td><%= @template_stats[:recently_created] || 0 %></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <% if @template_stats[:templates_by_category].present? %>
+      <h4><%= l(:wiki_hub_templates_by_category) %></h4>
+      <table class="list">
+        <thead>
+          <tr>
+            <th><%= l(:wiki_hub_filter_category) %></th>
+            <th><%= l(:label_total) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @template_stats[:templates_by_category].each do |category, count| %>
+            <tr>
+              <td><%= category %></td>
+              <td><%= count %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @templates.any? %>
+  <table class="list" data-testid="wiki-hub-templates-list">
+    <thead>
+      <tr>
+        <th><%= l(:label_wiki_page) %></th>
+        <th><%= l(:field_project) %></th>
+        <th><%= l(:wiki_hub_filter_category) %></th>
+        <th><%= l(:description) %></th>
+        <th><%= l(:wiki_hub_template_usage_count) %></th>
+        <th><%= l(:field_updated_on) %></th>
+        <th class="buttons"><%= l(:label_action_plural) %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @templates.each do |template| %>
+        <% profile = (@template_profiles || {})[template.wiki_page_id] %>
+        <% usage_count = (@template_usage_counts || {})[template.wiki_page_id].to_i %>
+
+        <tr data-testid="wiki-hub-template-row" data-template-id="<%= template.wiki_page_id %>">
+          <td class="name">
+            <strong data-testid="wiki-hub-template-title"><%= link_to template.title, knowledge_hub_template_path(template.wiki_page_id) %></strong>
+          </td>
+          <td data-testid="wiki-hub-template-project"><%= link_to template.project.name, project_path(template.project.identifier) if template.project %></td>
+          <td><%= profile&.category.to_s.presence || '-' %></td>
+          <td data-testid="wiki-hub-template-summary">
+            <%= profile&.summary.presence || truncate(template.searchable_text.to_s, length: 200) %>
+          </td>
+          <td><%= usage_count %></td>
+          <td data-testid="wiki-hub-template-date"><%= format_time(template.updated_at) %></td>
+          <td class="buttons">
+            <%= link_to l(:button_view), knowledge_hub_template_path(template.wiki_page_id), class: 'icon icon-preview' %>
+            <%= link_to l(:wiki_hub_view_analytics), analytics_knowledge_hub_template_path(template.wiki_page_id), class: 'icon icon-stats' %>
+            <%= link_to l(:wiki_hub_template_copy),
+                        knowledge_hub_copy_template_path(template.wiki_page_id),
+                        method: :post,
+                        class: 'icon icon-copy',
+                        data: { testid: 'wiki-hub-template-copy-button', confirm: l(:wiki_hub_template_copy_confirm) } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <div class="wiki-hub-empty" data-testid="wiki-hub-templates-empty">
+    <p class="nodata"><%= l(:wiki_hub_templates_empty) %></p>
+    <p><%= link_to l(:wiki_hub_create_first_template), create_from_hub_knowledge_hub_templates_path, class: 'button' %></p>
+  </div>
+<% end %>
+

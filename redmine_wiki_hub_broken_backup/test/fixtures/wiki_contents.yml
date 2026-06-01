@@ -1,0 +1,48 @@
+---
+master_playbook_content:
+  id: 6501
+  page_id: 6401
+  author_id: 6101
+  text: |
+    h1. Master Playbook
+
+    Canonical policy and operating controls.
+  comments: deterministic seed
+  version: 1
+  updated_on: 2026-04-01 00:00:00 +00:00
+
+supplier_onboarding_content:
+  id: 6502
+  page_id: 6402
+  author_id: 6101
+  text: |
+    h1. Supplier Onboarding
+
+    Intake and approval lifecycle.
+  comments: deterministic seed
+  version: 1
+  updated_on: 2026-04-01 00:00:00 +00:00
+
+contract_boilerplate_content:
+  id: 6503
+  page_id: 6403
+  author_id: 6101
+  text: |
+    h1. Contract Boilerplate
+
+    Standard legal clauses and fallback terms.
+  comments: deterministic seed
+  version: 1
+  updated_on: 2026-04-01 00:00:00 +00:00
+
+lessons_2026_04_content:
+  id: 6504
+  page_id: 6404
+  author_id: 6101
+  text: |
+    h1. Lessons 2026-04
+
+    Incident and remediation notes for April 2026.
+  comments: deterministic seed
+  version: 1
+  updated_on: 2026-04-01 00:00:00 +00:00

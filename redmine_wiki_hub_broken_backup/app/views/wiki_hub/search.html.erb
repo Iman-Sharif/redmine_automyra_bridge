@@ -1,0 +1,198 @@
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'wiki_hub_autocomplete', plugin: 'redmine_wiki_hub' %>
+  <%= javascript_include_tag 'wiki_hub_bulk', plugin: 'redmine_wiki_hub' %>
+<% end %>
+
+<div class="contextual">
+  <%= link_to l(:wiki_hub_back_to_hub), knowledge_hub_path, class: 'icon icon-cancel' %>
+</div>
+
+<h2 data-testid="wiki-hub-search-title">
+  <%= l(:wiki_hub_search_title) %>
+</h2>
+
+<% if @facets.present? %>
+  <div class="box" data-testid="wiki-hub-search-facets">
+    <h3><%= l(:wiki_hub_filter_by) %></h3>
+
+    <% if @facets[:categories].present? && @facets[:categories].any? %>
+      <p><strong><%= l(:wiki_hub_filter_category) %></strong></p>
+      <ul>
+        <% @facets[:categories].each do |category, count| %>
+          <li>
+            <%= link_to knowledge_hub_search_path(q: params[:q], category: (params[:category] == category ? nil : category)) do %>
+              <%= category.humanize %> (<%= count %>)<%= ' *' if params[:category] == category %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if @facets[:page_kinds].present? && @facets[:page_kinds].any? %>
+      <p><strong><%= l(:wiki_hub_filter_kind) %></strong></p>
+      <ul>
+        <% @facets[:page_kinds].each do |kind, count| %>
+          <li>
+            <%= link_to knowledge_hub_search_path(q: params[:q], page_kind: (params[:page_kind] == kind ? nil : kind)) do %>
+              <%= kind.humanize %> (<%= count %>)<%= ' *' if params[:page_kind] == kind %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if @facets[:projects].present? && @facets[:projects].any? %>
+      <p><strong><%= l(:field_project) %></strong></p>
+      <ul>
+        <% @facets[:projects].first(10).each do |project, count| %>
+          <li>
+            <%= link_to knowledge_hub_search_path(q: params[:q], project_id: (params[:project_id] == project ? nil : project)) do %>
+              <%= project %> (<%= count %>)<%= ' *' if params[:project_id] == project %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if @facets[:tags].present? && @facets[:tags].any? %>
+      <p><strong><%= l(:wiki_hub_filter_tag) %></strong></p>
+      <ul>
+        <% @facets[:tags].first(15).each do |tag, count| %>
+          <li>
+            <%= link_to knowledge_hub_search_path(q: params[:q], tag: (params[:tag] == tag ? nil : tag)) do %>
+              <%= tag %> (<%= count %>)<%= ' *' if params[:tag] == tag %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if params[:category].present? || params[:page_kind].present? || params[:project_id].present? || params[:tag].present? %>
+      <p>
+        <%= link_to l(:wiki_hub_clear_filters), knowledge_hub_search_path(q: params[:q]), class: 'button' %>
+      </p>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="box" data-testid="wiki-hub-search-form-container">
+  <%= form_with url: knowledge_hub_search_path, method: :get, local: true, data: { testid: 'wiki-hub-search-form' } do |f| %>
+    <p>
+      <%= f.text_field :q,
+                       placeholder: l(:wiki_hub_search_placeholder),
+                       value: params[:q],
+                       id: 'wiki-hub-search-input',
+                       size: 50,
+                       data: { testid: 'wiki-hub-search-input' } %>
+      <%= f.submit l(:wiki_hub_search_submit), name: nil, class: 'button', data: { testid: 'wiki-hub-search-submit' } %>
+    </p>
+
+    <p>
+      <label for="wiki-hub-search-author"><%= l(:field_author) %></label>
+      <%= f.select :author,
+                   options_for_select([['', '']] + User.active.map { |u| [u.name, u.id] }, params[:author]),
+                   {},
+                   id: 'wiki-hub-search-author',
+                   data: { testid: 'wiki-hub-search-author' } %>
+    </p>
+    <p>
+      <label for="wiki-hub-search-date-from"><%= l(:wiki_hub_date_from) %></label>
+      <%= f.date_field :date_from, value: params[:date_from], id: 'wiki-hub-search-date-from' %>
+    </p>
+    <p>
+      <label for="wiki-hub-search-date-to"><%= l(:wiki_hub_date_to) %></label>
+      <%= f.date_field :date_to, value: params[:date_to], id: 'wiki-hub-search-date-to' %>
+    </p>
+    <p>
+      <label for="wiki-hub-search-sort"><%= l(:wiki_hub_sort_by) %></label>
+      <%= f.select :sort_by,
+                   options_for_select([
+                     [l(:wiki_hub_sort_relevance), 'relevance'],
+                     [l(:wiki_hub_sort_date), 'date'],
+                     [l(:wiki_hub_sort_title), 'title']
+                   ], params[:sort_by] || 'relevance'),
+                   {},
+                   id: 'wiki-hub-search-sort' %>
+    </p>
+  <% end %>
+</div>
+
+<% if params[:q].present? || params[:category].present? || params[:page_kind].present? || params[:tag].present? %>
+  <p data-testid="wiki-hub-search-info">
+    <% if params[:q].present? %>
+      <%= l(:wiki_hub_search_results_for, query: params[:q]) %>
+    <% else %>
+      <%= l(:wiki_hub_filtered_results) %>
+    <% end %>
+    <% if @pages&.respond_to?(:count) %>
+      <span data-testid="wiki-hub-search-count">(<%= @pages.count %> <%= l(:wiki_hub_search_results_count) %>)</span>
+    <% end %>
+  </p>
+
+  <% if params[:category].present? || params[:page_kind].present? || params[:tag].present? || params[:author].present? %>
+    <p>
+      <strong><%= l(:wiki_hub_active_filters) %>:</strong>
+      <% if params[:category].present? %>
+        <span><%= l(:wiki_hub_filter_category) %>: <%= params[:category] %></span>
+      <% end %>
+      <% if params[:page_kind].present? %>
+        <span><%= l(:wiki_hub_filter_kind) %>: <%= params[:page_kind] %></span>
+      <% end %>
+      <% if params[:tag].present? %>
+        <span><%= l(:wiki_hub_filter_tag) %>: <%= params[:tag] %></span>
+      <% end %>
+      <% if params[:author].present? %>
+        <span class="badge"><%= l(:field_author) %>: <%= @author_name || params[:author] %></span>
+      <% end %>
+    </p>
+  <% end %>
+<% end %>
+
+<div data-testid="wiki-hub-search-results">
+  <% pages = @pages || [] %>
+  <% if pages.any? %>
+    <table class="list wiki-hub-search-list" data-testid="wiki-hub-search-list">
+      <thead>
+        <tr>
+          <th><%= l(:label_wiki_page) %></th>
+          <th><%= l(:field_project) %></th>
+          <th><%= l(:wiki_hub_filter_kind) %></th>
+          <th><%= l(:wiki_hub_filter_category) %></th>
+          <th><%= l(:description) %></th>
+          <th><%= l(:field_updated_on) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% pages.each do |page| %>
+          <% profile = page.wiki_page_profile %>
+          <tr class="wiki-hub-search-result" data-testid="wiki-hub-search-result" data-page-id="<%= page.wiki_page_id %>">
+            <td class="name">
+              <strong class="wiki-hub-search-result-title" data-testid="wiki-hub-search-result-title">
+                <%= link_to page.title, project_wiki_page_path(page.project.identifier, page.title) %>
+              </strong>
+            </td>
+            <td class="wiki-hub-search-result-project" data-testid="wiki-hub-search-result-project">
+              <%= link_to page.project.name, project_path(page.project.identifier) if page.project %>
+            </td>
+            <td data-testid="wiki-hub-search-result-kind"><%= profile&.page_kind.to_s.presence || '-' %></td>
+            <td data-testid="wiki-hub-search-result-category"><%= profile&.category.to_s.presence || '-' %></td>
+            <td>
+              <% if page.respond_to?(:searchable_text) && page.searchable_text.present? %>
+                <div class="wiki-hub-search-result-excerpt" data-testid="wiki-hub-search-result-excerpt">
+                  <%= truncate(page.searchable_text.to_s, length: 200) %>
+                </div>
+              <% else %>
+                -
+              <% end %>
+            </td>
+            <td class="wiki-hub-search-result-date" data-testid="wiki-hub-search-result-date"><%= format_time(page.updated_at) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% elsif params[:q].present? || params[:category].present? || params[:page_kind].present? %>
+    <p class="nodata" data-testid="wiki-hub-search-empty"><%= l(:wiki_hub_search_no_results, query: params[:q] || l(:wiki_hub_your_filters)) %></p>
+  <% else %>
+    <p class="nodata" data-testid="wiki-hub-search-prompt"><%= l(:wiki_hub_search_prompt) %></p>
+  <% end %>
+</div>

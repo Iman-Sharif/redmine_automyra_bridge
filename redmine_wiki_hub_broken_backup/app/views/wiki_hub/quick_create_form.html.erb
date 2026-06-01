@@ -1,0 +1,45 @@
+<div class="wiki-hub-quick-create" data-testid="wiki-hub-quick-create">
+  <div class="contextual">
+    <%= link_to l(:button_cancel), knowledge_hub_path, class: 'icon icon-cancel' %>
+  </div>
+
+  <h1><%= l(:wiki_hub_create_page) %></h1>
+  
+  <%= form_with url: quick_create_knowledge_hub_path, method: :post, local: true, 
+                data: { testid: 'wiki-hub-quick-create-form' }, html: { class: 'tabular' } do |f| %>
+    
+    <div class="box">
+      <div class="form-field">
+        <%= f.label :project_id, l(:field_project) %>
+        <%= f.select :project_id, 
+                     options_from_collection_for_select(@projects, :id, :name, params[:project_id]),
+                     { prompt: l(:wiki_hub_select_project) },
+                     { required: true, data: { testid: 'wiki-hub-quick-create-project' } } %>
+      </div>
+      
+      <div class="form-field">
+        <%= f.label :title, l(:field_title) %>
+        <%= f.text_field :title, 
+                         value: params[:title],
+                         placeholder: l(:wiki_hub_page_title_placeholder),
+                         required: true,
+                         data: { testid: 'wiki-hub-quick-create-title' } %>
+      </div>
+      
+       <div class="form-field">
+         <%= f.label :template_id, l(:wiki_hub_use_template) %>
+         <%= f.select :template_id,
+                     options_for_select([['', '']] + Array(@available_templates).map { |p| [p.title, p.id] }, params[:template_id]),
+                     {},
+                     { data: { testid: 'wiki-hub-quick-create-template' } } %>
+         <em class="info"><%= l(:wiki_hub_template_optional) %></em>
+       </div>
+    </div>
+    
+    <div class="form-actions">
+      <%= f.submit l(:button_create), class: 'button', 
+                   data: { testid: 'wiki-hub-quick-create-submit' } %>
+      <%= link_to l(:button_cancel), knowledge_hub_path, class: 'icon icon-cancel' %>
+    </div>
+  <% end %>
+</div>

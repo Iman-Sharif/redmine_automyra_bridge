@@ -1,0 +1,42 @@
+<div class="contextual">
+  <%= link_to l(:wiki_hub_back_to_hub), knowledge_hub_path, class: 'icon icon-cancel' %>
+</div>
+
+<h2 data-testid="wiki-hub-lessons-title">
+  <%= l(:wiki_hub_lessons_title) %>
+</h2>
+
+<p class="subtitle" data-testid="wiki-hub-lessons-description">
+  <%= l(:wiki_hub_lessons_description) %>
+</p>
+
+<% if @lessons.any? %>
+  <table class="list" data-testid="wiki-hub-lessons-list">
+    <thead>
+      <tr>
+        <th><%= l(:label_date) %></th>
+        <th><%= l(:label_wiki_page) %></th>
+        <th><%= l(:description) %></th>
+        <th><%= l(:field_project) %></th>
+        <th><%= l(:field_updated_on) %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @lessons.each do |lesson| %>
+        <% lesson_date = lesson.try(:lesson_date) %>
+        <tr data-testid="wiki-hub-lesson-row" data-lesson-id="<%= lesson.wiki_page_id %>">
+          <td data-testid="wiki-hub-lesson-date"><%= lesson_date ? format_date(lesson_date) : l(:wiki_hub_lessons_no_date) %></td>
+          <td class="name" data-testid="wiki-hub-lesson-title"><%= link_to lesson.title, project_wiki_page_path(lesson.project.identifier, lesson.title) %></td>
+          <td data-testid="wiki-hub-lesson-summary"><%= truncate(lesson.searchable_text.to_s, length: 200) %></td>
+          <td data-testid="wiki-hub-lesson-project"><%= link_to lesson.project.name, project_path(lesson.project.identifier) if lesson.project %></td>
+          <td data-testid="wiki-hub-lesson-updated"><%= format_time(lesson.updated_at) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <div class="wiki-hub-empty" data-testid="wiki-hub-lessons-empty">
+    <p class="nodata"><%= l(:wiki_hub_lessons_empty) %></p>
+  </div>
+<% end %>
+

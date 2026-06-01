@@ -1,0 +1,82 @@
+services:
+  db:
+    image: postgres:16-bookworm
+    container_name: redmine-wiki-hub-test-postgres
+    environment:
+      POSTGRES_USER: redmine
+      POSTGRES_PASSWORD: redmine
+      POSTGRES_DB: redmine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U redmine -d redmine"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    volumes:
+      - redmine_wiki_hub_test_pgdata:/var/lib/postgresql/data
+
+  redmine:
+    image: my-redmica:v3.2.6-staging
+    container_name: redmine-wiki-hub-test-redmine
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: test
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: redmine
+      DB_USER: redmine
+      DB_PASSWORD: redmine
+      SECRET_KEY_BASE: redmine-wiki-hub-test-secret-key-base
+      WAIT_FOR_DB_TIMEOUT: 180
+    volumes:
+      - ../:/usr/src/redmica/plugins/redmine_wiki_hub
+      - ./config/database.yml:/usr/src/redmica/config/database.yml:ro
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        cd /usr/src/redmica
+        echo "[redmine] Preparing database..."
+        bundle exec rake db:create db:migrate RAILS_ENV=test 2>&1 | tail -5
+        echo "[redmine] Running plugin migrations..."
+        bundle exec rake redmine:plugins:migrate RAILS_ENV=test 2>&1 | tail -5 || true
+        echo "[redmine] Starting server..."
+        exec bundle exec rails server -e test -b 0.0.0.0 -p 3000
+    healthcheck:
+      test: ["CMD-SHELL", "ruby -rsocket -e 'TCPSocket.new(\"127.0.0.1\", 3000).close rescue exit 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 120s
+    ports:
+      - "3300:3000"
+
+  test:
+    image: my-redmica:v3.2.6-staging
+    container_name: redmine-wiki-hub-test-runner
+    depends_on:
+      redmine:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: test
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: redmine
+      DB_USER: redmine
+      DB_PASSWORD: redmine
+      SECRET_KEY_BASE: redmine-wiki-hub-test-secret-key-base
+    volumes:
+      - ../:/usr/src/redmica/plugins/redmine_wiki_hub
+      - ./config/database.yml:/usr/src/redmica/config/database.yml:ro
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        cd /usr/src/redmica
+        echo "[test] Running plugin test suite..."
+        bundle exec rails test plugins/redmine_wiki_hub/test RAILS_ENV=test 2>&1
+
+volumes:
+  redmine_wiki_hub_test_pgdata:

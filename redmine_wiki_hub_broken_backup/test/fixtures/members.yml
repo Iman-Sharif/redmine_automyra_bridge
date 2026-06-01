@@ -1,0 +1,21 @@
+---
+hub_reader_a_agreements:
+  id: 6801
+  project_id: 6201
+  user_id: 6102
+  mail_notification: false
+  created_on: 2026-04-01 00:00:00 +00:00
+
+hub_reader_a_procurement:
+  id: 6802
+  project_id: 6202
+  user_id: 6102
+  mail_notification: false
+  created_on: 2026-04-01 00:00:00 +00:00
+
+hub_reader_b_process_docs:
+  id: 6803
+  project_id: 6203
+  user_id: 6103
+  mail_notification: false
+  created_on: 2026-04-01 00:00:00 +00:00

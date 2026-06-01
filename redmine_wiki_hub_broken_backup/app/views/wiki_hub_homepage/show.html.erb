@@ -1,0 +1,38 @@
+<div class="wiki-hub-homepage" data-testid="wiki-hub-homepage-page">
+  <h2 data-testid="wiki-hub-homepage-title">
+    <%= l(:wiki_hub_homepage_title) %>
+  </h2>
+
+  <p data-testid="wiki-hub-homepage-description">
+    <%= l(:wiki_hub_homepage_description) %>
+  </p>
+
+  <div class="box" data-testid="wiki-hub-homepage-settings">
+    <%= form_with url: my_wiki_hub_homepage_path, method: :patch, local: true, data: { testid: 'wiki-hub-homepage-form' }, html: { class: 'tabular' } do |f| %>
+      <%= fields_for :preference, @preference do |pf| %>
+        <p>
+          <label for="wiki-hub-homepage-enabled" data-testid="wiki-hub-homepage-enabled-label" class="checkbox inline">
+            <%= pf.check_box :homepage_enabled, checked: @preference.homepage_enabled?, id: 'wiki-hub-homepage-enabled', data: { testid: 'wiki-hub-homepage-checkbox' } %>
+            <%= l(:wiki_hub_homepage_enable) %>
+          </label>
+        </p>
+        <p class="wiki-hub-homepage-hint"><%= l(:wiki_hub_homepage_enable_hint) %></p>
+      <% end %>
+
+      <p class="buttons">
+        <%= f.submit l(:wiki_hub_homepage_save), class: 'button', data: { testid: 'wiki-hub-homepage-submit' } %>
+      </p>
+    <% end %>
+  </div>
+
+  <div class="box" data-testid="wiki-hub-homepage-status">
+    <h3><%= l(:wiki_hub_homepage_current_status) %></h3>
+    <p data-testid="wiki-hub-homepage-status-text">
+      <% if @preference.homepage_enabled? %>
+        <span class="wiki-hub-status-enabled icon icon-ok"><%= l(:wiki_hub_homepage_enabled) %></span>
+      <% else %>
+        <span class="wiki-hub-status-disabled icon icon-cancel"><%= l(:wiki_hub_homepage_disabled) %></span>
+      <% end %>
+    </p>
+  </div>
+</div>

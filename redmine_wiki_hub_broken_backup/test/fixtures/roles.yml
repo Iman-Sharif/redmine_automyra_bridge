@@ -1,0 +1,16 @@
+---
+hub_wiki_reader_role:
+  id: 6601
+  name: Hub Wiki Reader
+  builtin: 0
+  assignable: true
+  issues_visibility: default
+  users_visibility: all
+  time_entries_visibility: all
+  all_roles_managed: true
+  permissions: |
+    ---
+    - :view_wiki_pages
+    - :view_wiki_edits
+    - :export_wiki_pages
+  position: 99

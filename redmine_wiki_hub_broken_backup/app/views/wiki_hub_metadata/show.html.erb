@@ -1,0 +1,107 @@
+<div class="wiki-hub-metadata" data-testid="wiki-hub-metadata-page">
+  <div class="contextual">
+    <%= link_to l(:wiki_hub_back_to_wiki), project_wiki_page_path(@project, @wiki_page.title), class: 'icon icon-wiki' %>
+  </div>
+
+  <h2 data-testid="wiki-hub-metadata-title">
+    <%= l(:wiki_hub_metadata_title, page: @wiki_page.title) %>
+  </h2>
+
+  <div class="wiki-hub-metadata-form box" data-testid="wiki-hub-metadata-form">
+    <%= form_with url: project_wiki_metadata_path(@project, @wiki_page), method: :patch, local: true, data: { testid: 'wiki-hub-metadata-edit-form' } do |f| %>
+      <div class="wiki-hub-metadata-field">
+        <label for="wiki-hub-metadata-category" data-testid="wiki-hub-metadata-category-label">
+          <%= l(:wiki_hub_metadata_category) %>
+        </label>
+        <%= f.text_field :category,
+                         value: @profile&.category,
+                         id: 'wiki-hub-metadata-category',
+                         data: { testid: 'wiki-hub-metadata-category-input' } %>
+      </div>
+
+      <div class="wiki-hub-metadata-field">
+        <label for="wiki-hub-metadata-page-kind" data-testid="wiki-hub-metadata-page-kind-label">
+          <%= l(:wiki_hub_metadata_page_kind) %>
+        </label>
+        <%= f.select :page_kind,
+                     options_for_select(WikiHub::PageProfile.page_kinds.keys.map { |k| [k.humanize, k] }, @profile&.page_kind || 'standard'),
+                     {},
+                     id: 'wiki-hub-metadata-page-kind',
+                     data: { testid: 'wiki-hub-metadata-page-kind-select' } %>
+      </div>
+
+      <div class="wiki-hub-metadata-field">
+        <label for="wiki-hub-metadata-lesson-date" data-testid="wiki-hub-metadata-lesson-date-label">
+          <%= l(:wiki_hub_metadata_lesson_date) %>
+        </label>
+        <%= f.date_field :lesson_date,
+                         value: @profile&.lesson_date,
+                         id: 'wiki-hub-metadata-lesson-date',
+                         data: { testid: 'wiki-hub-metadata-lesson-date-input' } %>
+        <p class="wiki-hub-metadata-hint"><%= l(:wiki_hub_metadata_lesson_date_hint) %></p>
+      </div>
+
+      <div class="wiki-hub-metadata-field">
+        <label for="wiki-hub-metadata-tags" data-testid="wiki-hub-metadata-tags-label">
+          <%= l(:wiki_hub_metadata_tags) %>
+        </label>
+        <%= f.text_field :tags,
+                         value: @tag_names.join(', '),
+                         id: 'wiki-hub-metadata-tags',
+                         placeholder: l(:wiki_hub_metadata_tags_placeholder),
+                         data: { testid: 'wiki-hub-metadata-tags-input' } %>
+        <p class="wiki-hub-metadata-hint"><%= l(:wiki_hub_metadata_tags_hint) %></p>
+      </div>
+
+      <div class="wiki-hub-metadata-field">
+        <label for="wiki-hub-metadata-summary" data-testid="wiki-hub-metadata-summary-label">
+          <%= l(:wiki_hub_metadata_summary) %>
+        </label>
+        <%= f.text_area :summary,
+                        value: @profile&.summary,
+                        id: 'wiki-hub-metadata-summary',
+                        rows: 4,
+                        placeholder: l(:wiki_hub_metadata_summary_placeholder),
+                        data: { testid: 'wiki-hub-metadata-summary-input' } %>
+      </div>
+
+      <div class="wiki-hub-metadata-field">
+        <label for="wiki-hub-metadata-featured" data-testid="wiki-hub-metadata-featured-label">
+          <%= f.check_box :featured, checked: @profile&.featured?, id: 'wiki-hub-metadata-featured', data: { testid: 'wiki-hub-metadata-featured-checkbox' } %>
+          <%= l(:wiki_hub_metadata_featured) %>
+        </label>
+      </div>
+
+      <div class="wiki-hub-metadata-actions">
+          <%= f.submit l(:wiki_hub_metadata_save), class: 'button', data: { testid: 'wiki-hub-metadata-submit' } %>
+          <%= link_to l(:wiki_hub_cancel), project_wiki_page_path(@project, @wiki_page.title), class: 'icon icon-cancel', data: { testid: 'wiki-hub-metadata-cancel' } %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="wiki-hub-metadata-current box" data-testid="wiki-hub-metadata-current">
+    <h3><%= l(:wiki_hub_metadata_current) %></h3>
+    <dl class="wiki-hub-metadata-info">
+      <dt><%= l(:wiki_hub_metadata_category) %></dt>
+      <dd data-testid="wiki-hub-current-category"><%= @profile&.category.presence || l(:wiki_hub_metadata_not_set) %></dd>
+      <dt><%= l(:wiki_hub_metadata_page_kind) %></dt>
+      <dd data-testid="wiki-hub-current-page-kind"><%= (@profile&.page_kind || 'standard').humanize %></dd>
+      <dt><%= l(:wiki_hub_metadata_lesson_date) %></dt>
+      <dd data-testid="wiki-hub-current-lesson-date"><%= @profile&.lesson_date&.to_s.presence || l(:wiki_hub_metadata_not_set) %></dd>
+      <dt><%= l(:wiki_hub_metadata_tags) %></dt>
+      <dd data-testid="wiki-hub-current-tags">
+        <% if @tag_names.any? %>
+          <% @tag_names.each do |tag| %>
+            <span class="wiki-hub-tag" data-testid="wiki-hub-tag-<%= tag %>"><%= tag %></span>
+          <% end %>
+        <% else %>
+          <%= l(:wiki_hub_metadata_no_tags) %>
+        <% end %>
+      </dd>
+      <dt><%= l(:wiki_hub_metadata_summary) %></dt>
+      <dd data-testid="wiki-hub-current-summary"><%= @profile&.summary.presence || l(:wiki_hub_metadata_not_set) %></dd>
+      <dt><%= l(:wiki_hub_metadata_featured) %></dt>
+      <dd data-testid="wiki-hub-current-featured"><%= @profile&.featured? ? l(:wiki_hub_yes) : l(:wiki_hub_no) %></dd>
+    </dl>
+  </div>
+</div>

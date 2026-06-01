@@ -1,0 +1,32 @@
+---
+master_playbook:
+  id: 6401
+  wiki_id: 6301
+  title: Master Playbook
+  parent_id:
+  protected: false
+  created_on: 2026-04-01 00:00:00 +00:00
+
+supplier_onboarding:
+  id: 6402
+  wiki_id: 6303
+  title: Supplier Onboarding
+  parent_id:
+  protected: false
+  created_on: 2026-04-01 00:00:00 +00:00
+
+contract_boilerplate:
+  id: 6403
+  wiki_id: 6302
+  title: Contract Boilerplate
+  parent_id:
+  protected: false
+  created_on: 2026-04-01 00:00:00 +00:00
+
+lessons_2026_04:
+  id: 6404
+  wiki_id: 6301
+  title: Lessons 2026-04
+  parent_id:
+  protected: false
+  created_on: 2026-04-01 00:00:00 +00:00
