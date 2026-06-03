@@ -1,0 +1,98 @@
+<div class="box tabular">
+  <p>
+    <label>Automyra endpoint</label>
+    <%= text_field_tag 'settings[automyra_endpoint]', @settings['automyra_endpoint'], size: 80 %>
+    <em class="info">HTTP endpoint that accepts task improvement JSON requests.</em>
+  </p>
+  <p>
+    <label>Automyra token</label>
+    <%= password_field_tag 'settings[automyra_token]', @settings['automyra_token'], size: 80, autocomplete: 'new-password' %>
+    <em class="info">Stored in Redmica plugin settings; replace this value to rotate the token.</em>
+  </p>
+  <p>
+    <label>Request timeout seconds</label>
+    <%= text_field_tag 'settings[request_timeout_seconds]', @settings['request_timeout_seconds'], size: 10 %>
+  </p>
+  <p>
+    <label>Memory endpoint</label>
+    <%= text_field_tag 'settings[memory_endpoint]', @settings['memory_endpoint'], size: 80 %>
+    <em class="info">Optional Automyra/Manifest memory endpoint. Use an OpenAI-compatible /v1/chat/completions URL or a tool endpoint.</em>
+  </p>
+  <p>
+    <label>Memory token</label>
+    <%= password_field_tag 'settings[memory_token]', @settings['memory_token'], size: 80, autocomplete: 'new-password' %>
+  </p>
+  <p>
+    <label>Memory model</label>
+    <%= text_field_tag 'settings[memory_model]', @settings['memory_model'], size: 30 %>
+  </p>
+  <p>
+    <label>Memory session key</label>
+    <%= text_field_tag 'settings[memory_session_key]', @settings['memory_session_key'], size: 30 %>
+  </p>
+  <p>
+    <label>LanceDB config path</label>
+    <%= text_field_tag 'settings[memory_lancedb_config_path]', @settings['memory_lancedb_config_path'], size: 80 %>
+    <em class="info">OpenClaw/Manifest config used to discover the active memory-lancedb-pro dbPath and embedding settings.</em>
+  </p>
+  <p>
+    <label>LanceDB URI override</label>
+    <%= text_field_tag 'settings[memory_lancedb_uri]', @settings['memory_lancedb_uri'], size: 80 %>
+    <em class="info">Leave blank to use dbPath from the config path.</em>
+  </p>
+  <p>
+    <label>LanceDB tables</label>
+    <%= text_field_tag 'settings[memory_lancedb_table]', @settings['memory_lancedb_table'], size: 30 %>
+    <%= text_field_tag 'settings[memory_lancedb_redmine_table]', @settings['memory_lancedb_redmine_table'], size: 30 %>
+  </p>
+  <p>
+    <label>Incoming webhook secret</label>
+    <%= password_field_tag 'settings[webhook_secret]', @settings['webhook_secret'], size: 80, autocomplete: 'new-password' %>
+    <em class="info">Bearer token accepted by POST /automyra_bridge/webhooks/incoming.</em>
+  </p>
+  <p>
+    <label>Incoming webhook user login</label>
+    <%= text_field_tag 'settings[webhook_user_login]', @settings['webhook_user_login'], size: 30 %>
+    <em class="info">Redmica user used for inbound Outlook email jobs. Falls back to the first active administrator when blank.</em>
+  </p>
+  <p>
+    <label>Enable auto-close on Resolved</label>
+    <%= check_box_tag 'settings[auto_close_enabled]', '1', @settings['auto_close_enabled'] == '1' %>
+    <em class="info">Automatically close issues that reach the configured trigger status.</em>
+  </p>
+  <p>
+    <label>Trigger status name</label>
+    <%= text_field_tag 'settings[auto_close_trigger_status_name]', @settings['auto_close_trigger_status_name'], size: 30 %>
+    <em class="info">Issue status that triggers auto-close (e.g. Resolved). Leave blank to use the default Resolved status.</em>
+  </p>
+  <hr>
+  <h3>Hermes webhook endpoints</h3>
+  <p>
+    <label>Legacy webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url]', @settings['hermes_webhook_url'], size: 80 %>
+    <em class="info">Fallback URL used when per-event URLs are not configured. Default: https://automyra.sbg-server.com/webhooks/redmica-mentions</em>
+  </p>
+  <p>
+    <label>Mentions webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_mentions]', @settings['hermes_webhook_url_mentions'], size: 80 %>
+    <em class="info">URL for @automyra mention events (redmica.issue_mention, redmica.task_comment_mention). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Creation review webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_creation_review]', @settings['hermes_webhook_url_creation_review'], size: 80 %>
+    <em class="info">URL for new issue creation review (redmica.issue_created). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Auto-close webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_auto_close]', @settings['hermes_webhook_url_auto_close'], size: 80 %>
+    <em class="info">URL for auto-close deep review (redmica.issue_status_changed). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Hermes webhook secret</label>
+    <%= password_field_tag 'settings[hermes_webhook_secret]', @settings['hermes_webhook_secret'], size: 80, autocomplete: 'new-password' %>
+  </p>
+  <p>
+    <label>Governance</label>
+    <%= link_to 'Manage Governance Policies', '/automyra_bridge/governance/policies', class: 'icon icon-settings' %>
+  </p>
+</div>
