@@ -100,7 +100,7 @@ class AutomyraBridgeIssueCreationReviewWebhookTest < ActiveSupport::TestCase
       status: IssueStatus.find(1)
     )
 
-    job = enqueued_jobs.last
+    job = enqueued_jobs.find { |j| j[:job] == AutomyraBridge::HermesWebhookDeliverJob }
     assert_not_nil job
     assert_equal 'redmica.issue_created', job[:args][0]
     payload = job[:args][1]
@@ -123,7 +123,7 @@ class AutomyraBridgeIssueCreationReviewWebhookTest < ActiveSupport::TestCase
       status: IssueStatus.find(1)
     )
 
-    job = enqueued_jobs.last
+    job = enqueued_jobs.find { |j| j[:job] == AutomyraBridge::HermesWebhookDeliverJob }
     assert_not_nil job
     payload = job[:args][1]
     assert payload['description'].length <= 2000
