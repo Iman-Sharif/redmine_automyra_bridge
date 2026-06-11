@@ -309,10 +309,13 @@
       if (!this.panelOpen) return;
 
       var thread = this.currentThread();
+      var pageContext = this.getPageContext();
       var params = ['last_message_id=' + encodeURIComponent(this.lastMessageId || 0)];
       params.push('last_seen_update_at=' + encodeURIComponent(this.lastSeenUpdateAt || ''));
       if (thread && thread.id) params.push('thread_id=' + encodeURIComponent(thread.id));
       if (thread && thread.kind) params.push('thread_kind=' + encodeURIComponent(thread.kind));
+      if (pageContext.page_type) params.push('page_type=' + encodeURIComponent(pageContext.page_type));
+      if (pageContext.page_id) params.push('page_id=' + encodeURIComponent(pageContext.page_id));
 
       fetch('/automyra_bridge/chat/poll?' + params.join('&'), {
         credentials: 'same-origin',
@@ -336,7 +339,7 @@
       .catch(function() {
         console.warn('Automyra chat poll failed');
         this.refreshHistory();
-      });
+      }.bind(this));
     },
 
     startPolling: function() {
@@ -1173,9 +1176,12 @@
       if (!this.panelOpen) return Promise.resolve();
 
       var thread = this.currentThread();
+      var pageContext = this.getPageContext();
       var params = [];
       if (thread && thread.id) params.push('thread_id=' + encodeURIComponent(thread.id));
       if (thread && thread.kind) params.push('thread_kind=' + encodeURIComponent(thread.kind));
+      if (pageContext.page_type) params.push('page_type=' + encodeURIComponent(pageContext.page_type));
+      if (pageContext.page_id) params.push('page_id=' + encodeURIComponent(pageContext.page_id));
 
       return fetch('/automyra_bridge/chat/history' + (params.length ? '?' + params.join('&') : ''), {
         credentials: 'same-origin',

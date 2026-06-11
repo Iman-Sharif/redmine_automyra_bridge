@@ -55,7 +55,7 @@ class AutomyraBridgeIssueCreationReviewWebhookTest < ActiveSupport::TestCase
     end
   end
 
-  test 'does not fire webhook for bot-authored issue' do
+  test 'fires webhook for bot-authored issue (bot issues are reviewed too)' do
     bot_user = User.create!(
       login: 'automyra',
       firstname: 'Automyra',
@@ -65,7 +65,7 @@ class AutomyraBridgeIssueCreationReviewWebhookTest < ActiveSupport::TestCase
       language: 'en'
     )
 
-    assert_no_enqueued_jobs(only: AutomyraBridge::HermesWebhookDeliverJob) do
+    assert_enqueued_with(job: AutomyraBridge::HermesWebhookDeliverJob) do
       Issue.create!(
         project: @project,
         tracker: Tracker.find(1),
