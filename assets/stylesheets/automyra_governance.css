@@ -1,0 +1,175 @@
+.automyra-governance-policy-form {
+  max-width: 980px;
+}
+
+.box.tabular.automyra-governance-policy-form {
+  padding: 16px 18px;
+}
+
+.automyra-governance-form-section {
+  margin: 0 0 18px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.automyra-governance-form-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.automyra-governance-form-section h3 {
+  margin: 0 0 10px;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.automyra-governance-policy-form label {
+  color: #333 !important;
+  font-weight: bold;
+}
+
+.automyra-governance-policy-form label .required {
+  color: #b00000 !important;
+}
+
+.automyra-governance-policy-form label.inline {
+  float: none;
+  display: inline;
+  margin-left: 6px;
+  width: auto;
+  text-align: left;
+}
+
+.automyra-governance-health {
+  display: inline-block;
+  min-width: 5.5em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+}
+
+.automyra-governance-health-success {
+  background: #3a8f3a;
+}
+
+.automyra-governance-health-failed {
+  background: #b33630;
+}
+
+.automyra-governance-health-unknown {
+  background: #777;
+}
+
+.automyra-governance-toggle-button {
+  border-radius: 3px;
+  color: #fff !important;
+  font-weight: bold;
+}
+
+.automyra-governance-toggle-button:hover,
+.automyra-governance-toggle-button:focus {
+  color: #fff !important;
+}
+
+.automyra-governance-toggle-button-pause {
+  background: #b33630;
+  border: 1px solid #922b26;
+}
+
+.automyra-governance-toggle-button-pause:hover,
+.automyra-governance-toggle-button-pause:focus {
+  background: #982b26;
+}
+
+.automyra-governance-toggle-button-resume {
+  background: #3a8f3a;
+  border: 1px solid #2f7430;
+}
+
+.automyra-governance-toggle-button-resume:hover,
+.automyra-governance-toggle-button-resume:focus {
+  background: #2f7430;
+}
+
+.automyra-governance-policy-form input[type="text"],
+.automyra-governance-policy-form input[type="number"],
+.automyra-governance-policy-form select,
+.automyra-governance-policy-form textarea {
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #bbb;
+}
+
+.automyra-governance-policy-form textarea {
+  max-width: 100%;
+  font-family: monospace;
+}
+
+.automyra-governance-policy-form .info {
+  margin: 4px 0 0 180px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.automyra-governance-policy-form-actions {
+  margin-top: 12px;
+}
+
+.automyra-governance-page .comparison-box {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+}
+
+.automyra-governance-page .comparison-before,
+.automyra-governance-page .comparison-after {
+  flex: 1;
+  min-width: 0;
+}
+
+.automyra-governance-page .comparison-before h4 {
+  color: #c91e1e;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.automyra-governance-page .comparison-after h4 {
+  color: #2a8f2a;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.automyra-governance-page .comparison-before pre,
+.automyra-governance-page .comparison-after pre {
+  margin: 0;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 12px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.automyra-governance-page .comparison-arrow {
+  font-size: 24px;
+  color: #999;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.automyra-governance-page .confidence-indicator {
+  font-weight: bold;
+}
+
+.automyra-governance-page .confidence-high { color: #2a8f2a; }
+.automyra-governance-page .confidence-medium { color: #c97400; }
+.automyra-governance-page .confidence-low { color: #c91e1e; }

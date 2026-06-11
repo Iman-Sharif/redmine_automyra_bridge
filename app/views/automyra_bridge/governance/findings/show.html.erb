@@ -1,0 +1,91 @@
+<div class="contextual">
+  <%= link_to 'Back to findings', automyra_bridge_governance_findings_path %>
+</div>
+
+<h2>Finding #<%= @finding.id %></h2>
+
+<div class="splitcontent">
+  <div class="splitcontentleft">
+    <div class="box">
+      <h3>What was checked</h3>
+      <table class="attributes">
+        <tr>
+          <th>Policy</th>
+          <td><%= link_to @finding.governance_policy.name, automyra_bridge_governance_policy_path(@finding.governance_policy) %></td>
+        </tr>
+        <tr>
+          <th>Run</th>
+          <td><%= link_to "##{@finding.governance_run_id}", automyra_bridge_governance_run_path(@finding.governance_run, { project_id: @finding.governance_policy.project_id }.compact) %></td>
+        </tr>
+        <tr>
+          <th>Object</th>
+          <td>
+            <%= governance_object_link(@finding) %>
+          </td>
+        </tr>
+        <tr>
+          <th>Rule</th>
+          <td>
+            <% if @finding.finding_type == 'task_title' || @finding.object_type.to_s.include?('Task') %>
+              Task title
+            <% elsif @finding.finding_type == 'wiki_title' || @finding.object_type.to_s.include?('WikiPage') %>
+              Wiki page title
+            <% elsif @finding.finding_type == 'attachment_filename' || @finding.object_type == 'Attachment' %>
+              Attachment filename
+            <% else %>
+              <%= h @finding.finding_type.humanize %>
+            <% end %>
+          </td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td><span class="badge <%= @finding.status == 'valid' ? 'badge-status-closed' : 'badge-status-open' %>"><%= h @finding.status %></span></td>
+        </tr>
+        <tr>
+          <th>Confidence</th>
+          <td>
+            <span class="confidence-indicator <%= @finding.confidence.to_f >= 0.85 ? 'confidence-high' : (@finding.confidence.to_f >= 0.5 ? 'confidence-medium' : 'confidence-low') %>">
+              <%= number_to_percentage(@finding.confidence.to_f * 100, precision: 0) %>
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <th>Created</th>
+          <td><%= format_time(@finding.created_at) %></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="splitcontentright">
+    <div class="box">
+      <h3>Comparison</h3>
+      <div class="comparison-box">
+        <div class="comparison-before">
+          <h4>Current value</h4>
+          <pre><%= h(@finding.current_value.to_s.presence || '—') %></pre>
+        </div>
+        <div class="comparison-arrow">→</div>
+        <div class="comparison-after">
+          <h4>Recommended value</h4>
+          <pre><%= h(@finding.recommended_value.to_s.presence || '—') %></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @finding.evaluator_error.present? %>
+  <div class="flash error">
+    <strong>Evaluator error:</strong> <%= h @finding.evaluator_error %>
+  </div>
+<% end %>
+
+<div class="box">
+  <h3>Actions</h3>
+  <% if @finding.governance_actions.any? %>
+    <%= render partial: 'automyra_bridge/governance/actions/table', locals: { actions: @finding.governance_actions.order(created_at: :desc).limit(20) } %>
+  <% else %>
+    <p class="nodata">No actions recorded.</p>
+  <% end %>
+</div>

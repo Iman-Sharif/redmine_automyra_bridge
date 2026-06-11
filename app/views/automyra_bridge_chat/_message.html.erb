@@ -1,0 +1,43 @@
+<div class="automyra-chat-message automyra-chat-message--<%= message.role %>" data-message-id="<%= message.id %>" data-message-status="<%= message.status %>">
+  <div class="automyra-chat-message-content">
+    <% if message.role == 'assistant' && message.status == 'pending' %>
+      <span class="automyra-chat-typing-indicator">Automyra is thinking...</span>
+    <% else %>
+      <% if message.content.present? %>
+        <%= markdown_to_html(message.content) %>
+      <% end %>
+      <% if message.role == 'assistant' && message.job_id.present? %>
+        <div class="automyra-chat-sources"><small>Sources: Automyra run tools and current page context</small></div>
+      <% end %>
+      <% if message.attachments.any? %>
+        <div class="automyra-chat-message-attachments">
+          <% message.attachments.each do |attachment| %>
+            <% if attachment.image? %>
+              <%= image_tag(attachment_path(attachment), class: 'automyra-chat-message-image', alt: attachment.filename) %>
+            <% else %>
+              <%= link_to attachment.filename, attachment_path(attachment), class: 'automyra-chat-attachment-link' %>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+      <% if message.has_proposal? %>
+        <%= render partial: 'automyra_bridge_chat/proposal_inline', locals: { proposal: message.proposal, message: message } %>
+      <% end %>
+      <% job_status = message.respond_to?(:job) && message.job ? message.job.status.to_s : nil %>
+      <% retryable_run = message.role == 'assistant' && message.job_id.present? && (message.status == 'failed' || %w[failed max_steps_reached].include?(job_status)) %>
+      <% active_run = message.role == 'assistant' && message.job_id.present? && (message.status == 'pending' || %w[running retrying].include?(job_status)) %>
+      <% if retryable_run %>
+        <p class="buttons automyra-chat-job-actions">
+          <button type="button" class="button-positive" data-chat-retry-job="<%= message.job_id %>">Retry</button>
+          <button type="button" class="button" data-chat-cancel-job="<%= message.job_id %>">Cancel</button>
+        </p>
+      <% end %>
+      <% if active_run %>
+        <p class="buttons automyra-chat-job-actions"><button type="button" class="button" data-chat-cancel-job="<%= message.job_id %>">Cancel</button></p>
+      <% elsif message.role == 'assistant' && message.job_id.present? && !retryable_run %>
+        <p class="buttons automyra-chat-job-actions"><button type="button" class="button" data-chat-retry-job="<%= message.job_id %>">Regenerate</button></p>
+      <% end %>
+    <% end %>
+  </div>
+  <span class="automyra-chat-message-time"><%= format_time(message.created_at) %></span>
+</div>

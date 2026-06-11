@@ -1,0 +1,17 @@
+<div class="box">
+  <h3>Assistant diagnostics</h3>
+  <p>
+    <strong>Status:</strong> <%= h diagnostics[:status] %><br>
+    <strong>Provider reachable:</strong> <%= diagnostics[:provider_reachable] ? 'yes' : 'no' %><br>
+    <strong>Memory reachable:</strong> <%= diagnostics[:memory_reachable] ? 'yes' : 'no' %><br>
+    <strong>Queue depth:</strong> <%= diagnostics[:queue_depth] %><br>
+    <strong>Email bridge last processed:</strong> <%= diagnostics.dig(:email_bridge, :last_processed_at).presence || '-' %><br>
+    <strong>Email bridge last error:</strong> <%= diagnostics.dig(:email_bridge, :last_error).presence || '-' %><br>
+    <strong>Email bridge queue depth:</strong> <%= diagnostics.dig(:email_bridge, :queue_depth) || 0 %><br>
+    <strong>Email bridge failures in last 24 hours:</strong> <%= diagnostics.dig(:email_bridge, :failures_24h_count) || 0 %><br>
+    <strong>Last successful run:</strong> <%= diagnostics[:last_successful_run_at].presence || '-' %><br>
+    <strong>Last failed run:</strong> <%= diagnostics[:last_failed_run_at].presence || '-' %><br>
+    <strong>Tool registry:</strong> <%= diagnostics.dig(:tool_registry_status, :healthy) %>/<%= diagnostics.dig(:tool_registry_status, :total) %> read tools healthy
+  </p>
+  <p><%= link_to 'Diagnostics JSON', automyra_bridge_diagnostics_path(@project), class: 'icon icon-report' %></p>
+</div>

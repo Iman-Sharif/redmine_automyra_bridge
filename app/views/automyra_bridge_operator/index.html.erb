@@ -1,0 +1,166 @@
+<div class="contextual">
+  <%= link_to 'Back to project', project_path(@project), class: 'icon icon-projects' %>
+</div>
+
+<div class="box">
+  <h3>Bridge health</h3>
+  <p>
+    <strong>Adapter:</strong> <%= @adapter_health[:status] %> <%= @adapter_health[:body] %><br>
+    <strong>Queued jobs:</strong> <%= @queue_depth %><br>
+    <strong>Running jobs:</strong> <%= @running_jobs_count %><br>
+    <strong>Failed jobs in last 24 hours:</strong> <%= @recent_failed_jobs_count %><br>
+    <strong>Active bridge jobs:</strong> <%= @active_bridge_jobs_count %><br>
+    <strong>Active runs:</strong> <%= @active_runs_count %><br>
+    <strong>Visible run events:</strong> <%= @unprocessed_run_events_count %><br>
+    <strong>Failed runs in last 24 hours:</strong> <%= @failed_runs_24h_count %><br>
+    <strong>Last job update:</strong> <%= @last_worker_job ? format_time(@last_worker_job.updated_at) : '-' %>
+  </p>
+</div>
+
+<div class="box">
+  <h3>Email bridge</h3>
+  <p>
+    <strong>Last processed email:</strong> <%= @email_bridge_last_processed_job ? format_time(@email_bridge_last_processed_job.updated_at) : '-' %><br>
+    <strong>Last email processing error:</strong> <%= @email_bridge_last_failed_job&.error_message.presence || '-' %><br>
+    <strong>Email bridge queue depth:</strong> <%= @email_bridge_queue_depth %><br>
+    <strong>Email bridge failures in last 24 hours:</strong> <%= @email_bridge_failures_24h_count %>
+  </p>
+</div>
+
+<%= render partial: 'diagnostics', locals: { diagnostics: @diagnostics } %>
+
+<div class="box">
+  <h3>Tool registry</h3>
+  <p><strong>Registered tools:</strong> <%= @registered_tools.count %></p>
+  <ul>
+    <% @tool_risk_counts.sort.each do |risk, count| %>
+      <li><%= h(risk) %>: <%= count %></li>
+    <% end %>
+  </ul>
+</div>
+
+<h3>Proposal filters</h3>
+<%= form_tag automyra_bridge_operator_path(@project), method: :get do %>
+  <p>
+    <label>Status</label> <%= select_tag :proposal_status, options_for_select([['Any', '']] + AutomyraBridgeActionProposal::STATUSES.map { |status| [status.humanize, status] }, @proposal_status_filter) %>
+    <label>Action</label> <%= select_tag :proposal_action, options_for_select([['Any', '']] + AutomyraBridgeActionProposal::ACTION_TYPES.map { |action| [action.humanize, action] }, @proposal_action_filter) %>
+    <%= submit_tag 'Apply' %>
+  </p>
+<% end %>
+
+<h2>Automyra operator review</h2>
+
+<div class="box tabular">
+  <h3>Project controls</h3>
+  <%= form_tag automyra_bridge_project_settings_path(@project), method: :patch do %>
+    <p>
+      <label>Enabled actions</label>
+      <% AutomyraBridgeProjectSetting::ACTIONS.each do |action| %>
+        <label class="inline"><%= check_box_tag 'automyra_bridge_project_setting[enabled_actions][]', action, @project_setting.enabled_action_list.include?(action) %> <%= action.humanize %></label>
+      <% end %>
+    </p>
+    <p>
+      <label>Risk tier</label>
+      <%= select_tag 'automyra_bridge_project_setting[risk_tier]', options_for_select(AutomyraBridgeProjectSetting::RISK_TIERS.map { |tier| [tier.humanize, tier] }, @project_setting.risk_tier) %>
+    </p>
+    <p>
+      <label>Live updates</label>
+      <label class="inline"><%= hidden_field_tag 'automyra_bridge_project_setting[enable_sse]', '0' %><%= check_box_tag 'automyra_bridge_project_setting[enable_sse]', '1', @project_setting.respond_to?(:enable_sse?) && @project_setting.enable_sse? %> Enable SSE live transport</label>
+    </p>
+    <p><em>Autonomous executes enabled low-risk task actions directly. Destructive, issue, and wiki actions remain operator-visible unless separately implemented.</em></p>
+    <p><%= submit_tag 'Save' %></p>
+  <% end %>
+</div>
+
+<h3>Pending proposals</h3>
+<% if @pending_proposals.any? %>
+  <table class="list">
+    <thead><tr><th>ID</th><th>Action</th><th>Task</th><th>Requested by</th><th>Created</th></tr></thead>
+    <tbody>
+      <% @pending_proposals.each do |proposal| %>
+        <tr class="<%= cycle('odd', 'even') %>">
+          <td><%= link_to proposal.id, automyra_bridge_proposal_path(proposal) %></td>
+          <td><%= proposal.action_type.humanize %></td>
+          <td><%= proposal.task ? link_to(proposal.task.title, task_hub_standalone_path(proposal.task)) : '-' %></td>
+          <td><%= link_to_user proposal.user %></td>
+          <td><%= format_time proposal.created_at %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p class="nodata">No pending Automyra proposals.</p>
+<% end %>
+
+<h3>Failed and unsupported proposals</h3>
+<% if @failed_proposals.any? %>
+  <table class="list">
+    <thead><tr><th>ID</th><th>Action</th><th>Task</th><th>Error</th><th>Updated</th><th>Payload</th></tr></thead>
+    <tbody>
+      <% @failed_proposals.each do |proposal| %>
+        <tr class="<%= cycle('odd', 'even') %>">
+          <td><%= link_to proposal.id, automyra_bridge_proposal_path(proposal) %></td>
+          <td><%= proposal.action_type.humanize %></td>
+          <td><%= proposal.task ? link_to(proposal.task.title, task_hub_standalone_path(proposal.task)) : '-' %></td>
+          <td><%= truncate(proposal.error_message.to_s, length: 120) %></td>
+          <td><%= format_time proposal.updated_at %></td>
+          <td><%= truncate(proposal.request_payload.to_s, length: 160) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p class="nodata">No failed or unsupported Automyra proposals.</p>
+<% end %>
+
+<h3>Failed jobs and retry decisions</h3>
+<% if @failed_jobs.any? %>
+  <table class="list">
+    <thead><tr><th>ID</th><th>Source</th><th>Error</th><th>Updated</th><th></th></tr></thead>
+    <tbody>
+      <% @failed_jobs.each do |job| %>
+        <tr class="<%= cycle('odd', 'even') %>">
+          <td><%= job.id %></td>
+          <td><%= job.source_type %> #<%= job.source_id %></td>
+          <td><%= truncate(job.error_message.to_s, length: 120) %></td>
+          <td><%= format_time job.updated_at %></td>
+          <td class="buttons">
+            <%= button_to 'Retry', automyra_bridge_retry_job_path(@project, job), method: :post %>
+            <%= button_to 'Cancel', automyra_bridge_cancel_job_path(@project, job), method: :post %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p class="nodata">No failed Automyra jobs.</p>
+<% end %>
+
+<h3>Audit search</h3>
+<%= form_tag automyra_bridge_operator_path(@project), method: :get do %>
+  <p>
+    <label>Status</label> <%= text_field_tag :status, @status_filter, size: 12 %>
+    <label>Search</label> <%= text_field_tag :q, @audit_query, size: 40 %>
+    <%= submit_tag 'Apply' %>
+  </p>
+<% end %>
+
+<% if @audit_events.any? %>
+  <table class="list">
+    <thead><tr><th>Action</th><th>Status</th><th>Correlation</th><th>User</th><th>Created</th><th>Error</th></tr></thead>
+    <tbody>
+      <% @audit_events.each do |event| %>
+        <tr class="<%= cycle('odd', 'even') %>">
+          <td><%= event.action %></td>
+          <td><%= event.status %></td>
+          <td><%= event.correlation_id %></td>
+          <td><%= link_to_user event.user %></td>
+          <td><%= format_time event.created_at %></td>
+          <td><%= truncate(event.error_message.to_s, length: 120) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p class="nodata">No Automyra audit events match the current filters.</p>
+<% end %>

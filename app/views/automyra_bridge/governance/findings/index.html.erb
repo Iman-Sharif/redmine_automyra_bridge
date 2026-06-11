@@ -1,0 +1,9 @@
+<h2>Automyra governance findings</h2>
+
+<%= form_tag automyra_bridge_governance_findings_path, method: :get do %>
+  <%= hidden_field_tag :project_id, @project.id if @project %>
+  <%= hidden_field_tag :policy_id, params[:policy_id] if params[:policy_id].present? %>
+  <p><label>Status</label> <%= text_field_tag :status, params[:status] %> <label>Object type</label> <%= text_field_tag :object_type, params[:object_type] %> <label>Minimum confidence</label> <%= text_field_tag :minimum_confidence, params[:minimum_confidence] %> <%= submit_tag 'Filter findings' %></p>
+<% end %>
+
+<%= render partial: 'table', locals: { findings: @findings } %>

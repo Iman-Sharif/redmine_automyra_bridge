@@ -1,0 +1,54 @@
+<% project = local_assigns[:page_context].is_a?(Hash) ? AutomyraBridge::ChatProjectResolver.from_context(local_assigns[:page_context]) : thread&.project %>
+<% if AutomyraBridge::ChatPermission.allowed?(User.current, project: project) %>
+  <% canonical_context = (local_assigns[:page_context] || {}).slice(:page_type, :page_id, :project_id, :url_path, :page_title, :issue_id, :wiki_page_title, :task_id).merge(project_id: project&.id || local_assigns.dig(:page_context, :project_id)).reject { |_key, value| value.blank? } %>
+  <% project_setting = project ? AutomyraBridgeProjectSetting.for_project(project) : nil %>
+  <div id="automyra-chat-panel" class="automyra-chat-panel automyra-chat-hidden" data-automyra-chat="panel" data-thread-id="<%= thread&.id %>" data-thread-kind="<%= thread&.thread_kind || 'page' %>" data-unread-count="<%= thread&.unread_count || 0 %>" data-page-type="<%= local_assigns.dig(:page_context, :page_type) %>" data-page-id="<%= local_assigns.dig(:page_context, :page_id) %>" data-project-id="<%= project&.id %>" data-url-path="<%= local_assigns.dig(:page_context, :url_path) %>" data-page-title="<%= local_assigns.dig(:page_context, :page_title) %>">
+    <script type="application/json" id="automyra-chat-context"><%= raw json_escape(canonical_context.to_json) %></script>
+    <script>
+      window.automyraSettings = Object.assign({}, window.automyraSettings || {}, { enable_sse: <%= project_setting&.enable_sse? ? 'true' : 'false' %> });
+    </script>
+<!-- Header -->
+    <div class="automyra-chat-header">
+      <div class="automyra-chat-header-main">
+        <span class="automyra-chat-title">Ask Automyra</span>
+        <span class="automyra-chat-thread-meta">
+          <%= h(thread&.channel_label || 'New chat') %>
+          <% if project %> · <%= h(project.name) %><% end %>
+          · <%= thread&.thread_kind == 'global' ? 'Global' : 'Page' %>
+        </span>
+      </div>
+      <div class="automyra-chat-header-actions">
+        <button type="button" data-automyra-chat="toggle-thread" title="Toggle thread scope">
+          <%= thread&.thread_kind == 'global' ? 'Global' : 'Page' %>
+        </button>
+        <button type="button" data-automyra-chat="new-thread" title="New thread">New</button>
+        <button type="button" data-automyra-chat="mark-read" title="Mark as read">✓</button>
+        <button type="button" data-automyra-chat="close-panel" title="Close">×</button>
+      </div>
+    </div>
+
+    <% if thread %>
+      <div class="automyra-chat-channel contextual">
+        <small title="<%= h(thread.channel_description) %>"><%= h(thread.channel_label) %></small>
+      </div>
+    <% end %>
+
+    <!-- Message List -->
+    <div class="automyra-chat-message-list" data-automyra-chat="message-list"></div>
+
+    <!-- Status Bar -->
+    <div class="automyra-chat-status automyra-chat-hidden" data-automyra-chat="status">
+      Automyra is thinking...
+    </div>
+
+    <!-- Input Area -->
+    <div class="automyra-chat-input-area">
+      <textarea class="automyra-chat-textarea" data-automyra-chat="input" placeholder="Ask Automyra..." rows="2"></textarea>
+      <div class="automyra-chat-input-actions">
+        <input type="file" class="automyra-chat-file-input automyra-chat-hidden" data-automyra-chat="file-input" />
+        <button type="button" class="automyra-chat-attach-btn" data-automyra-chat="attach-btn" title="Attach file">📎</button>
+        <button type="button" class="automyra-chat-send-btn" data-automyra-chat="send-btn">Send</button>
+      </div>
+    </div>
+  </div>
+<% end %>

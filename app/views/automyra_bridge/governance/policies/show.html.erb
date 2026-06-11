@@ -1,0 +1,31 @@
+<h2>Automyra governance policy: <%= h @policy.name %></h2>
+
+<div class="box">
+  <p><strong>Project:</strong> <%= h @policy.project&.name %></p>
+  <p><strong>Mode:</strong> <span class="badge"><%= h @policy.mode %></span></p>
+  <p><strong>Provider model:</strong> <%= h @policy.provider_model %></p>
+  <p><strong>Linked Wiki Hub policy page ID:</strong> <%= @policy.policy_page_id || 'None' %></p>
+  <p><strong>Max-change guardrail:</strong> <%= @policy.max_changes_per_run || 'Not set' %></p>
+  <p><strong>Enabled:</strong> <%= @policy.enabled? ? 'Yes' : 'No' %></p>
+</div>
+
+<h3>Run now</h3>
+<%= form_tag run_now_automyra_bridge_governance_policy_path(@policy), method: :post do %>
+  <p>
+    <label>Run mode</label>
+    <%= select_tag :mode, options_for_select(AutomyraBridge::GovernancePolicy::MODES, @policy.mode) %>
+    <label>Max changes</label>
+    <%= number_field_tag :max_changes_per_run, @policy.max_changes_per_run || 10, min: 1 %>
+    <%= submit_tag 'Queue governance run' %>
+  </p>
+<% end %>
+<% if governance_read_only? %><p class="warning">Read-only project mode blocks apply runs.</p><% end %>
+
+<h3>Recent runs</h3>
+<%= render partial: 'automyra_bridge/governance/runs/table', locals: { runs: @runs } %>
+
+<h3>Recent findings</h3>
+<%= render partial: 'automyra_bridge/governance/findings/table', locals: { findings: @findings } %>
+
+<h3>Recent actions</h3>
+<%= render partial: 'automyra_bridge/governance/actions/table', locals: { actions: @actions } %>

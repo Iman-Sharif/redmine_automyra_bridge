@@ -1,0 +1,19 @@
+<% task = local_assigns[:task] %>
+<% issue = local_assigns[:issue] %>
+<% project = local_assigns[:project] || task&.project || issue&.project %>
+<% can_use = project && (User.current.admin? || User.current.allowed_to?(:use_automyra_bridge, project)) %>
+<% if can_use %>
+  <div class="box automyra-assistant-panel">
+    <h3>Automyra assistant</h3>
+    <%= form_with url: automyra_bridge_assistant_request_path, scope: :automyra_assistant, local: true do |f| %>
+      <%= f.hidden_field :project_id, value: project.id %>
+      <%= f.hidden_field :task_id, value: task.id if task %>
+      <%= f.hidden_field :issue_id, value: issue.id if issue %>
+      <p>
+        <%= f.label :body, 'Ask Automyra' %>
+        <%= f.text_area :body, rows: 3, class: 'wiki-edit' %>
+      </p>
+      <p class="buttons"><%= f.submit 'Ask Automyra' %></p>
+    <% end %>
+  </div>
+<% end %>

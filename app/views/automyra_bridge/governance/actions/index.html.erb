@@ -1,0 +1,10 @@
+<h2>Automyra governance actions</h2>
+
+<%= form_tag automyra_bridge_governance_actions_path, method: :get do %>
+  <%= hidden_field_tag :project_id, @project.id if @project %>
+  <%= hidden_field_tag :policy_id, params[:policy_id] if params[:policy_id].present? %>
+  <%= hidden_field_tag :finding_id, params[:finding_id] if params[:finding_id].present? %>
+  <p><label>Status</label> <%= text_field_tag :status, params[:status] %> <label>Action type</label> <%= text_field_tag :action_type, params[:action_type] %> <%= submit_tag 'Filter actions' %></p>
+<% end %>
+
+<%= render partial: 'table', locals: { actions: @actions } %>

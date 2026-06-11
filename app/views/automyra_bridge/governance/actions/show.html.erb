@@ -1,0 +1,73 @@
+<div class="contextual">
+  <%= link_to 'Back to actions', automyra_bridge_governance_actions_path %>
+</div>
+
+<h2>Action #<%= @action.id %></h2>
+
+<div class="splitcontent">
+  <div class="splitcontentleft">
+    <div class="box">
+      <h3>Details</h3>
+      <table class="attributes">
+        <tr>
+          <th>Policy</th>
+          <td><%= link_to @action.governance_policy.name, automyra_bridge_governance_policy_path(@action.governance_policy) %></td>
+        </tr>
+        <tr>
+          <th>Run</th>
+          <td><%= link_to "##{@action.governance_run_id}", automyra_bridge_governance_run_path(@action.governance_run, { project_id: @action.governance_policy.project_id }.compact) %></td>
+        </tr>
+        <tr>
+          <th>Finding</th>
+          <td><%= @action.governance_finding_id ? link_to("##{@action.governance_finding_id}", automyra_bridge_governance_finding_path(@action.governance_finding_id, { project_id: @action.governance_policy.project_id }.compact)) : '—' %></td>
+        </tr>
+        <tr>
+          <th>Object</th>
+          <td><%= h @action.object_type %> #<%= @action.object_id %></td>
+        </tr>
+        <tr>
+          <th>Action type</th>
+          <td><%= h @action.action_type %></td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td><span class="badge <%= @action.applied? ? 'badge-status-closed' : (@action.failed? ? 'badge-status-open' : 'badge-status-locked') %>"><%= h @action.status %></span></td>
+        </tr>
+        <tr>
+          <th>Created</th>
+          <td><%= format_time(@action.created_at) %></td>
+        </tr>
+        <tr>
+          <th>Applied</th>
+          <td><%= format_time(@action.applied_at) %></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="splitcontentright">
+    <div class="box">
+      <h3>Comparison</h3>
+      <div class="comparison-box">
+        <div class="comparison-before">
+          <h4>Before / current value</h4>
+          <pre><%= h(@action.before_value.to_s.presence || '—') %></pre>
+        </div>
+        <div class="comparison-arrow">→</div>
+        <div class="comparison-after">
+          <h4>After / recommended value</h4>
+          <pre><%= h(@action.after_value.to_s.presence || '—') %></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="splitcontent">
+  <div class="splitcontentleft">
+    <div class="box">
+      <h3>Rollback payload</h3>
+      <pre><%= JSON.pretty_generate(JSON.parse(@action.rollback_payload.to_s)) rescue h(@action.rollback_payload.to_s) %></pre>
+    </div>
+  </div>
+</div>

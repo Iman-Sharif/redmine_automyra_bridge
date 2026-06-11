@@ -1,0 +1,46 @@
+<%= error_messages_for @policy %>
+
+<div class="box tabular automyra-governance-policy-form">
+  <div class="automyra-governance-form-section">
+    <h3>Policy basics</h3>
+    <p><label for="automyra_bridge_governance_policy_name">Policy name <span class="required">*</span></label><%= f.text_field :name, required: true, no_label: true %></p>
+    <p><label for="automyra_bridge_governance_policy_scope_type">Policy scope <span class="required">*</span></label><%= f.select :scope_type, AutomyraBridge::GovernancePolicy::SCOPE_TYPES.map { |scope| [scope == 'global' ? 'Global policy' : 'Project policy', scope] }, {}, required: true, no_label: true %></p>
+    <p class="info">Use Global policy for rules that can scan multiple projects. Use Project policy for one project only.</p>
+    <p><label for="automyra_bridge_governance_policy_project_id">Project for project policy</label><%= f.select :project_id, Project.order(:name).map { |project| [project.name, project.id] }, { include_blank: 'No project for global policy' }, no_label: true %></p>
+    <p><label for="automyra_bridge_governance_policy_mode">Default mode <span class="required">*</span></label><%= f.select :mode, AutomyraBridge::GovernancePolicy::MODES.map { |mode| [mode, mode] }, {}, required: true, no_label: true %></p>
+    <p class="info">Start with report_only, then move to propose after reviewing findings.</p>
+  </div>
+
+  <div class="automyra-governance-form-section">
+    <h3>Provider and limits</h3>
+    <p><label for="automyra_bridge_governance_policy_provider_model">Provider model <span class="required">*</span></label><%= f.text_field :provider_model, required: true, no_label: true %></p>
+    <p><label for="automyra_bridge_governance_policy_policy_page_id">Linked Wiki Hub policy page ID</label><%= f.text_field :policy_page_id, no_label: true %></p>
+    <p><label for="automyra_bridge_governance_policy_max_changes_per_run">Max changes per run</label><%= f.text_field :max_changes_per_run, no_label: true %></p>
+    <p><label for="automyra_bridge_governance_policy_confidence_threshold">Confidence threshold</label><%= f.text_field :confidence_threshold, no_label: true %></p>
+    <p><label for="automyra_bridge_governance_policy_frequency_hours">Frequency hours</label><%= f.text_field :frequency_hours, no_label: true %></p>
+    <p><%= f.check_box :enabled, no_label: true %><label class="inline" for="automyra_bridge_governance_policy_enabled">Enabled</label></p>
+  </div>
+
+  <div class="automyra-governance-form-section">
+    <h3>Scan scope</h3>
+    <p><%= f.check_box :scope_wiki_pages, no_label: true %><label class="inline" for="automyra_bridge_governance_policy_scope_wiki_pages">Scan Wiki Hub pages</label></p>
+    <p><%= f.check_box :scope_tasks, no_label: true %><label class="inline" for="automyra_bridge_governance_policy_scope_tasks">Scan Task Hub tasks</label></p>
+    <p><%= f.check_box :scope_attachments, no_label: true %><label class="inline" for="automyra_bridge_governance_policy_scope_attachments">Scan document and attachment filenames</label></p>
+    <p><%= f.check_box :scope_requirement_links, no_label: true %><label class="inline" for="automyra_bridge_governance_policy_scope_requirement_links">Scan requirement links</label></p>
+    <p><%= f.check_box :scope_wiki_requirement_links, no_label: true %><label class="inline" for="automyra_bridge_governance_policy_scope_wiki_requirement_links">Scan wiki requirement links</label></p>
+    <p><%= f.check_box :scope_task_requirement_links, no_label: true %><label class="inline" for="automyra_bridge_governance_policy_scope_task_requirement_links">Scan task requirement links</label></p>
+  </div>
+
+  <div class="automyra-governance-form-section">
+    <h3>Rules</h3>
+    <p><label for="automyra_bridge_governance_policy_config">Policy config JSON</label><%= f.text_area :config, rows: 14, cols: 100, no_label: true %></p>
+    <p class="info">Use JSON for title rules, project filters, confidence thresholds, exclusions, and requirement-linking settings.</p>
+    <p><label for="automyra_bridge_governance_policy_exclusions">Exclusions JSON</label><%= f.text_area :exclusions, rows: 6, cols: 100, no_label: true %></p>
+  </div>
+</div>
+
+<% form_read_only = @policy.project_scope? && @policy.project && AutomyraBridgeProjectSetting.for_project(@policy.project).read_only? %>
+<p class="automyra-governance-policy-form-actions"><%= submit_tag 'Save governance policy', disabled: form_read_only %></p>
+<% if form_read_only %>
+  <p class="warning">This project is read-only for Automyra. Policy changes are disabled.</p>
+<% end %>

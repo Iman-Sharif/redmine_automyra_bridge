@@ -1,0 +1,8 @@
+<% if User.current.logged? && (User.current.admin? || User.current.projects.any? { |p| User.current.allowed_to?(:use_automyra_bridge, p) }) %>
+  <div id="automyra-chat-floating-button" class="automyra-chat-floating-button" data-automyra-chat="floating-button">
+<button type="button" class="automyra-chat-launch-btn" title="Ask Automyra" aria-label="Ask Automyra">
+      <span class="automyra-chat-icon">💬</span>
+      <span class="automyra-chat-unread-badge automyra-chat-hidden"><%= thread ? thread.unread_count : 0 %></span>
+    </button>
+  </div>
+<% end %>

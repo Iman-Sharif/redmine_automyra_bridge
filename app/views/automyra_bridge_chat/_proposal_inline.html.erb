@@ -1,0 +1,39 @@
+<% if proposal && (!local_assigns.key?(:message) || message.nil? || message&.has_proposal?) %>
+  <% can_manage_proposal = User.current.admin? || User.current.allowed_to?(:manage_automyra_bridge, proposal.project) %>
+  <% target_label = [proposal.target_type.presence, proposal.target_id.present? ? "##{proposal.target_id}" : nil].compact.join(' ').presence || 'Redmica record' %>
+  <div class="box automyra-chat-run-event automyra-chat-proposal automyra-chat-proposal--<%= proposal.status %>" data-proposal-id="<%= proposal.id %>">
+    <div class="automyra-chat-proposal-header">
+      <strong class="automyra-chat-proposal-type"><%= proposal.action_type.to_s.humanize %></strong>
+      <span class="automyra-chat-proposal-target"><%= h(target_label) %></span>
+      <span class="automyra-chat-proposal-status automyra-chat-proposal-status--<%= proposal.status %>"><%= proposal.executed? ? 'Executed' : proposal.rejected? ? 'Rejected' : proposal.status.to_s.humanize %></span>
+      <%= link_to 'Details', automyra_bridge_proposal_path(proposal), class: 'automyra-chat-proposal-detail' %>
+    </div>
+
+    <div class="automyra-chat-proposal-summary">
+      <p class="info" title="This action can modify Redmica data and requires operator approval.">This action can modify Redmica data and requires operator approval.</p>
+      <% if proposal.pending? %>
+        <p class="info automyra-chat-proposal-transition">Waiting for an operator decision.</p>
+      <% elsif proposal.approved? %>
+        <p class="info automyra-chat-proposal-transition">Approved; Automyra is applying the action.</p>
+      <% elsif proposal.executed? %>
+        <p class="info automyra-chat-proposal-transition">Executed; changes were applied.</p>
+      <% elsif proposal.rejected? %>
+        <p class="info automyra-chat-proposal-transition">Rejected; no changes were applied.</p>
+      <% end %>
+      <% if proposal.payload.present? && proposal.pending? %>
+        <pre class="automyra-chat-proposal-payload"><%= JSON.pretty_generate(proposal.payload) %></pre>
+      <% end %>
+    </div>
+
+    <% if proposal.pending? && can_manage_proposal %>
+      <div class="buttons automyra-chat-proposal-actions">
+        <%= form_with url: approve_automyra_bridge_proposal_path(proposal), method: :post, local: false, class: 'automyra-chat-proposal-form' do |f| %>
+          <%= f.submit 'Approve', class: 'button-positive', data: { proposal_action: 'approve', proposal_url: approve_automyra_bridge_proposal_path(proposal) } %>
+        <% end %>
+        <%= form_with url: reject_automyra_bridge_proposal_path(proposal), method: :post, local: false, class: 'automyra-chat-proposal-form' do |f| %>
+          <%= f.submit 'Reject', class: 'button', data: { proposal_action: 'reject', proposal_url: reject_automyra_bridge_proposal_path(proposal) } %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

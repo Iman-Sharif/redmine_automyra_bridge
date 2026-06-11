@@ -1,0 +1,39 @@
+<div class="contextual">
+  <%= button_to 'Run all now', run_all_now_automyra_bridge_governance_policies_path(project_id: @project&.id), method: :post, class: 'icon icon-play', form: { class: 'automyra-governance-run-all-form' } %>
+  <%= link_to 'New Governance Policy', new_automyra_bridge_governance_policy_path(project_id: @project&.id), class: 'icon icon-add' %>
+</div>
+
+<h2>Automyra governance policies</h2>
+
+<table class="list">
+  <thead><tr><th>Name</th><th>Health</th><th>Scope</th><th>Project</th><th>Mode</th><th>Enabled</th><th>Max changes</th><th>Last run</th><th></th></tr></thead>
+  <tbody>
+    <% @policies.each do |policy| %>
+      <tr class="<%= cycle('odd', 'even') %>">
+        <% latest_run = policy.governance_runs.order(created_at: :desc).first %>
+        <td><%= link_to policy.name, automyra_bridge_governance_policy_path(policy) %></td>
+        <td>
+          <% if latest_run&.failed? %>
+            <span class="automyra-governance-health automyra-governance-health-failed">Failed</span>
+          <% elsif latest_run&.completed? %>
+            <span class="automyra-governance-health automyra-governance-health-success">Successful</span>
+          <% else %>
+            <span class="automyra-governance-health automyra-governance-health-unknown">No run</span>
+          <% end %>
+        </td>
+        <td><%= policy.global? ? 'Global' : 'Project' %></td>
+        <td><%= h policy.project&.name %></td>
+        <td><span class="badge"><%= h policy.mode %></span></td>
+        <td><%= policy.enabled? ? 'Yes' : 'No' %></td>
+        <td><%= policy.max_changes_per_run || 'Not set' %></td>
+        <td><%= format_time(policy.last_run_at) if policy.last_run_at %></td>
+        <td>
+          <% unless governance_read_only? %>
+            <%= button_to (policy.enabled? ? 'Pause' : 'Resume'), toggle_enabled_automyra_bridge_governance_policy_path(policy), method: :post, class: "icon automyra-governance-toggle-button #{policy.enabled? ? 'icon-locked automyra-governance-toggle-button-pause' : 'icon-unlock automyra-governance-toggle-button-resume'}" %>
+            <%= button_to 'Edit', edit_automyra_bridge_governance_policy_path(policy), method: :get, class: 'icon icon-edit' %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

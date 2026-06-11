@@ -1,0 +1,37 @@
+<div class="contextual">
+  <%= link_to 'Back to operator review', automyra_bridge_operator_path(@proposal.project), class: 'icon icon-back' %>
+</div>
+
+<h2>Automyra proposal #<%= @proposal.id %></h2>
+
+<div class="box tabular">
+  <p><label>Project</label> <%= link_to_project @proposal.project %></p>
+  <p><label>Status</label> <%= @proposal.status.humanize %></p>
+  <p><label>Action</label> <%= @proposal.action_type.humanize %></p>
+  <p><label>Requested by</label> <%= link_to_user @proposal.user %></p>
+  <p><label>Task</label> <%= @proposal.task ? link_to(@proposal.task.title, task_hub_standalone_path(@proposal.task)) : '-' %></p>
+  <p><label>Idempotency key</label> <%= @proposal.idempotency_key.presence || '-' %></p>
+  <p><label>Error</label> <%= @proposal.error_message.presence || '-' %></p>
+  <p><label>Created</label> <%= format_time @proposal.created_at %></p>
+  <p><label>Updated</label> <%= format_time @proposal.updated_at %></p>
+</div>
+
+<h3>Payload</h3>
+<pre><%= JSON.pretty_generate(@proposal.payload) rescue @proposal.request_payload %></pre>
+
+<% if @proposal.task && @proposal.action_type == 'update_task' %>
+  <% proposed_task = @proposal.payload['task'] || {} %>
+  <h3>Task update preview</h3>
+  <table class="list">
+    <thead><tr><th>Field</th><th>Current</th><th>Proposed</th></tr></thead>
+    <tbody>
+      <% proposed_task.each do |field, value| %>
+        <tr>
+          <td><%= field %></td>
+          <td><%= @proposal.task.respond_to?(field) ? @proposal.task.public_send(field).to_s : '-' %></td>
+          <td><%= value.to_s %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

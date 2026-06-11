@@ -1,0 +1,18 @@
+<table class="list">
+  <thead><tr><th>ID</th><th>Policy</th><th>Run</th><th>Finding</th><th>Object</th><th>Action type</th><th>Status</th><th>Proposal</th><th>Applied</th></tr></thead>
+  <tbody>
+    <% actions.each do |action| %>
+      <tr class="<%= cycle('odd', 'even') %>">
+        <td>#<%= action.id %></td>
+        <td><%= link_to action.governance_policy.name, automyra_bridge_governance_policy_path(action.governance_policy) %></td>
+        <td><%= link_to "##{action.governance_run_id}", automyra_bridge_governance_run_path(action.governance_run, { project_id: action.governance_policy.project_id }.compact) %></td>
+        <td><%= h action.object_type %> #<%= action.object_id %></td>
+        <td><%= link_to "##{action.id}", automyra_bridge_governance_action_path(action, { project_id: action.governance_policy.project_id }.compact) %></td>
+        <td><%= h action.action_type %></td>
+        <td><span class="badge"><%= h action.status %></span></td>
+        <td><%= link_to('Approval queue', automyra_bridge_operator_path(action.governance_policy.project, proposal_status: 'pending')) if action.proposed? && action.governance_policy.project %></td>
+        <td><%= format_time(action.applied_at) if action.applied_at %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

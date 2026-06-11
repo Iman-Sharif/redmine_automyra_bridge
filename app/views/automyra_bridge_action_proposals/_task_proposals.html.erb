@@ -1,0 +1,24 @@
+<% proposals = AutomyraBridgeActionProposal.pending.visible_on_task(task).order(:created_at) %>
+<% if proposals.any? %>
+  <div class="box">
+    <h3>Automyra proposed actions</h3>
+    <% proposals.each do |proposal| %>
+      <% payload = proposal.payload %>
+      <% task_payload = payload['task'].is_a?(Hash) ? payload['task'] : payload %>
+      <div class="wiki">
+        <p><strong><%= proposal.action_type.humanize %></strong></p>
+        <% if task_payload['title'].present? %>
+          <p><strong>Title:</strong> <%= task_payload['title'] %></p>
+        <% end %>
+        <% if task_payload['notes'].present? %>
+          <p><strong>Notes:</strong></p>
+          <pre><%= task_payload['notes'] %></pre>
+        <% end %>
+        <p class="buttons">
+          <%= button_to 'Approve', automyra_bridge_approve_proposal_path(proposal), method: :post, class: 'button-small' %>
+          <%= button_to 'Reject', automyra_bridge_reject_proposal_path(proposal), method: :post, class: 'button-small' %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+<% end %>

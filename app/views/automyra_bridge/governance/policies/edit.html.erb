@@ -1,0 +1,13 @@
+<h2>Edit Automyra governance policy</h2>
+
+<%= form_for @policy, url: automyra_bridge_governance_policy_path(@policy), method: :patch do |f| %>
+  <%= render partial: 'form', locals: { f: f } %>
+<% end %>
+
+<p>
+  <%= button_to 'Delete',
+                automyra_bridge_governance_policy_path(@policy),
+                method: :delete,
+                form: { data: { turbo_confirm: 'Delete this governance policy?' } },
+                class: 'icon icon-del' %>
+</p>

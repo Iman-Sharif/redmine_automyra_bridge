@@ -1,0 +1,25 @@
+<table class="list">
+  <thead><tr><th>ID</th><th>Policy</th><th>Run</th><th>Object</th><th>Type</th><th>Status</th><th>Confidence</th><th>Recommendation</th><th>Actions</th></tr></thead>
+  <tbody>
+    <% findings.each do |finding| %>
+      <tr class="<%= cycle('odd', 'even') %>">
+        <td>#<%= finding.id %></td>
+        <td><%= link_to finding.governance_policy.name, automyra_bridge_governance_policy_path(finding.governance_policy) %></td>
+        <td><%= link_to "##{finding.governance_run_id}", automyra_bridge_governance_run_path(finding.governance_run, { project_id: finding.governance_policy.project_id }.compact) %></td>
+        <td><%= link_to "#{finding.object_type} ##{finding.object_id}", automyra_bridge_governance_finding_path(finding, { project_id: finding.governance_policy.project_id }.compact) %></td>
+        <td><%= h finding.finding_type %></td>
+        <td><span class="badge"><%= h finding.status %></span></td>
+        <td><%= finding.confidence %></td>
+        <td><%= h finding.recommended_value.to_s.truncate(80) %></td>
+        <td>
+          <% action_count = finding.governance_actions.count %>
+          <% if action_count.positive? %>
+            <%= link_to "#{action_count} action".pluralize(action_count), automyra_bridge_governance_actions_path({ project_id: finding.governance_policy.project_id, policy_id: finding.governance_policy_id, finding_id: finding.id }.compact) %>
+          <% else %>
+            <span class="automyra-governance-no-actions">No actions</span>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

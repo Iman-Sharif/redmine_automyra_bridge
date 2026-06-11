@@ -1,0 +1,7 @@
+<h2>New Automyra governance policy</h2>
+
+<p class="wiki description">Create a report-only policy first, review the findings, then switch to proposal or apply mode after the rule is proven.</p>
+
+<%= form_for @policy, url: automyra_bridge_governance_policies_path(project_id: @project&.id) do |f| %>
+  <%= render partial: 'form', locals: { f: f } %>
+<% end %>
