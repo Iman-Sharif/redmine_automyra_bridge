@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'net/http'
 require 'json'
 require 'openssl'
@@ -8,7 +10,7 @@ module AutomyraBridge
   # Wire format (X-Hub-Signature-256, sha256=<hex>) matches Hermes' aiohttp
   # listener at gateway/platforms/webhook.py — see _validate_signature.
   class HermesWebhookNotifier
-    USER_AGENT = 'Automyra-Bridge-Hermes-Notifier/1.0'.freeze
+    USER_AGENT = 'Automyra-Bridge-Hermes-Notifier/1.0'
 
     def self.deliver(event_type:, payload:, delivery_id: nil)
       new.deliver(event_type: event_type, payload: payload, delivery_id: delivery_id)

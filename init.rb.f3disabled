@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'redmine'
 
 Redmine::Plugin.register :redmine_automyra_bridge do
@@ -9,7 +11,7 @@ Redmine::Plugin.register :redmine_automyra_bridge do
   requires_redmine version: '6.0'
 
   settings default: {
-               'automyra_endpoint' => '',
+             'automyra_endpoint' => '',
                'automyra_token' => '',
                'request_timeout_seconds' => '15',
                 'memory_endpoint' => '',
@@ -30,16 +32,16 @@ Redmine::Plugin.register :redmine_automyra_bridge do
                  'activity_log_secret' => 'change-me-in-production',
                  'auto_close_enabled' => '0',
                  'auto_close_trigger_status_name' => 'Resolved'
-              },
+           },
            partial: 'settings/automyra_bridge_settings'
 
   project_module :automyra_bridge do
     permission :use_automyra_bridge,
-                { automyra_bridge: %i[improve_task assistant_request] },
+                { automyra_bridge: [:improve_task, :assistant_request] },
                 require: :member
     permission :manage_automyra_bridge,
                {
-                 automyra_bridge_operator: %i[index retry_job cancel_job update_settings]
+                 automyra_bridge_operator: [:index, :retry_job, :cancel_job, :update_settings]
                },
                require: :member
   end
@@ -55,7 +57,7 @@ Redmine::Plugin.register :redmine_automyra_bridge do
   Redmine::MenuManager.map(:application_menu).push(
     :issues,
     { controller: 'issues', action: 'index' },
-    if: Proc.new do
+    if: proc do
       User.current.allowed_to?(:view_issues, nil, global: true) &&
         EnabledModule.exists?(project: Project.visible, name: :issue_tracking)
     end,
@@ -101,50 +103,50 @@ prepare_automyra_bridge = proc do
   require_dependency File.expand_path('app/services/automyra_bridge/chat_memory_writer', __dir__)
   require_dependency File.expand_path('app/services/automyra_bridge/tools/base_tool', __dir__)
   require_dependency File.expand_path('app/services/automyra_bridge/tools/semantic_read_helpers', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_create_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_update_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_cancel_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_complete_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_reopen_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_assign_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_set_priority_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_set_due_date_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_add_comment_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_link_issue_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_promote_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_search_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_hub_count_my_open_tasks_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_hub_get_my_open_tasks_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/task_hub_search_my_tasks_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_create_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_update_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_assign_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_set_status_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_set_priority_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_set_due_date_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_link_related_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_search_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_summarize_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_assign_to_requester_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_add_comment_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/issues_get_my_open_issues_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_read_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_search_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_create_page_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_update_page_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_create_draft_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_summarize_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_backlinks_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_related_pages_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/context_current_object_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/context_current_page_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/context_current_thread_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/context_linked_objects_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/context_project_search_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/context_memory_search_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/context_expand_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tools/project_status_summary_tool', __dir__)
-require_dependency File.expand_path('app/services/automyra_bridge/tool_registry', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_create_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_update_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_cancel_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_complete_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_reopen_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_assign_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_set_priority_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_set_due_date_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_add_comment_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_link_issue_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_promote_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_search_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_hub_count_my_open_tasks_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_hub_get_my_open_tasks_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/task_hub_search_my_tasks_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_create_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_update_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_assign_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_set_status_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_set_priority_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_set_due_date_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_link_related_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_search_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_summarize_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_assign_to_requester_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issue_add_comment_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/issues_get_my_open_issues_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_read_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_search_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_create_page_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_update_page_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_create_draft_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_summarize_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_backlinks_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/wiki_related_pages_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/context_current_object_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/context_current_page_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/context_current_thread_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/context_linked_objects_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/context_project_search_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/context_memory_search_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/context_expand_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tools/project_status_summary_tool', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/tool_registry', __dir__)
   AutomyraBridge::ToolRegistry.validate_tool_classes!
   require_dependency File.expand_path('app/services/automyra_bridge/action_proposal_creator', __dir__)
   require_dependency File.expand_path('app/services/automyra_bridge/action_proposal_executor', __dir__)
