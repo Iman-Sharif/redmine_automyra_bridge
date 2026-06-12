@@ -25,7 +25,7 @@ class AutomyraBridgeAuditRecorderTest < ActiveSupport::TestCase
 
     assert_not_nil event
     assert_match UUID_REGEX, event.correlation_id
-    assert_match(/^audit-generate_test-#{@user.id}-\d+$/, event.idempotency_key)
+    assert_match(/\Aaudit-generate_test-#{@user.id}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i, event.idempotency_key)
   end
 
   test 'accepts custom correlation_id and idempotency_key' do
@@ -83,7 +83,7 @@ class AutomyraBridgeAuditRecorderTest < ActiveSupport::TestCase
     )
 
     assert_not_nil event
-    details = JSON.parse(event.details)
+    details = JSON.parse(event.request_payload)
     assert_equal 'bar', details['foo']
     assert_equal 42, details['count']
   end

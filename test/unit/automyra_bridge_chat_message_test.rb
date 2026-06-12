@@ -7,7 +7,10 @@ class AutomyraBridgeChatMessageTest < ActiveSupport::TestCase
     @user = users(:users_001)
     @chat_thread = AutomyraBridgeChatThread.create!(
       user: @user,
-      title: 'Test Thread'
+      title: 'Test Thread',
+      thread_kind: 'page',
+      page_type: 'project',
+      page_id: 1
     )
     @message = AutomyraBridgeChatMessage.new(
       chat_thread: @chat_thread,
@@ -152,7 +155,10 @@ class AutomyraBridgeChatMessageTest < ActiveSupport::TestCase
   def test_by_thread_scope
     other_thread = AutomyraBridgeChatThread.create!(
       user: @user,
-      title: 'Other Thread'
+      title: 'Other Thread',
+      thread_kind: 'page',
+      page_type: 'project',
+      page_id: 2
     )
     @message.save!
 

@@ -61,7 +61,7 @@ class ChatMessageCreatorTest < ActiveSupport::TestCase
     assert_not_nil event
     assert_equal @user, event.user
     assert_equal @project.id, event.project_id
-    details = JSON.parse(event.details)
+    details = JSON.parse(event.request_payload)
     assert_equal message.id, details['message_id']
     assert_equal @thread.id, details['thread_id']
     assert_equal 'user', details['role']
@@ -136,11 +136,11 @@ class ChatMessageCreatorTest < ActiveSupport::TestCase
       message, 'Here is the answer', proposal.id
     )
 
-    event = AutomyraBridgeAuditEvent.find_by(action: 'chat_message_sent')
+    event = AutomyraBridgeAuditEvent.find_by(action: 'chat_reply_delivered')
     assert_not_nil event
     assert_equal @user, event.user
     assert_equal @project.id, event.project_id
-    details = JSON.parse(event.details)
+    details = JSON.parse(event.request_payload)
     assert_equal message.id, details['message_id']
     assert_equal @thread.id, details['thread_id']
     assert_equal 'assistant', details['role']
@@ -232,7 +232,7 @@ class ChatMessageCreatorTest < ActiveSupport::TestCase
     assert_not_nil event
     assert_equal @user, event.user
     assert_equal @project.id, event.project_id
-    details = JSON.parse(event.details)
+    details = JSON.parse(event.request_payload)
     assert_equal message.id, details['message_id']
     assert_equal @thread.id, details['thread_id']
     assert_equal 'assistant', details['role']

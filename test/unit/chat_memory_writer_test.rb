@@ -83,23 +83,25 @@ class AutomyraBridgeChatMemoryWriterTest < ActiveSupport::TestCase
   end
 
   test 'includes correlation_id from linked job' do
+    message = AutomyraBridgeChatMessage.create!(
+      chat_thread: @thread,
+      user: @user,
+      role: 'user',
+      content: 'Message with job',
+      status: 'sent'
+    )
+
     job = AutomyraBridgeJob.create!(
       user: @user,
       project: @project,
       status: 'queued',
       correlation_id: 'test-correlation-123',
       idempotency_key: SecureRandom.uuid,
-      request_payload: {}.to_json
+      request_payload: {}.to_json,
+      source_type: 'AutomyraBridgeChatMessage',
+      source_id: message.id
     )
-
-    message = AutomyraBridgeChatMessage.create!(
-      chat_thread: @thread,
-      user: @user,
-      role: 'user',
-      content: 'Message with job',
-      status: 'sent',
-      job: job
-    )
+    message.update!(job: job)
 
     assert_difference('AutomyraBridgeMemoryEvent.count', 1) do
       AutomyraBridge::ChatMemoryWriter.write_message(message, @thread)
@@ -160,13 +162,23 @@ class AutomyraBridgeChatMemoryWriterTest < ActiveSupport::TestCase
   end
 
   test 'writes compact assistant run summary payload shape' do
+    seed_message = AutomyraBridgeChatMessage.create!(
+      chat_thread: @thread,
+      user: @user,
+      role: 'user',
+      content: 'What did we decide about issue 42?',
+      status: 'sent'
+    )
+
     job = AutomyraBridgeJob.create!(
       user: @user,
       project: @project,
       status: 'succeeded',
       correlation_id: 'run-summary-correlation',
       idempotency_key: SecureRandom.uuid,
-      request_payload: { body: 'What did we decide about issue 42?' }.to_json
+      request_payload: { body: 'What did we decide about issue 42?' }.to_json,
+      source_type: 'AutomyraBridgeChatMessage',
+      source_id: seed_message.id
     )
 
     run = defined?(AutomyraBridgeRun) && AutomyraBridgeRun.table_exists? ? AutomyraBridgeRun.create!(user: @user, project: @project, source_type: 'AutomyraBridgeChatMessage', source_id: 123, status: 'completed') : nil

@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 
 class AutomyraBridge::ChatPollServiceTest < ActiveSupport::TestCase
-  fixtures :users
+  fixtures :users, :projects
 
   def setup
     @user = users(:users_001)
@@ -173,12 +173,23 @@ class AutomyraBridge::ChatPollServiceTest < ActiveSupport::TestCase
   # --- message hash shape ---
 
   def test_message_hash_contains_required_fields
-    proposal = AutomyraBridgeActionProposal.create!(
+    project = Project.find(1)
+    job = AutomyraBridgeJob.create!(
+      source_type: 'Issue',
+      source_id: 1,
+      project: project,
       user: @user,
-      chat_thread: @thread,
+      correlation_id: 'corr-msg-hash-test',
+      idempotency_key: 'job-msg-hash-test',
+      status: 'queued'
+    )
+    proposal = AutomyraBridgeActionProposal.create!(
+      automyra_bridge_job: job,
+      project: project,
+      user: @user,
       action_type: 'create_issue',
       status: 'pending',
-      content: 'Test proposal'
+      request_payload: { summary: 'Test proposal' }.to_json
     )
     msg = create_message(
       content: 'Test',

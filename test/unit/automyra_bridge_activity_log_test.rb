@@ -34,31 +34,31 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
   def test_requires_action_type
     @log.action_type = nil
     assert_not @log.valid?
-    assert_includes @log.errors[:action_type], "can't be blank"
+    assert_includes @log.errors[:action_type], 'cannot be blank'
   end
 
   def test_requires_source
     @log.source = nil
     assert_not @log.valid?
-    assert_includes @log.errors[:source], "can't be blank"
+    assert_includes @log.errors[:source], 'cannot be blank'
   end
 
   def test_requires_summary
     @log.summary = nil
     assert_not @log.valid?
-    assert_includes @log.errors[:summary], "can't be blank"
+    assert_includes @log.errors[:summary], 'cannot be blank'
   end
 
   def test_requires_idempotency_key
     @log.idempotency_key = nil
     assert_not @log.valid?
-    assert_includes @log.errors[:idempotency_key], "can't be blank"
+    assert_includes @log.errors[:idempotency_key], 'cannot be blank'
   end
 
   def test_requires_occurred_at
     @log.occurred_at = nil
     assert_not @log.valid?
-    assert_includes @log.errors[:occurred_at], "can't be blank"
+    assert_includes @log.errors[:occurred_at], 'cannot be blank'
   end
 
   def test_idempotency_key_must_be_unique
