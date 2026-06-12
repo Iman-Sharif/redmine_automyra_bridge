@@ -1,5 +1,11 @@
-# Database and backups
-db/
+# Database - sqlite files only (migrations and schema MUST be tracked)
+db/*.sqlite3
+db/*.sqlite3-*
+!db/migrate/
+!db/migrate/**
+!db/schema.rb
+
+# Database backups and dumps
 *.sql
 *.tar.gz
 backups/
@@ -27,14 +33,6 @@ __pycache__/
 
 # Temp/junk files
 tmp/
-CSSEOF
-EOF
-ERBEOF
-LEARN_EOF
-LEARNINGS
-SCRIPT
-RUBY
-1
 
 # Screenshots (artifacts, not config)
 *.png
@@ -48,16 +46,11 @@ debug_wiki_hub.rb
 .tmp_erb_check.rb
 .tmp_wiki_audit.py
 
-# Docker artifacts
-dir:*/
-git:*/
-
 # Large binary data
 db_data.tar.gz
 redmine_backup.sql
 kanban_board.png
 kanban_dom.txt
-check_hub_route_docs_parity
 
 # Test results
 test-results/
@@ -81,7 +74,4 @@ package.json
 package-lock.json
 
 # Misc junk
-en.yml
 login-snapshot.yml
-# Stray empty file
-CSS_EOF
