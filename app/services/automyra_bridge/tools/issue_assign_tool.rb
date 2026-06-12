@@ -25,6 +25,11 @@ module AutomyraBridge
         issue.update!(assigned_to_id: assigned_to_id)
         { issue_id: issue.id, assigned_to_id: issue.assigned_to_id }
       end
+
+      def verify!(result, input)
+        assigned_to_id = input.dig('assignment', 'assigned_to_id') || input['assigned_to_id']
+        raise 'Issue assignment verification failed.' unless Issue.find_by(id: result[:issue_id])&.assigned_to_id.to_i == assigned_to_id.to_i
+      end
     end
   end
 end

@@ -25,6 +25,11 @@ module AutomyraBridge
         issue.update!(priority_id: priority_id)
         { issue_id: issue.id, priority_id: issue.priority_id }
       end
+
+      def verify!(result, input)
+        priority_id = input.dig('issue', 'priority_id') || input['priority_id']
+        raise 'Issue priority verification failed.' unless Issue.find_by(id: result[:issue_id])&.priority_id.to_i == priority_id.to_i
+      end
     end
   end
 end

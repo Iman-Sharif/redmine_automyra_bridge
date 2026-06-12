@@ -21,6 +21,14 @@ module AutomyraBridge
         page.save!
         { page_id: page.id, title: page.title }
       end
+
+      def verify!(result, input)
+        page = WikiPage.find_by(id: result[:page_id])
+        raise 'Wiki page verification failed.' unless page
+
+        title = (input['wiki'] || input)['title'].to_s.strip
+        raise 'Wiki page verification failed.' unless page.title == title
+      end
     end
   end
 end

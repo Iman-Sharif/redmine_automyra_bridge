@@ -23,6 +23,11 @@ module AutomyraBridge
         issue.update!(due_date: due_date)
         { issue_id: issue.id, due_date: issue.due_date&.to_s }
       end
+
+      def verify!(result, input)
+        due_date = input.dig('issue', 'due_date') || input['due_date']
+        raise 'Issue due date verification failed.' unless Issue.find_by(id: result[:issue_id])&.due_date&.to_s == due_date.to_s
+      end
     end
   end
 end

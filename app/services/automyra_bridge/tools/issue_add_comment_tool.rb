@@ -29,6 +29,15 @@ module AutomyraBridge
 
         { issue_id: issue.id, comment: body }
       end
+
+      def verify!(result, input)
+        issue = Issue.find_by(id: result[:issue_id])
+        raise 'Issue comment verification failed.' unless issue
+
+        body = input.dig('comment', 'body').to_s.strip
+        journal = issue.journals.order(id: :desc).first
+        raise 'Issue comment verification failed.' unless journal&.notes == body
+      end
     end
   end
 end

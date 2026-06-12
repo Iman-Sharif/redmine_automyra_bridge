@@ -17,6 +17,13 @@ module AutomyraBridge
         relation = IssueRelation.find_or_create_by!(issue_from: source, issue_to: target, relation_type: IssueRelation::TYPE_RELATES)
         { issue_id: source.id, related_issue_id: target.id, relation_id: relation.id }
       end
+
+      def verify!(result, input)
+        raise 'Issue link verification failed.' unless IssueRelation.find_by(id: result[:relation_id])
+
+        related_issue_id = input.dig('target', 'related_issue_id') || input['related_issue_id']
+        raise 'Issue link verification failed.' unless IssueRelation.find_by(id: result[:relation_id])&.issue_to_id.to_i == related_issue_id.to_i
+      end
     end
   end
 end
