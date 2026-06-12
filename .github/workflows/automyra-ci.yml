@@ -1,0 +1,116 @@
+name: Automyra CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: redmine_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      RAILS_ENV: test
+
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby 3.3.11
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.11'
+
+      - name: Clone Redmica v3.2.6
+        run: |
+          git clone --depth 1 --branch v3.2.6 https://github.com/redmica/redmica.git redmica
+          # Place this plugin inside Redmica's plugins directory
+          ln -s "$(pwd)" redmica/plugins/redmine_automyra_bridge
+
+      - name: Install dependencies
+        working-directory: redmica
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+
+      - name: Configure database
+        working-directory: redmica
+        run: |
+          cat > config/database.yml <<'YAML'
+          test:
+            adapter: postgresql
+            encoding: unicode
+            database: redmine_test
+            host: localhost
+            port: 5432
+            username: postgres
+            password: postgres
+          YAML
+
+      - name: Run plugin migrations
+        working-directory: redmica
+        run: |
+          bin/rails db:migrate RAILS_ENV=test
+          bin/rails redmine:plugins:migrate RAILS_ENV=test
+
+      - name: Run plugin tests
+        working-directory: redmica
+        run: |
+          bin/rails test plugins/redmine_automyra_bridge/test
+
+  rubocop:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby 3.3.11
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.11'
+
+      - name: Clone Redmica v3.2.6 (for bundler context)
+        run: |
+          git clone --depth 1 --branch v3.2.6 https://github.com/redmica/redmica.git redmica
+          ln -s "$(pwd)" redmica/plugins/redmine_automyra_bridge
+
+      - name: Install dependencies
+        working-directory: redmica
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+
+      - name: Run rubocop
+        working-directory: redmica/plugins/redmine_automyra_bridge
+        run: |
+          BUNDLE_GEMFILE="$(pwd)/../../Gemfile" bundle exec rubocop --config .rubocop.yml --force-exclusion
+
+  migration-guard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+
+      - name: Check for gitignored migrations
+        run: |
+          for f in db/migrate/*.rb; do
+            if git check-ignore -q "$f"; then
+              echo "Migration $f is gitignored!"
+              exit 1
+            fi
+          done
+          echo "All migrations are tracked by git."
