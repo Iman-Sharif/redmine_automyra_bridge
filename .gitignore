@@ -85,3 +85,5 @@ en.yml
 login-snapshot.yml
 # Stray empty file
 CSS_EOF
+# Pre-cutover backups
+*.precutover.bak

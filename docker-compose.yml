@@ -34,7 +34,6 @@ services:
       - ./plugins:/usr/src/redmica/plugins
       - ./themes:/usr/src/redmica/public/themes
       - ./config/database.yml:/usr/src/redmica/config/database.yml:ro
-      - ./config/additional_environment.rb:/usr/src/redmica/config/additional_environment.rb:ro
       - ./docker/entrypoint.sh:/usr/local/bin/redmica-entrypoint:ro
       - /root/.openclaw:/root/.openclaw:ro
       - ./patches/app/controllers/repositories_controller.rb:/usr/src/redmica/app/controllers/repositories_controller.rb:ro
