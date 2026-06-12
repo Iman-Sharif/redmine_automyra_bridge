@@ -34,7 +34,8 @@ module AutomyraBridge
       placeholder = AutomyraBridgeChatMessage.where(job_id: job.id, role: 'assistant').order(:id).last
       placeholder&.update_columns(status: 'failed', content: 'Unable to get response. Retry?', updated_at: Time.current)
       placeholder&.chat_thread&.increment_unread!(placeholder.user_id, sender_type: placeholder.role)
-    rescue StandardError
+    rescue StandardError => e
+      Rails.logger.error("[AutomyraBridge::RecoverStaleJobs] safe_mark_failed! failed for job #{job&.id}: #{e.class}: #{e.message}") if defined?(Rails)
       nil
     end
   end

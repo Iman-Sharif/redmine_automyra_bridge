@@ -2,11 +2,17 @@ namespace :automyra_bridge do
   desc 'Process queued Automyra bridge jobs'
   task process_queue: :environment do
     processed = 0
-    AutomyraBridge::RecoverStaleJobs.call
+    begin
+      AutomyraBridge::RecoverStaleJobs.call
+    rescue StandardError => e
+      Rails.logger.error("[automyra_bridge:process_queue] stale recovery failed: #{e.class}: #{e.message}")
+    end
 
     AutomyraBridgeJob.ready_to_process.order(:created_at, :id).find_each do |job|
       AutomyraBridge::JobProcessor.new.process(job)
       processed += 1
+    rescue StandardError => e
+      Rails.logger.error("[automyra_bridge:process_queue] job #{job.id} raised: #{e.class}: #{e.message}")
     end
     puts "Processed #{processed} Automyra bridge job(s)."
   end

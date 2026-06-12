@@ -11,6 +11,7 @@ class SwallowSitesCharacterizationTest < ActiveSupport::TestCase
   test 'recover_stale_jobs safe_mark_failed! swallows and returns nil' do
     job = mock('job')
     job.stubs(:update_columns).raises(StandardError, 'boom')
+    job.stubs(:id).returns(42)
     svc = AutomyraBridge::RecoverStaleJobs.new
     # CHARACTERIZATION: current swallow -> nil; Task 14 decides keep/surface.
     assert_nil svc.send(:safe_mark_failed!, job, 'msg')

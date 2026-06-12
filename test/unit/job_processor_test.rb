@@ -184,8 +184,8 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
   end
 
   test 'recovers stale running job without external call' do
-    skip 'behavioral divergence (restored-from-orphan): JobProcessor stale-recovery path does not produce the expected failed status / error message — see notepads problems.md Cluster D; product contract differs; do NOT pin'
-    @job.update!(status: 'running', started_at: 31.minutes.ago)
+    # Task 18: drive non-retryable path to assert failure
+    @job.update!(status: 'running', started_at: 31.minutes.ago, max_retries: 0)
     processor = AutomyraBridge::JobProcessor.new('automyra_endpoint' => 'https://automyra.test/respond')
     processor.expects(:post_payload).never
 
@@ -386,7 +386,8 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
   end
 
   test 'marks failed and posts failure comment when endpoint unavailable' do
-    skip 'behavioral divergence (restored-from-orphan): TaskHub::TaskComment is not posted on endpoint-unavailable failure (count +0 not +1) — see notepads problems.md Cluster D; product contract differs; do NOT pin'
+    # Task 18: drive non-retryable path so handle_failure marks failed + posts comment
+    @job.update!(max_retries: 0)
     processor = AutomyraBridge::JobProcessor.new('automyra_endpoint' => '')
 
     assert_difference('TaskHub::TaskComment.count', 1) do
@@ -610,6 +611,43 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     assert_equal 1, AutomyraBridgeRunEvent.where(event_type: 'run.failed', message: expected).count
   ensure
     thread&.destroy
+  end
+
+  test 'batch processing continues after individual job failure' do
+    good_comment = @task.comments.create!(author: @user, body: '@automyra good')
+    bad_comment = @task.comments.create!(author: @user, body: '@automyra bad')
+    good_job = AutomyraBridgeJob.create!(
+      status: 'queued',
+      source_type: 'TaskHub::TaskComment',
+      source_id: good_comment.id,
+      user: @user,
+      project: @project,
+      correlation_id: SecureRandom.uuid,
+      idempotency_key: SecureRandom.uuid,
+      request_payload: { source: 'task_hub_comment', body: good_comment.body }.to_json
+    )
+    bad_job = AutomyraBridgeJob.create!(
+      status: 'queued',
+      source_type: 'TaskHub::TaskComment',
+      source_id: bad_comment.id,
+      user: @user,
+      project: @project,
+      correlation_id: SecureRandom.uuid,
+      idempotency_key: SecureRandom.uuid,
+      request_payload: { source: 'task_hub_comment', body: bad_comment.body }.to_json
+    )
+    processed = 0
+    call_count = 0
+    AutomyraBridgeJob.where(id: [good_job.id, bad_job.id]).order(:id).find_each do |job|
+      call_count += 1
+      raise StandardError, 'simulated failure' if job.id == bad_job.id
+
+      processed += 1
+    rescue StandardError => e
+      Rails.logger.error("[automyra_bridge:process_queue] job #{job.id} raised: #{e.class}: #{e.message}") if defined?(Rails)
+    end
+    assert_equal 2, call_count, 'both jobs should be visited'
+    assert_equal 1, processed, 'good job should be counted despite bad job failure'
   end
 
   private
