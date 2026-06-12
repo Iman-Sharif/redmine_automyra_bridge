@@ -18,7 +18,8 @@ module AutomyraBridge
     def self.configured?(settings = Setting.plugin_redmine_automyra_bridge)
       config = lancedb_configuration(settings)
       File.directory?(config[:uri].to_s)
-    rescue StandardError
+    rescue StandardError => e
+      Rails.logger.warn("AutomyraBridge memory configuration check failed: #{e.class}: #{e.message}") if defined?(Rails)
       false
     end
 

@@ -77,7 +77,8 @@ module AutomyraBridge
 
     def automyra_page_title(controller)
       controller&.view_context&.html_title
-    rescue StandardError
+    rescue StandardError => e
+      Rails.logger.warn("Automyra page title resolution failed: #{e.class}: #{e.message}") if defined?(Rails)
       nil
     end
 

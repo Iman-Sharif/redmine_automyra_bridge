@@ -83,7 +83,8 @@ module AutomyraBridge
       def action_project(action)
         object = action.object_type.safe_constantize&.where(id: action.object_id)&.first
         object.respond_to?(:project) ? object.project : nil
-      rescue StandardError
+      rescue StandardError => e
+        Rails.logger.warn("Automyra mode executor action_project resolution failed: #{e.class}: #{e.message}") if defined?(Rails)
         nil
       end
     end

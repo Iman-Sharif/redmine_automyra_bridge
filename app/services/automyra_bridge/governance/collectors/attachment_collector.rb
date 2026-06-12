@@ -46,7 +46,8 @@ module AutomyraBridge
           return container.project.id if container.respond_to?(:project) && container.project
 
           nil
-        rescue StandardError
+        rescue StandardError => e
+          Rails.logger.warn("Automyra attachment collector project_id resolution failed: #{e.class}: #{e.message}") if defined?(Rails)
           nil
         end
 

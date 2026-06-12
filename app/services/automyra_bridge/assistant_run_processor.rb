@@ -267,7 +267,8 @@ module AutomyraBridge
       return [] unless thread && defined?(AutomyraBridge::MemoryReader) && AutomyraBridge::MemoryReader.configured?
 
       AutomyraBridge::MemoryReader.recall(thread_key: thread.channel_key.presence || thread.page_key.presence || "redmica-chat-#{thread.id}", limit: 3)
-    rescue StandardError
+    rescue StandardError => e
+      Rails.logger.warn("Automyra recall memory events failed: #{e.class}: #{e.message}") if defined?(Rails)
       []
     end
 

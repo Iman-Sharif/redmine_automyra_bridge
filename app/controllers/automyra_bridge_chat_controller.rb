@@ -476,7 +476,8 @@ class AutomyraBridgeChatController < ApplicationController
     return [] unless run_id && defined?(AutomyraBridgeMemoryEvent) && AutomyraBridgeMemoryEvent.table_exists?
 
     AutomyraBridgeMemoryEvent.where(run_id: run_id).limit(10).map { |memory| { type: 'memory_event', id: memory.id, event_type: memory.event_type } }
-  rescue StandardError
+  rescue StandardError => e
+    Rails.logger.warn("Automyra memory event sources lookup failed for run #{run_id}: #{e.class}: #{e.message}") if defined?(Rails)
     []
   end
 
@@ -532,7 +533,8 @@ class AutomyraBridgeChatController < ApplicationController
     parsed = payload.is_a?(Hash) ? payload : JSON.parse(payload.to_s.presence || '{}')
     sources = parsed['sources'] || parsed[:sources] || parsed['sources_used'] || parsed[:sources_used]
     sources.presence
-  rescue StandardError
+  rescue StandardError => e
+    Rails.logger.warn("Automyra sources_for_message lookup failed for message #{message&.id}: #{e.class}: #{e.message}") if defined?(Rails)
     nil
   end
 
@@ -589,7 +591,8 @@ class AutomyraBridgeChatController < ApplicationController
     return unless defined?(AutomyraBridgeRun) && message
 
     AutomyraBridgeRun.find_by(source_type: AutomyraBridge::ChatJobCreator::SOURCE_TYPE, source_id: message.id)
-  rescue StandardError
+  rescue StandardError => e
+    Rails.logger.warn("Automyra run lookup for message failed for #{message&.id}: #{e.class}: #{e.message}") if defined?(Rails)
     nil
   end
 
@@ -685,7 +688,8 @@ class AutomyraBridgeChatController < ApplicationController
              file.tempfile.read.to_s.encode('UTF-8', invalid: :replace, undef: :replace).truncate(4000)
            end
     metadata.merge(text: text.presence).compact
-  rescue StandardError
+  rescue StandardError => e
+    Rails.logger.warn("Automyra attachment text extraction failed for #{metadata[:filename]}: #{e.class}: #{e.message}") if defined?(Rails)
     metadata
   end
 

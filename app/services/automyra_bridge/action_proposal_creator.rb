@@ -166,7 +166,11 @@ module AutomyraBridge
         action_type: record.action_type,
         status: record.status
       )
-    rescue StandardError
+    # Task 14: audit recording is best-effort — an audit failure must NOT block
+    # proposal creation (proposal already persisted upstream). Keep swallowing,
+    # but no longer silently: log so the failure is observable.
+    rescue StandardError => e
+      Rails.logger.warn("Automyra proposal created audit record failed for #{record&.id}: #{e.class}: #{e.message}") if defined?(Rails)
     end
 
     def record_run_proposal_created(record)

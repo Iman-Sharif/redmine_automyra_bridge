@@ -174,7 +174,8 @@ class AutomyraBridgeOperatorController < ApplicationController
       response = http.get(uri.request_uri) if response.is_a?(Net::HTTPMethodNotAllowed)
       response.code.to_i < 500
     end
-  rescue StandardError
+  rescue StandardError => e
+    Rails.logger.warn("Automyra operator endpoint reachability check failed: #{e.class}: #{e.message}") if defined?(Rails)
     false
   end
 

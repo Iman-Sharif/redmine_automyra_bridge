@@ -78,7 +78,8 @@ module AutomyraBridge
         WikiPolicyParser.parse(raw_text).merge(
           'standard_wiki_page' => WikiPolicyLoader.context(page_profile_id: policy.policy_page_id)
         )
-      rescue StandardError
+      rescue StandardError => e
+        Rails.logger.warn("Automyra wiki policy load failed for policy #{policy&.policy_page_id}: #{e.class}: #{e.message}") if defined?(Rails)
         {}
       end
     end
