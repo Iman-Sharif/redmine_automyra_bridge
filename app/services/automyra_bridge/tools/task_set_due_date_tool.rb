@@ -1,22 +1,24 @@
 module AutomyraBridge
   module Tools
     class TaskSetDueDateTool < BaseTool
+      include ResolvesTarget
+
       NAME = 'task.set_due_date'.freeze
       LEGACY_ACTION_TYPE = 'set_task_due_date'.freeze
       DESCRIPTION = 'Set due date on the current Task Hub task.'.freeze
       RISK_LEVEL = 'write'.freeze
       INPUT_SCHEMA = { type: 'object', required: ['task'], properties: { task: { type: 'object', required: ['due_date'], properties: { due_date: { type: 'string' } } } } }.freeze
 
+      self.target_resolver = :source_task
+      self.target_name = 'Task'
+      self.target_id_key = :task_id
+
       def required_permission
         :manage_task_hub_tasks
       end
 
-      def available?(job)
-        source_task(job).present?
-      end
-
       def call(job, _user, input)
-        task = source_task(job) || raise('Task is no longer available.')
+        task = resolve_target!(job)
         due_date = input.dig('task', 'due_date') || input['due_date']
         task.update!(due_date: due_date)
         { task_id: task.id, due_date: task.due_date&.to_s }
