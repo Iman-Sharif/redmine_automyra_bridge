@@ -60,6 +60,12 @@ module AutomyraBridge
         true
       end
 
+      def safe_call(job, user, input)
+        { tool: name, result: call(job, user, input) }
+      rescue StandardError => e
+        { tool: name, error: e.message }
+      end
+
       def result_summary(result)
         "Executed #{name}: #{result.inspect}"
       end

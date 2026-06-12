@@ -42,7 +42,10 @@ module AutomyraBridge
       tool = AutomyraBridge::ToolRegistry.find_by_legacy_action(proposal.action_type)
       raise 'Unsupported Automyra write proposal.' unless tool
 
-      result = tool.call(proposal_job(proposal), user, proposal.payload)
+      outcome = tool.safe_call(proposal_job(proposal), user, proposal.payload)
+      raise outcome[:error] if outcome[:error]
+
+      result = outcome[:result]
       tool.verify!(result, proposal.payload)
       proposal.update!(status: 'executed', result_payload: result.to_json, executed_at: Time.current)
       record_proposal_decision_event(proposal, user, 'executed')
