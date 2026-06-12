@@ -533,14 +533,16 @@ class AutomyraBridgeChatControllerTest < ActionController::TestCase
   end
 
   def grant_automyra_bridge_permission!(user, project)
+    # Scope to the target project only: jsmith shares core roles across
+    # ecookbook/onlinestore, so a global role mutation would leak the
+    # permission and mask the forbidden-project authorization behavior.
     role = Role.generate!(permissions: [:use_automyra_bridge])
-    Member.create!(project: project, user: user, roles: [role]) unless user.member_of?(project)
-
-    user.memberships.includes(:roles).each do |membership|
-      membership.roles.each do |member_role|
-        permissions = member_role.permissions.map(&:to_sym)
-        member_role.update!(permissions: (permissions | [:use_automyra_bridge]).map(&:to_s))
-      end
+    member = Member.find_by(user_id: user.id, project_id: project.id)
+    if member
+      member.roles << role
+      member.save!
+    else
+      Member.create!(project: project, user: user, roles: [role])
     end
   end
 
