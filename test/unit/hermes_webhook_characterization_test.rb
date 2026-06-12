@@ -22,14 +22,15 @@ require File.expand_path('../test_helper', __dir__)
 #     hex = `OpenSSL::HMAC.hexdigest('SHA256', secret, body_bytes)`.
 #   * Delivery id format: `auto-close-issue-<issue_id>-journal-<journal_id>`.
 #
-# Pinned retry/timeout baseline (Task 17 owns evolution; pin TODAY):
-#   * HermesWebhookDeliverJob: `retry_on StandardError, wait: :exponentially_longer,
-#     attempts: 5`. The retry block logs and SWALLOWS the final error so the
-#     primary AutomyraBridgeJob pipeline is never blocked by Hermes fanout.
+# Retry/timeout baseline (evolved by Task 17):
+#   * HermesWebhookDeliverJob: `retry_on StandardError, wait: :polynomially_longer,
+#     attempts: 5` (Rails 7.2 spelling). The retry block logs and SWALLOWS the
+#     final error so the primary AutomyraBridgeJob pipeline is never blocked by
+#     Hermes fanout.
 #   * HermesWebhookNotifier: `read_timeout`/`open_timeout` both pulled from
-#     `request_timeout_seconds`, default 15s when unset/zero, clamped to [1, 120].
-#   * No per-delivery idempotency store — re-enqueueing the same delivery_id
-#     will redeliver.
+#     `request_timeout_seconds`, default 15s when unset/zero, clamped to [1, 30].
+#   * Per-delivery idempotency store (AutomyraBridgeWebhookDelivery): a delivery
+#     id recorded after a successful send is skipped on re-enqueue.
 class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
@@ -179,7 +180,7 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
                  'X-Hub-Signature-256 algorithm + value pinned to sha256 HMAC of the wire body'
   end
 
-  test 'deliver job retry policy is pinned: StandardError, exponentially_longer, 5 attempts' do
+  test 'deliver job retry policy is pinned: StandardError, polynomially_longer, 5 attempts' do
     job_class = AutomyraBridge::HermesWebhookDeliverJob
 
     # ActiveJob stores retry_on registrations as rescue_from entries on
@@ -195,11 +196,11 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
       '../../app/jobs/automyra_bridge/hermes_webhook_deliver_job.rb', __dir__
     )
     src = File.read(src_path)
-    assert_match(/retry_on\s+StandardError,\s*wait:\s*:exponentially_longer,\s*attempts:\s*5/, src,
-                 'retry policy pinned: StandardError + :exponentially_longer + attempts: 5')
+    assert_match(/retry_on\s+StandardError,\s*wait:\s*:polynomially_longer,\s*attempts:\s*5/, src,
+                 'retry policy pinned: StandardError + :polynomially_longer (Rails 7.2) + attempts: 5')
   end
 
-  test 'notifier timeout baseline is pinned: default 15s, clamped to [1, 120]' do
+  test 'notifier timeout baseline is pinned: default 15s, clamped to [1, 30]' do
     n = AutomyraBridge::HermesWebhookNotifier.new(
       'hermes_webhook_url' => AUTO_CLOSE_URL,
       'hermes_webhook_secret' => CHAR_SECRET
@@ -225,7 +226,7 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
       'hermes_webhook_secret' => CHAR_SECRET,
       'request_timeout_seconds' => '999'
     )
-    assert_equal 120, n_too_high.send(:timeout), 'timeout clamped at upper bound of 120s'
+    assert_equal 30, n_too_high.send(:timeout), 'timeout clamped at upper bound of 30s (API timeout constraint)'
 
     n_mid = AutomyraBridge::HermesWebhookNotifier.new(
       'hermes_webhook_url' => AUTO_CLOSE_URL,

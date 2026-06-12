@@ -5,11 +5,10 @@ module AutomyraBridge
   class HermesWebhookDeliverJob < ActiveJob::Base
     queue_as :default
 
-    # Retry transient failures with exponential backoff. When all attempts are
-    # exhausted the block runs instead of re-raising, so the failure is logged
-    # and swallowed — the AutomyraBridge job system handles its own delivery and
-    # Hermes fanout is best-effort.
-    retry_on StandardError, wait: :exponentially_longer, attempts: 5 do |job, error|
+    # :polynomially_longer is the Rails 7.2 spelling (the older
+    # :exponentially_longer symbol raises at retry time on this version).
+    # attempts: 5 bounds the backoff so retries always terminate.
+    retry_on StandardError, wait: :polynomially_longer, attempts: 5 do |job, error|
       Rails.logger.error(
         '[AutomyraBridge::HermesWebhookDeliverJob] giving up after retries: ' \
         "event=#{job.arguments[0]} delivery_id=#{job.arguments[2]} error=#{error.class}: #{error.message}"

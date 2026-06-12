@@ -11,6 +11,9 @@ module AutomyraBridge
   # listener at gateway/platforms/webhook.py — see _validate_signature.
   class HermesWebhookNotifier
     USER_AGENT = 'Automyra-Bridge-Hermes-Notifier/1.0'
+    MAX_PAYLOAD_BYTES = 1.megabyte
+    MAX_TIMEOUT_SECONDS = 30
+    DEFAULT_TIMEOUT_SECONDS = 15
 
     def self.deliver(event_type:, payload:, delivery_id: nil)
       new.deliver(event_type: event_type, payload: payload, delivery_id: delivery_id)
@@ -28,7 +31,11 @@ module AutomyraBridge
       return nil unless uri
 
       delivery = delivery_id.presence || SecureRandom.uuid
+      return nil if already_delivered?(delivery, event_type)
+
       body_bytes = { event_type: event_type, payload: payload }.to_json
+      return nil if payload_too_large?(body_bytes, event_type, delivery)
+
       signature = "sha256=#{OpenSSL::HMAC.hexdigest('SHA256', secret, body_bytes)}"
 
       request = Net::HTTP::Post.new(uri.request_uri)
@@ -50,12 +57,44 @@ module AutomyraBridge
           raise message
         end
 
+        record_delivery(delivery, event_type)
         Rails.logger.info("[AutomyraBridge::HermesWebhookNotifier] delivered event=#{event_type} delivery_id=#{delivery} status=#{response.code}")
         response
       end
     end
 
     private
+
+    # A delivery is idempotent-skipped only after a prior SUCCESSFUL send was
+    # recorded; failed attempts leave no record so retries still proceed.
+    def already_delivered?(delivery, event_type)
+      return false unless AutomyraBridgeWebhookDelivery.table_exists?
+      return false unless AutomyraBridgeWebhookDelivery.already_delivered?(delivery)
+
+      Rails.logger.info("[AutomyraBridge::HermesWebhookNotifier] skipping already-delivered event=#{event_type} delivery_id=#{delivery}")
+      true
+    rescue StandardError => e
+      Rails.logger.warn("[AutomyraBridge::HermesWebhookNotifier] idempotency check failed, proceeding: #{e.message}")
+      false
+    end
+
+    def record_delivery(delivery, event_type)
+      return unless AutomyraBridgeWebhookDelivery.table_exists?
+
+      AutomyraBridgeWebhookDelivery.record_delivery!(idempotency_key: delivery, event_type: event_type.to_s)
+    rescue StandardError => e
+      Rails.logger.warn("[AutomyraBridge::HermesWebhookNotifier] idempotency record failed: #{e.message}")
+    end
+
+    def payload_too_large?(body_bytes, event_type, delivery)
+      return false if body_bytes.bytesize <= MAX_PAYLOAD_BYTES
+
+      Rails.logger.error(
+        "[AutomyraBridge::HermesWebhookNotifier] payload exceeds #{MAX_PAYLOAD_BYTES} bytes " \
+        "(#{body_bytes.bytesize}), dropping event=#{event_type} delivery_id=#{delivery}"
+      )
+      true
+    end
 
     def webhook_url_for_event_type(event_type)
       case event_type.to_s
@@ -77,8 +116,8 @@ module AutomyraBridge
     def timeout
       raw = @settings['request_timeout_seconds']
       value = raw.to_i
-      value = 15 if value.zero?
-      value.clamp(1, 120)
+      value = DEFAULT_TIMEOUT_SECONDS if value.zero?
+      value.clamp(1, MAX_TIMEOUT_SECONDS)
     end
 
     # Returns the validated URI, or nil if the URL fails SSRF/allowlist checks.
