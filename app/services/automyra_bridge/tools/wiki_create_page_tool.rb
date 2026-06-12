@@ -15,6 +15,7 @@ module AutomyraBridge
         attrs = input['wiki'] || input
         raise 'Wiki title is blank.' if attrs['title'].to_s.strip.blank?
         raise 'Wiki page already exists.' if wiki_page(job, attrs['title'])
+
         page = WikiPage.new(wiki: project_wiki(job), title: attrs['title'])
         page.content = WikiContent.new(page: page, text: attrs['text'].to_s, author: user)
         page.save!

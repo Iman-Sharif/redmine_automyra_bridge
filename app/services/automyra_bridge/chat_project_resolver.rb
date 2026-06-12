@@ -2,6 +2,7 @@ module AutomyraBridge
   class ChatProjectResolver
     def self.from_context(context)
       return nil unless context.is_a?(Hash)
+
       from_page(context[:page_type], context[:page_id]) || from_project_id(context[:project_id]) || context[:project]
     end
 
@@ -21,6 +22,7 @@ module AutomyraBridge
         WikiPage.find_by(id: page_id.to_i)&.wiki&.project
       when 'task', 'task_hub_task', 'TaskHub::Task'
         return nil unless defined?(TaskHub::Task)
+
         TaskHub::Task.find_by(id: page_id.to_i)&.project
       when 'project', 'Project'
         from_project_id(page_id)

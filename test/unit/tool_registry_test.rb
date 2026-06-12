@@ -25,7 +25,7 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
     %w[wiki.read wiki.search wiki.create_page wiki.update_page wiki.create_draft wiki.summarize wiki.backlinks wiki.related_pages].each do |name|
       assert_includes names, name
     end
-%w[context.current_object context.current_thread context.linked_objects context.project_search context.memory_search context.expand project.status_summary].each do |name|
+    %w[context.current_object context.current_thread context.linked_objects context.project_search context.memory_search context.expand project.status_summary].each do |name|
       assert_includes names, name
     end
     assert_equal 'task.create', AutomyraBridge::ToolRegistry.find('task.create').schema[:name]
@@ -66,7 +66,7 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
     assert_equal 1, compact[:tier]
     assert_nil compact[:project_search]
     assert_equal 3, expanded[:tier]
-    assert expanded[:project_search][:tasks].any? { |item| item[:title] == 'Searchable context task' }
+    assert(expanded[:project_search][:tasks].any? { |item| item[:title] == 'Searchable context task' })
   end
 
   test 'context project search tool returns broadened project context' do
@@ -77,7 +77,7 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
 
     result = tool.call(job, @user, { 'query' => 'Tool searchable', 'limit' => 5 })
 
-    assert result[:result][:tasks].any? { |item| item[:title] == 'Tool searchable task' }
+    assert(result[:result][:tasks].any? { |item| item[:title] == 'Tool searchable task' })
   end
 
   test 'registry filters tools by job context' do
@@ -202,7 +202,7 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
 
   test 'task tools fail with invalid input and unauthorized users' do
     other = User.generate!(login: 'other')
-    other_member = Member.create!(user: other, project: @project, role_ids: [Role.find_by_name('Manager').id])
+    Member.create!(user: other, project: @project, role_ids: [Role.find_by_name('Manager').id])
 
     # Unauthorized user authorization check
     cancel = AutomyraBridge::ToolRegistry.find('task.cancel')
@@ -222,7 +222,7 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
 
     # Invalid status ID triggers tool-side validation
     set_status = AutomyraBridge::ToolRegistry.find('issue.set_status')
-    assert_raises(RuntimeError) { set_status.call(job, @user, { 'issue' => { 'status_id' => 999999 } }) }
+    assert_raises(RuntimeError) { set_status.call(job, @user, { 'issue' => { 'status_id' => 999_999 } }) }
 
     # Unauthorized user must not have membership or admin role
     anon = User.anonymous
@@ -253,12 +253,12 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
 
   test 'context tools expose only authorized project data' do
     other_project = Project.generate!(name: 'Other Project')
-    other_task = TaskHub::Task.create!(title: 'Other project task', user: @user, author: @user, project: other_project, status: 'todo')
+    TaskHub::Task.create!(title: 'Other project task', user: @user, author: @user, project: other_project, status: 'todo')
 
     # Project search should not leak other project tasks
     search = AutomyraBridge::ToolRegistry.find('task.search')
     result = search.call(@job, @user, { 'query' => 'Other', 'limit' => 10 })
-    assert_not result[:tasks].any? { |t| t[:title] == 'Other project task' }
+    assert_not(result[:tasks].any? { |t| t[:title] == 'Other project task' })
   end
 
   test 'audit events are recorded for tool execution' do

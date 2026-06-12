@@ -25,12 +25,12 @@ module AutomyraBridge
     def create_user_message!(user, thread, content, context: nil)
       AutomyraBridgeChatMessage.transaction do
         message = AutomyraBridgeChatMessage.create!(message_metadata(thread, context).merge(
-          chat_thread: thread,
-          user: user,
-          role: 'user',
-          content: content,
-          status: 'sent'
-        ))
+                                                      chat_thread: thread,
+                                                      user: user,
+                                                      role: 'user',
+                                                      content: content,
+                                                      status: 'sent'
+                                                    ))
 
         AuditRecorder.record(
           'chat_message_sent',
@@ -52,13 +52,13 @@ module AutomyraBridge
     def create_assistant_placeholder!(thread, job, context: nil)
       AutomyraBridgeChatMessage.transaction do
         message = AutomyraBridgeChatMessage.create!(message_metadata(thread, context).merge(
-          chat_thread: thread,
-          user: thread.user,
-          role: 'assistant',
-          content: '',
-          status: 'pending',
-          job: job
-        ))
+                                                      chat_thread: thread,
+                                                      user: thread.user,
+                                                      role: 'assistant',
+                                                      content: '',
+                                                      status: 'pending',
+                                                      job: job
+                                                    ))
 
         thread.increment_unread!(message.user_id, sender_type: message.role)
         ChatMemoryWriter.write_message(message, thread)
@@ -98,12 +98,12 @@ module AutomyraBridge
     def create_system_message!(thread, content, context: nil)
       AutomyraBridgeChatMessage.transaction do
         message = AutomyraBridgeChatMessage.create!(message_metadata(thread, context).merge(
-          chat_thread: thread,
-          user: thread.user,
-          role: 'system',
-          content: content,
-          status: 'delivered'
-        ))
+                                                      chat_thread: thread,
+                                                      user: thread.user,
+                                                      role: 'system',
+                                                      content: content,
+                                                      status: 'delivered'
+                                                    ))
 
         thread.increment_unread!(message.user_id, sender_type: message.role)
         ChatMemoryWriter.write_message(message, thread)
@@ -115,13 +115,13 @@ module AutomyraBridge
     def create_assistant_reply!(thread, content, proposal_id, context: nil)
       AutomyraBridgeChatMessage.transaction do
         message = AutomyraBridgeChatMessage.create!(message_metadata(thread, context).merge(
-          chat_thread: thread,
-          user: thread.user,
-          role: 'assistant',
-          content: content,
-          status: 'delivered',
-          proposal_id: proposal_id
-        ))
+                                                      chat_thread: thread,
+                                                      user: thread.user,
+                                                      role: 'assistant',
+                                                      content: content,
+                                                      status: 'delivered',
+                                                      proposal_id: proposal_id
+                                                    ))
 
         thread.increment_unread!(message.user_id, sender_type: message.role)
         ChatMemoryWriter.write_message(message, thread)
@@ -149,8 +149,8 @@ module AutomyraBridge
       page = snapshot[:page] || snapshot['page'] || {}
       metadata = {
         page_type: context[:page_type].presence || thread.page_type,
-        page_id: (context[:page_id].presence || thread.page_id),
-        project_id: (context[:project_id].presence || thread.project_id),
+        page_id: context[:page_id].presence || thread.page_id,
+        project_id: context[:project_id].presence || thread.project_id,
         url_path: context[:url_path].presence || thread.url_path,
         page_title: context[:page_title].presence || page[:title] || page['title'],
         snapshot_reference: snapshot_reference(thread, context)

@@ -5,6 +5,7 @@ module AutomyraBridge
         def call
           task = TaskHub::Task.find_by(id: action.object_id) if defined?(TaskHub::Task)
           return fail_action!('Task is no longer available.') unless task
+
           issue = requirement_issue
           return fail_action!('Requirement issue is no longer available.') unless issue
 

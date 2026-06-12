@@ -20,7 +20,7 @@ class CreateAutomyraBridgeChatThreads < ActiveRecord::Migration[6.1]
     add_index :automyra_bridge_chat_threads, :user_id
     add_index :automyra_bridge_chat_threads, :project_id
     add_index :automyra_bridge_chat_threads, :page_key
-    add_index :automyra_bridge_chat_threads, [:user_id, :page_key], unique: true, name: 'index_chat_threads_on_user_and_page_key'
+    add_index :automyra_bridge_chat_threads, %i[user_id page_key], unique: true, name: 'index_chat_threads_on_user_and_page_key'
   end
 
   def down

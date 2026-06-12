@@ -43,8 +43,8 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
       assert_equal 'assistant_reply', event_types.last
     end
     body = @task.comments.order(:id).last.body
-    assert_no_match /Automyra is working/, body
-    assert_match /Suggested next step/, body
+    assert_no_match(/Automyra is working/, body)
+    assert_match(/Suggested next step/, body)
   end
 
   test 'chat assistant run summary memory payload shape' do
@@ -61,7 +61,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     assert_equal job.source_id, payload[:source_id]
     assert_equal [], payload[:tools_used]
     assert_kind_of Array, payload[:proposals_created]
-    assert_match /0 open tasks/, payload[:summary]
+    assert_match(/0 open tasks/, payload[:summary])
   end
 
   test 'job payload includes available tool schemas' do
@@ -82,10 +82,10 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     assert_equal 'function', task_schema[:type]
     assert_equal 'task.create', task_schema.dig(:function, :name)
     assert_equal task_schema[:input_schema], task_schema.dig(:function, :parameters)
-    assert_match /tasks means Task Hub tasks/, captured[:instruction]
-    assert_match /issues means Redmica issues/, captured[:instruction]
-    assert_match /call the available read tools/, captured[:instruction]
-    assert_match /Do not provide final-answer text/, captured[:instruction]
+    assert_match(/tasks means Task Hub tasks/, captured[:instruction])
+    assert_match(/issues means Redmica issues/, captured[:instruction])
+    assert_match(/call the available read tools/, captured[:instruction])
+    assert_match(/Do not provide final-answer text/, captured[:instruction])
   end
 
   test 'creates legacy proposals from normalized tool calls' do
@@ -115,7 +115,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     assert_nil parsed['response']
     assert_equal 'context.project_search', parsed['tool_calls'].first['name']
     assert_equal({ 'query' => 'Andy Wright' }, parsed['tool_calls'].first['input'])
-    assert_no_match /tool_calls/, processor.send(:response_text, parsed)
+    assert_no_match(/tool_calls/, processor.send(:response_text, parsed))
   end
 
   test 'executes tool calls directly when autonomous mode is enabled and user is authorized' do
@@ -152,7 +152,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     proposal = AutomyraBridgeActionProposal.order(:id).last
     assert_equal 'cancel_task', proposal.action_type
     assert_equal 'failed', proposal.status
-    assert_match /not authorized/, proposal.error_message
+    assert_match(/not authorized/, proposal.error_message)
   end
 
   test 'posts Task Hub status comments as Automyra bot when available' do
@@ -193,7 +193,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
 
     @job.reload
     assert_equal 'failed', @job.status
-    assert_match /interrupted/, @job.error_message
+    assert_match(/interrupted/, @job.error_message)
   end
 
   test 'successful external response remains succeeded when final status comment fails' do
@@ -207,7 +207,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
 
     @job.reload
     assert_equal 'succeeded', @job.status
-    assert_match /Status post failed/, @job.error_message
+    assert_match(/Status post failed/, @job.error_message)
   end
 
   test 'does not complete a job cancelled while endpoint is running' do
@@ -237,7 +237,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     processor.process(@job)
 
     assert_equal 'failed', @job.reload.status
-    assert_match /request.body required/, @job.error_message
+    assert_match(/request.body required/, @job.error_message)
   end
 
   test 'autonomous project executes supported low-risk task proposal directly' do
@@ -307,7 +307,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     proposal = AutomyraBridgeActionProposal.order(:id).last
     assert_equal 'todo', @task.reload.status
     assert_equal 'failed', proposal.status
-    assert_match /disabled/, proposal.error_message
+    assert_match(/disabled/, proposal.error_message)
   end
 
   test 'autonomous project does not execute unsupported destructive proposal' do
@@ -348,7 +348,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
 
   test 'autonomous project assigns current issue to requester from assistant action' do
     issue = Issue.find(1)
-    role = Role.generate!(permissions: [:edit_issues, :add_issue_notes, :use_automyra_bridge])
+    role = Role.generate!(permissions: %i[edit_issues add_issue_notes use_automyra_bridge])
     member = Member.find_or_initialize_by(project: issue.project, user: @user)
     member.roles = [role]
     member.save!
@@ -395,8 +395,8 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
 
     @job.reload
     assert_equal 'failed', @job.status
-    assert_match /not configured/, @job.error_message
-    assert_match /failed/, @task.comments.order(:id).last.body
+    assert_match(/not configured/, @job.error_message)
+    assert_match(/failed/, @task.comments.order(:id).last.body)
     assert_equal 'error', AutomyraBridgeMemoryEvent.order(:id).last.event_type if AutomyraBridgeMemoryEvent.table_exists?
   end
 
@@ -425,7 +425,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     end
 
     assert_equal 'succeeded', job.reload.status
-    assert_match /Issue guidance/, issue.journals.order(:id).last.notes
+    assert_match(/Issue guidance/, issue.journals.order(:id).last.notes)
   end
 
   test 'issue journal Automyra response containing mention does not enqueue recursive job' do
@@ -563,7 +563,7 @@ class AutomyraBridgeJobProcessorTest < ActiveSupport::TestCase
     processor.process(job)
 
     assert_equal 'succeeded', job.reload.status
-    assert captured_messages.second.any? { |message| message['role'] == 'tool' && message['content'].include?('Process task') }
+    assert(captured_messages.second.any? { |message| message['role'] == 'tool' && message['content'].include?('Process task') })
     assert_equal 'I found Process task.', thread.chat_messages.where(role: 'assistant').last.content
   ensure
     thread&.destroy

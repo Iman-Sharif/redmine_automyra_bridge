@@ -11,7 +11,7 @@ module AutomyraBridge
     # Hermes fanout is best-effort.
     retry_on StandardError, wait: :exponentially_longer, attempts: 5 do |job, error|
       Rails.logger.error(
-        "[AutomyraBridge::HermesWebhookDeliverJob] giving up after retries: " \
+        '[AutomyraBridge::HermesWebhookDeliverJob] giving up after retries: ' \
         "event=#{job.arguments[0]} delivery_id=#{job.arguments[2]} error=#{error.class}: #{error.message}"
       )
     end

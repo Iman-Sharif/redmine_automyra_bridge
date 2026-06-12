@@ -25,19 +25,19 @@ class InvalidRevisionParam < StandardError; end
 
 class RepositoriesController < ApplicationController
   menu_item :repository
-  menu_item :settings, :only => [:new, :create, :edit, :update, :destroy, :committers]
+  menu_item :settings, only: %i[new create edit update destroy committers]
   default_search_scope :changesets
 
-  before_action :find_project_by_project_id, :only => [:new, :create]
-  before_action :build_new_repository_from_params, :only => [:new, :create]
-  before_action :find_repository, :only => [:edit, :update, :destroy, :committers]
-  before_action :find_project_repository, :except => [:new, :create, :edit, :update, :destroy, :committers]
-  before_action :find_changeset, :only => [:revision, :add_related_issue, :remove_related_issue]
+  before_action :find_project_by_project_id, only: %i[new create]
+  before_action :build_new_repository_from_params, only: %i[new create]
+  before_action :find_repository, only: %i[edit update destroy committers]
+  before_action :find_project_repository, except: %i[new create edit update destroy committers]
+  before_action :find_changeset, only: %i[revision add_related_issue remove_related_issue]
   before_action :authorize
   accept_atom_auth :revisions
   accept_api_auth :new, :create, :edit, :update, :destroy, :committers, :add_related_issue, :remove_related_issue
 
-  rescue_from Redmine::Scm::Adapters::CommandFailed, :with => :show_error_command_failed
+  rescue_from Redmine::Scm::Adapters::CommandFailed, with: :show_error_command_failed
 
   def new
     @repository.is_default = @project.repository.nil?
@@ -46,10 +46,10 @@ class RepositoriesController < ApplicationController
 
   def create
     if @repository.save
-      redirect_to settings_project_path(@project, :tab => 'repositories')
+      redirect_to settings_project_path(@project, tab: 'repositories')
     else
       no_store
-      render :action => 'new'
+      render action: 'new'
     end
   end
 
@@ -60,31 +60,33 @@ class RepositoriesController < ApplicationController
   def update
     @repository.safe_attributes = params[:repository]
     if @repository.save
-      redirect_to settings_project_path(@project, :tab => 'repositories')
+      redirect_to settings_project_path(@project, tab: 'repositories')
     else
       no_store
-      render :action => 'edit'
+      render action: 'edit'
     end
   end
 
   def committers
     @committers = @repository.committers
     @users = @project.users.to_a
-    additional_user_ids = @committers.collect {|c| c.last.to_i} - @users.collect(&:id)
-    @users += User.where(:id => additional_user_ids).to_a unless additional_user_ids.empty?
+    additional_user_ids = @committers.collect { |c| c.last.to_i } - @users.collect(&:id)
+    @users += User.where(id: additional_user_ids).to_a unless additional_user_ids.empty?
     @users.compact!
     @users.sort!
-    if request.post? && params[:committers].present?
-      # Build a hash with repository usernames as keys and corresponding user ids as values
-      @repository.committer_ids = params[:committers].values.inject({}) {|h, c| h[c.first] = c.last; h}
-      flash[:notice] = l(:notice_successful_update)
-      redirect_to settings_project_path(@project, :tab => 'repositories')
+    return unless request.post? && params[:committers].present?
+
+    # Build a hash with repository usernames as keys and corresponding user ids as values
+    @repository.committer_ids = params[:committers].values.each_with_object({}) do |c, h|
+      h[c.first] = c.last
     end
+    flash[:notice] = l(:notice_successful_update)
+    redirect_to settings_project_path(@project, tab: 'repositories')
   end
 
   def destroy
     @repository.destroy if request.delete?
-    redirect_to settings_project_path(@project, :tab => 'repositories')
+    redirect_to settings_project_path(@project, tab: 'repositories')
   end
 
   def show
@@ -93,17 +95,20 @@ class RepositoriesController < ApplicationController
     @entries = @repository.entries(@path, @rev)
     @changeset = @repository.find_changeset_by_name(@rev)
     if request.xhr?
-      @entries ? render(:partial => 'dir_list_content') : head(:ok)
+      @entries ? render(partial: 'dir_list_content') : head(:ok)
     else
-      (show_error_not_found; return) unless @entries
+      unless @entries
+        (show_error_not_found
+         return)
+      end
       @changesets = @repository.latest_changesets(@path, @rev)
       @properties = @repository.properties(@path, @rev)
       @repositories = @project.repositories
-      render :action => 'show'
+      render action: 'show'
     end
   end
 
-  alias_method :browse, :show
+  alias browse show
 
   def fetch_changesets
     @repository.fetch_changesets if @project.active? && @path.empty? && !Setting.autofetch_changesets?
@@ -116,7 +121,10 @@ class RepositoriesController < ApplicationController
 
   def changes
     @entry = @repository.entry(@path, @rev)
-    (show_error_not_found; return) unless @entry
+    unless @entry
+      (show_error_not_found
+       return)
+    end
     @changesets = @repository.latest_changesets(@path, @rev, Setting.repository_log_display_limit.to_i)
     @properties = @repository.properties(@path, @rev)
     @changeset = @repository.find_changeset_by_name(@rev)
@@ -127,15 +135,15 @@ class RepositoriesController < ApplicationController
     @changeset_pages = Paginator.new @changeset_count,
                                      per_page_option,
                                      params['page']
-    @changesets = @repository.changesets.
-      limit(@changeset_pages.per_page).
-      offset(@changeset_pages.offset).
-      includes(:user, :repository, :parents).
-      to_a
+    @changesets = @repository.changesets
+                             .limit(@changeset_pages.per_page)
+                             .offset(@changeset_pages.offset)
+                             .includes(:user, :repository, :parents)
+                             .to_a
 
     respond_to do |format|
-      format.html {render :layout => false if request.xhr?}
-      format.atom {render_feed(@changesets, :title => "#{@project.name}: #{l(:label_revision_plural)}")}
+      format.html { render layout: false if request.xhr? }
+      format.atom { render_feed(@changesets, title: "#{@project.name}: #{l(:label_revision_plural)}") }
     end
   end
 
@@ -145,24 +153,30 @@ class RepositoriesController < ApplicationController
 
   def entry
     entry_and_raw(false)
-    @raw_url = url_for(:action => 'raw',
-                       :id     => @project,
-                       :repository_id => @repository.identifier_param,
-                       :path   => @path,
-                       :rev    => @rev,
-                       :only_path => true)
+    @raw_url = url_for(action: 'raw',
+                       id: @project,
+                       repository_id: @repository.identifier_param,
+                       path: @path,
+                       rev: @rev,
+                       only_path: true)
   end
 
   def entry_and_raw(is_raw)
     @entry = @repository.entry(@path, @rev)
-    (show_error_not_found; return) unless @entry
+    unless @entry
+      (show_error_not_found
+       return)
+    end
 
     # If the entry is a dir, show the browser
-    (show; return) if @entry.is_dir?
+    if @entry.is_dir?
+      (show
+       return)
+    end
 
     if is_raw
       # Force the download
-      send_opt = {:filename => filename_for_content_disposition(@path.split('/').last)}
+      send_opt = { filename: filename_for_content_disposition(@path.split('/').last) }
       send_type = Redmine::MimeType.of(@path)
       case send_type
       when nil
@@ -179,13 +193,16 @@ class RepositoriesController < ApplicationController
       # set up pagination from entry to entry
       parent_path = @path.split('/')[0...-1].join('/')
       @entries = @repository.entries(parent_path, @rev).reject(&:is_dir?)
-      if index = @entries.index{|e| e.name == @entry.name}
-        @paginator = Redmine::Pagination::Paginator.new(@entries.size, 1, index+1)
+      if index = @entries.index { |e| e.name == @entry.name }
+        @paginator = Redmine::Pagination::Paginator.new(@entries.size, 1, index + 1)
       end
 
       if !@entry.size || @entry.size <= Setting.file_max_size_displayed.to_i.kilobyte
         content = @repository.cat(@path, @rev)
-        (show_error_not_found; return) unless content
+        unless content
+          (show_error_not_found
+           return)
+        end
 
         if content.size <= Setting.file_max_size_displayed.to_i.kilobyte &&
            is_entry_text_data?(content, @path)
@@ -215,7 +232,10 @@ class RepositoriesController < ApplicationController
 
   def annotate
     @entry = @repository.entry(@path, @rev)
-    (show_error_not_found; return) unless @entry
+    unless @entry
+      (show_error_not_found
+       return)
+    end
 
     @annotate = @repository.scm.annotate(@path, @rev)
     if @annotate.blank?
@@ -235,7 +255,7 @@ class RepositoriesController < ApplicationController
   def revision
     respond_to do |format|
       format.html
-      format.js {render :layout => false}
+      format.js { render layout: false }
     end
   end
 
@@ -244,9 +264,7 @@ class RepositoriesController < ApplicationController
   def add_related_issue
     issue_id = params[:issue_id].to_s.delete_prefix('#')
     @issue = @changeset.find_referenced_issue_by_id(issue_id)
-    if @issue && (!@issue.visible? || @changeset.issues.include?(@issue))
-      @issue = nil
-    end
+    @issue = nil if @issue && (!@issue.visible? || @changeset.issues.include?(@issue))
 
     respond_to do |format|
       if @issue
@@ -263,9 +281,7 @@ class RepositoriesController < ApplicationController
   # DELETE /projects/:project_id/repository/(:repository_id/)revisions/:rev/issues/:issue_id
   def remove_related_issue
     @issue = Issue.visible.find_by_id(params[:issue_id])
-    if @issue
-      @changeset.issues.delete(@issue)
-    end
+    @changeset.issues.delete(@issue) if @issue
     respond_to do |format|
       format.api { render_api_ok }
       format.js
@@ -275,15 +291,18 @@ class RepositoriesController < ApplicationController
   def diff
     if params[:format] == 'diff'
       @diff = @repository.diff(@path, @rev, @rev_to)
-      (show_error_not_found; return) unless @diff
+      unless @diff
+        (show_error_not_found
+         return)
+      end
       filename = "changeset_r#{@rev}"
       filename << "_r#{@rev_to}" if @rev_to
-      send_data @diff.join, :filename => "#{filename}.diff",
-                            :type => 'text/x-patch',
-                            :disposition => 'attachment'
+      send_data @diff.join, filename: "#{filename}.diff",
+                            type: 'text/x-patch',
+                            disposition: 'attachment'
     else
       @diff_type = params[:type] || User.current.pref[:diff_type] || 'inline'
-      @diff_type = 'inline' unless %w(inline sbs).include?(@diff_type)
+      @diff_type = 'inline' unless %w[inline sbs].include?(@diff_type)
 
       # Save diff type as user preference
       if User.current.logged? && @diff_type != User.current.pref[:diff_type]
@@ -291,33 +310,35 @@ class RepositoriesController < ApplicationController
         User.current.preference.save
       end
       @cache_key = "repositories/diff/#{@repository.id}/" +
-                      ActiveSupport::Digest.hexdigest("#{@path}-#{@rev}-#{@rev_to}-#{@diff_type}-#{current_language}")
+                   ActiveSupport::Digest.hexdigest("#{@path}-#{@rev}-#{@rev_to}-#{@diff_type}-#{current_language}")
       unless read_fragment(@cache_key)
         @diff = @repository.diff(@path, @rev, @rev_to)
-        (show_error_not_found; return) unless @diff
+        unless @diff
+          (show_error_not_found
+           return)
+        end
       end
 
       @changeset = @repository.find_changeset_by_name(@rev)
       @changeset_to = @rev_to ? @repository.find_changeset_by_name(@rev_to) : nil
       @diff_format_revisions = @repository.diff_format_revisions(@changeset, @changeset_to)
-      render :diff, :formats => :html
+      render :diff, formats: :html
     end
   end
 
-  def stats
-  end
+  def stats; end
 
   # Returns JSON data for repository graphs
   def graph
     data = nil
     case params[:graph]
-    when "commits_per_month"
+    when 'commits_per_month'
       data = graph_commits_per_month(@repository)
-    when "commits_per_author"
+    when 'commits_per_author'
       data = graph_commits_per_author(@repository)
     end
     if data
-      render :json => data
+      render json: data
     else
       render_404
     end
@@ -344,16 +365,19 @@ class RepositoriesController < ApplicationController
     render_404
   end
 
-  REV_PARAM_RE = %r{\A[a-f0-9]*\z}i
+  REV_PARAM_RE = /\A[a-f0-9]*\z/i
 
   def find_project_repository
     @project = Project.find(params[:id])
-    if params[:repository_id].present?
-      @repository = @project.repositories.find_by_identifier_param(params[:repository_id])
-    else
-      @repository = @project.repository || @project.repositories.first
+    @repository = if params[:repository_id].present?
+                    @project.repositories.find_by_identifier_param(params[:repository_id])
+                  else
+                    @project.repository || @project.repositories.first
+                  end
+    unless @repository
+      (render_404
+       return false)
     end
-    (render_404; return false) unless @repository
     @path = params[:path].is_a?(Array) ? params[:path].join('/') : params[:path].to_s
 
     @rev = params[:rev].to_s.strip.presence || @repository.default_branch
@@ -368,14 +392,12 @@ class RepositoriesController < ApplicationController
   end
 
   def find_changeset
-    if @rev.present?
-      @changeset = @repository.find_changeset_by_name(@rev)
-    end
+    @changeset = @repository.find_changeset_by_name(@rev) if @rev.present?
     show_error_not_found unless @changeset
   end
 
   def show_error_not_found
-    render_error :message => l(:error_scm_not_found), :status => 404
+    render_error message: l(:error_scm_not_found), status: 404
   end
 
   # Handler for Redmine::Scm::Adapters::CommandFailed exception
@@ -387,36 +409,38 @@ class RepositoriesController < ApplicationController
     date_to = User.current.today
     date_from = date_to << 11
     date_from = Date.civil(date_from.year, date_from.month, 1)
-    commits_by_day = Changeset.
-      where("repository_id = ? AND commit_date BETWEEN ? AND ?", repository.id, date_from, date_to).
-      group(:commit_date).
-      count
+    commits_by_day = Changeset
+                     .where('repository_id = ? AND commit_date BETWEEN ? AND ?', repository.id, date_from, date_to)
+                     .group(:commit_date)
+                     .count
     commits_by_month = [0] * 12
-    commits_by_day.each {|c| commits_by_month[(date_to.month - c.first.to_date.month) % 12] += c.last}
+    commits_by_day.each { |c| commits_by_month[(date_to.month - c.first.to_date.month) % 12] += c.last }
 
-    changes_by_day = Change.
-      joins(:changeset).
-      where("#{Changeset.table_name}.repository_id = ? AND #{Changeset.table_name}.commit_date BETWEEN ? AND ?", repository.id, date_from, date_to).
-      group(:commit_date).
-      count
+    changes_by_day = Change
+                     .joins(:changeset)
+                     .where("#{Changeset.table_name}.repository_id = ? AND #{Changeset.table_name}.commit_date BETWEEN ? AND ?", repository.id, date_from, date_to)
+                     .group(:commit_date)
+                     .count
     changes_by_month = [0] * 12
-    changes_by_day.each {|c| changes_by_month[(date_to.month - c.first.to_date.month) % 12] += c.last}
+    changes_by_day.each { |c| changes_by_month[(date_to.month - c.first.to_date.month) % 12] += c.last }
 
     fields = []
     today = User.current.today
-    12.times {|m| fields << month_name(((today.month - 1 - m) % 12) + 1)}
+    12.times { |m| fields << month_name(((today.month - 1 - m) % 12) + 1) }
 
-    data = {
-      :labels => fields.reverse,
-      :commits => commits_by_month[0..11].reverse,
-      :changes => changes_by_month[0..11].reverse
+    {
+      labels: fields.reverse,
+      commits: commits_by_month[0..11].reverse,
+      changes: changes_by_month[0..11].reverse
     }
   end
 
   def graph_commits_per_author(repository)
     # data
     stats = repository.stats_by_author
-    fields, commits_data, changes_data = [], [], []
+    fields = []
+    commits_data = []
+    changes_data = []
     stats.each do |name, hsh|
       fields << name
       commits_data << hsh[:commits_count]
@@ -424,29 +448,29 @@ class RepositoriesController < ApplicationController
     end
 
     # expand to 10 values if needed
-    fields = fields + [""]*(10 - fields.length) if fields.length<10
-    commits_data = commits_data + [0]*(10 - commits_data.length) if commits_data.length<10
-    changes_data = changes_data + [0]*(10 - changes_data.length) if changes_data.length<10
+    fields += [''] * (10 - fields.length) if fields.length < 10
+    commits_data += [0] * (10 - commits_data.length) if commits_data.length < 10
+    changes_data += [0] * (10 - changes_data.length) if changes_data.length < 10
 
     # Remove email address in usernames
-    fields = fields.collect {|c| c.gsub(%r{<.+@.+>}, '')}
+    fields = fields.collect { |c| c.gsub(/<.+@.+>/, '') }
 
-    data = {
-      :labels => fields.reverse,
-      :commits => commits_data.reverse,
-      :changes => changes_data.reverse
+    {
+      labels: fields.reverse,
+      commits: commits_data.reverse,
+      changes: changes_data.reverse
     }
   end
 
-  def disposition(path)
-    if Redmine::MimeType.of(@path) == "application/pdf"
+  def disposition(_path)
+    if Redmine::MimeType.of(@path) == 'application/pdf'
       'inline'
     else
       'attachment'
     end
   end
 
-  def send_file(path, options={})
+  def send_file(path, options = {})
     headers['content-security-policy'] = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
     super
   end

@@ -1,8 +1,8 @@
-class AutomyraBridgeActionProposal < ActiveRecord::Base
+class AutomyraBridgeActionProposal < ApplicationRecord
   self.table_name = 'automyra_bridge_action_proposals'
 
   STATUSES = %w[pending approved pr_opened rejected executed failed].freeze
-ACTION_TYPES = %w[create_task update_task cancel_task complete_task reopen_task assign_task set_task_priority set_task_due_date add_task_comment link_task_issue promote_task search_tasks create_issue update_issue assign_issue set_issue_status set_issue_priority set_issue_due_date link_related_issue search_issues summarize_issue assign_issue_to_requester add_issue_comment read_wiki search_wiki create_wiki_page update_wiki create_wiki_draft summarize_wiki wiki_backlinks wiki_related_pages context_current_object context_current_thread context_linked_objects context_project_search context_memory_search context_expand project_status_summary change_status destructive_action unsupported_action].freeze
+  ACTION_TYPES = %w[create_task update_task cancel_task complete_task reopen_task assign_task set_task_priority set_task_due_date add_task_comment link_task_issue promote_task search_tasks create_issue update_issue assign_issue set_issue_status set_issue_priority set_issue_due_date link_related_issue search_issues summarize_issue assign_issue_to_requester add_issue_comment read_wiki search_wiki create_wiki_page update_wiki create_wiki_draft summarize_wiki wiki_backlinks wiki_related_pages context_current_object context_current_thread context_linked_objects context_project_search context_memory_search context_expand project_status_summary change_status destructive_action unsupported_action].freeze
   SUPPORTED_ACTION_TYPES = %w[create_task update_task cancel_task complete_task reopen_task assign_task set_task_priority set_task_due_date add_task_comment link_task_issue promote_task search_tasks create_issue update_issue assign_issue set_issue_status set_issue_priority set_issue_due_date link_related_issue search_issues summarize_issue assign_issue_to_requester add_issue_comment read_wiki search_wiki create_wiki_page update_wiki create_wiki_draft summarize_wiki wiki_backlinks wiki_related_pages context_current_object context_current_thread context_linked_objects context_project_search context_memory_search context_expand project_status_summary].freeze
 
   belongs_to :automyra_bridge_job, class_name: 'AutomyraBridgeJob'
@@ -51,7 +51,7 @@ ACTION_TYPES = %w[create_task update_task cancel_task complete_task reopen_task 
   private
 
   def task_target_type
-    return unless task_id.present?
+    return if task_id.blank?
 
     'TaskHub::Task'
   end

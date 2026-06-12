@@ -120,7 +120,7 @@ class AutomyraBridgeOperatorController < ApplicationController
     endpoint = Setting.plugin_redmine_automyra_bridge['automyra_endpoint'].to_s
     ready_uri = AutomyraBridge::UrlValidator.validate!(endpoint.sub(%r{/improve\z}, '/ready'))
     response = Net::HTTP.start(ready_uri.host, ready_uri.port, use_ssl: ready_uri.scheme == 'https', open_timeout: 2, read_timeout: 2) do |http|
-        AutomyraBridge::UrlValidator.validate_connected_peer!(http, ready_uri.host, Setting.plugin_redmine_automyra_bridge)
+      AutomyraBridge::UrlValidator.validate_connected_peer!(http, ready_uri.host, Setting.plugin_redmine_automyra_bridge)
       http.get(ready_uri.request_uri)
     end
     { status: response.code.to_i, body: response.body.to_s.truncate(160) }

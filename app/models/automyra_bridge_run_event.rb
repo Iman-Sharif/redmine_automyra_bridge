@@ -1,4 +1,4 @@
-class AutomyraBridgeRunEvent < ActiveRecord::Base
+class AutomyraBridgeRunEvent < ApplicationRecord
   belongs_to :run,
              class_name: 'AutomyraBridgeRun',
              foreign_key: 'automyra_bridge_run_id'
@@ -8,7 +8,7 @@ class AutomyraBridgeRunEvent < ActiveRecord::Base
 
   validates :automyra_bridge_run_id, :event_type, presence: true
 
-  scope :by_run, lambda { |run_id| where(automyra_bridge_run_id: run_id) }
+  scope :by_run, ->(run_id) { where(automyra_bridge_run_id: run_id) }
   scope :by_sequence, -> { order(:sequence) }
   scope :visible, -> { where(visible_to_user: true) }
   scope :recent, -> { order(created_at: :desc, id: :desc) }

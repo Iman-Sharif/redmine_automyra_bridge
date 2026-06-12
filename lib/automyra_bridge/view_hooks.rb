@@ -9,6 +9,7 @@ module AutomyraBridge
     def view_layouts_base_body_bottom(context = {})
       page_context = automyra_page_context(context)
       return unless automyra_chat_available?(page_context)
+
       thread = automyra_chat_thread(page_context, context[:project])
 
       controller = context[:controller]

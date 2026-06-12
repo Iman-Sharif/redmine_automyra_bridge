@@ -20,6 +20,7 @@ module AutomyraBridge
         issue_id = input.dig('target', 'issue_id') || input['issue_id']
         issue = Issue.visible(user).find_by(id: issue_id)
         raise 'Issue is not visible.' unless issue
+
         task.update!(issue_id: issue.id, project_id: issue.project_id)
         { task_id: task.id, issue_id: task.issue_id }
       end

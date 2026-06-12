@@ -32,7 +32,7 @@ module AutomyraBridge
         return if notes&.include?('<!-- automyra-auto-close-result -->')
 
         AutomyraBridge::AutoCloseDispatcher.dispatch(self)
-      rescue => e
+      rescue StandardError => e
         Rails.logger.error("[AutomyraBridge::IssueStatusHook] Error: #{e.message}")
       end
     end

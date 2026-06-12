@@ -8,7 +8,7 @@ class AutomyraBridgeControllerTest < ActionController::TestCase
   test 'requires login' do
     post :improve_task, params: { task: { title: 'Draft' } }
 
-    assert_response 302
+    assert_response :found
   end
 
   test 'returns Automyra suggestions for authorized user' do
@@ -89,7 +89,7 @@ class AutomyraBridgeControllerTest < ActionController::TestCase
 
     assert_redirected_to project_path(project)
     assert task.comments.reload.any?, "expected assistant request to create a comment, response=#{response.status}, flash=#{flash.to_hash.inspect}"
-    assert_match /@Automyra cancel this task/, task.comments.order(:id).last.body
+    assert_match(/@Automyra cancel this task/, task.comments.order(:id).last.body)
     assert AutomyraBridge::MentionDetector.mentioned?(task.comments.order(:id).last.body)
   end
 

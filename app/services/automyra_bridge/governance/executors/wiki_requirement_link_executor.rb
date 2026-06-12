@@ -5,6 +5,7 @@ module AutomyraBridge
         def call
           snapshot = WikiHub::PageSnapshot.find_by(id: action.object_id) if defined?(WikiHub::PageSnapshot)
           return fail_action!('Wiki page is no longer available.') unless snapshot
+
           issue = requirement_issue
           return fail_action!('Requirement issue is no longer available.') unless issue
 

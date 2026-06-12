@@ -25,8 +25,10 @@ module AutomyraBridge
       return decision('readonly', 'Automyra is read-only for this project.') if @setting.read_only?
       return decision('reject', 'Automyra action is disabled for this project.') unless @setting.action_enabled?(@proposal.action_type)
       return decision('execute', 'Iman unrestricted autonomy policy.', true) if iman?
+
       if @setting.autonomous?
         return decision('execute', 'Project autonomous mode.', false) if tool_authorized?
+
         return decision('reject', 'User is not authorized for this tool.')
       end
 

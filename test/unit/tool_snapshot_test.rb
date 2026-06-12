@@ -39,7 +39,7 @@ class ToolSnapshotTest < ActiveSupport::TestCase
       ['issue.assign',      tool('issue.assign'),      @issue_job, @user, { 'assignment' => { 'assigned_to_id' => @user.id } }],
       ['task.set_due_date', tool('task.set_due_date'), @task_job,  @user, { 'task' => { 'due_date' => fixed_date } }],
       ['issue.set_due_date', tool('issue.set_due_date'), @issue_job, @user, { 'issue' => { 'due_date' => fixed_date } }],
-      ['task.set_priority', tool('task.set_priority'), @task_job,  @user, { 'task' => { 'priority' => priority_value } }],
+      ['task.set_priority', tool('task.set_priority'), @task_job, @user, { 'task' => { 'priority' => priority_value } }],
       ['issue.set_priority', tool('issue.set_priority'), @issue_job, @user, { 'issue' => { 'priority_id' => IssuePriority.first.id } }],
       ['task.add_comment',  tool('task.add_comment'),  @task_job,  @user, { 'comment' => { 'body' => comment_body } }],
       ['issue.add_comment', tool('issue.add_comment'), @issue_job, @user, { 'comment' => { 'body' => comment_body } }],
@@ -66,7 +66,7 @@ class ToolSnapshotTest < ActiveSupport::TestCase
     baseline = ToolSnapshot.normalize(ToolSnapshot.capture(pair_inputs))
     mutated = ToolSnapshot.normalize(ToolSnapshot.capture(pair_inputs(priority_value: 1, comment_body: 'DIFFERENT body')))
 
-    refute_equal baseline, mutated, 'a changed input must change the normalized snapshot'
+    assert_not_equal baseline, mutated, 'a changed input must change the normalized snapshot'
     File.write('/tmp/task-11-baseline.json', baseline)
     File.write('/tmp/task-11-mutated.json', mutated)
   end

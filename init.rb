@@ -12,36 +12,36 @@ Redmine::Plugin.register :redmine_automyra_bridge do
 
   settings default: {
              'automyra_endpoint' => '',
-               'automyra_token' => '',
-               'request_timeout_seconds' => '15',
-                'memory_endpoint' => '',
-                'memory_token' => '',
-                'memory_session_key' => 'main',
-                'memory_model' => 'manifest/auto',
-                'memory_lancedb_config_path' => '/root/.openclaw/openclaw.json',
-                 'memory_lancedb_uri' => '',
-                 'memory_lancedb_table' => 'memories',
-                 'memory_lancedb_redmine_table' => 'redmine-memories',
-                 'webhook_secret' => '',
-                 'webhook_user_login' => '',
-                  'hermes_webhook_url' => 'https://automyra.sbg-server.com/webhooks/redmica-mentions',
-                  'hermes_webhook_url_mentions' => '',
-                  'hermes_webhook_url_creation_review' => '',
-                  'hermes_webhook_url_auto_close' => '',
-                  'hermes_webhook_secret' => '',
-                 'activity_log_secret' => 'change-me-in-production',
-                 'auto_close_enabled' => '0',
-                 'auto_close_trigger_status_name' => 'Resolved'
+             'automyra_token' => '',
+             'request_timeout_seconds' => '15',
+             'memory_endpoint' => '',
+             'memory_token' => '',
+             'memory_session_key' => 'main',
+             'memory_model' => 'manifest/auto',
+             'memory_lancedb_config_path' => '/root/.openclaw/openclaw.json',
+             'memory_lancedb_uri' => '',
+             'memory_lancedb_table' => 'memories',
+             'memory_lancedb_redmine_table' => 'redmine-memories',
+             'webhook_secret' => '',
+             'webhook_user_login' => '',
+             'hermes_webhook_url' => 'https://automyra.sbg-server.com/webhooks/redmica-mentions',
+             'hermes_webhook_url_mentions' => '',
+             'hermes_webhook_url_creation_review' => '',
+             'hermes_webhook_url_auto_close' => '',
+             'hermes_webhook_secret' => '',
+             'activity_log_secret' => 'change-me-in-production',
+             'auto_close_enabled' => '0',
+             'auto_close_trigger_status_name' => 'Resolved'
            },
            partial: 'settings/automyra_bridge_settings'
 
   project_module :automyra_bridge do
     permission :use_automyra_bridge,
-                { automyra_bridge: [:improve_task, :assistant_request] },
-                require: :member
+               { automyra_bridge: %i[improve_task assistant_request] },
+               require: :member
     permission :manage_automyra_bridge,
                {
-                 automyra_bridge_operator: [:index, :retry_job, :cancel_job, :update_settings]
+                 automyra_bridge_operator: %i[index retry_job cancel_job update_settings]
                },
                require: :member
   end

@@ -144,7 +144,7 @@ class IssueTaskPairsCharacterizationTest < ActiveSupport::TestCase
     # CHARACTERIZATION: task.add_comment returns a :comment_id, diverging from
     # issue.add_comment which returns the raw :comment body string -- pinned for Task 15.
     result = tool('task.add_comment').call(@task_job, @user, { 'comment' => { 'body' => 'Pinned comment' } })
-    assert_equal [:comment_id, :task_id], result.keys.sort
+    assert_equal %i[comment_id task_id], result.keys.sort
     assert_equal @task.id, result[:task_id]
     assert_equal TaskHub::TaskComment.find(result[:comment_id]).id, result[:comment_id]
     assert_equal 'Pinned comment', TaskHub::TaskComment.find(result[:comment_id]).body

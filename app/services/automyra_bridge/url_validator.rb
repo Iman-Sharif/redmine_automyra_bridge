@@ -72,6 +72,7 @@ module AutomyraBridge
       return false unless uri
       return fail_with('URL must include a hostname') if uri.host.blank?
       return fail_with('URL must use HTTP or HTTPS') unless uri.is_a?(URI::HTTP)
+
       trusted_internal = self.class.trusted_internal_host?(uri.host, @settings)
       return fail_with('HTTP URLs are disabled') if uri.scheme == 'http' && !allow_http? && !trusted_internal
       return fail_with('hostname is not allowlisted') unless host_allowed?(uri.host)

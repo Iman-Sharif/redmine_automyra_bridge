@@ -32,6 +32,6 @@ class ChatThreadChannelResolverTest < ActiveSupport::TestCase
     second = AutomyraBridge::ChatThreadChannelResolver.channel_key(page_type: 'generic', page_id: 0, project_id: 42, url_path: '/projects/demo/activity')
 
     assert_equal first, second
-    assert_match %r{\Ageneric:42:[0-9a-f]{16}\z}, first
+    assert_match(/\Ageneric:42:[0-9a-f]{16}\z/, first)
   end
 end

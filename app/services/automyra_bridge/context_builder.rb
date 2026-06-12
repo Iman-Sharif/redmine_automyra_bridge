@@ -28,9 +28,9 @@ module AutomyraBridge
         }.compact,
         comments: filtered_task_comments(task),
         recent_automyra_actions: AutomyraBridgeActionProposal.visible_on_task(task)
-          .order(updated_at: :desc).limit(10).map { |proposal|
+                                                             .order(updated_at: :desc).limit(10).map do |proposal|
           { id: proposal.id, action_type: proposal.action_type, status: proposal.status, updated_at: proposal.updated_at&.iso8601 }
-        },
+        end,
         automyra_memory: AutomyraBridge::MemoryReader.recent(task),
         memory_event: memory_event
       }
@@ -56,12 +56,16 @@ module AutomyraBridge
 
       q = query.to_s.downcase
       {
-        tasks: defined?(TaskHub::Task) ? TaskHub::Task.where(project: project).where('LOWER(title) LIKE ?', "%#{q}%").limit(limit).map { |task|
-          { id: task.id, title: task.title, status: task.status }
-        } : [],
-        issues: Issue.visible(@user).where(project: project).where('LOWER(issues.subject) LIKE ?', "%#{q}%").limit(limit).map { |issue|
+        tasks: if defined?(TaskHub::Task)
+                 TaskHub::Task.where(project: project).where('LOWER(title) LIKE ?', "%#{q}%").limit(limit).map do |task|
+                   { id: task.id, title: task.title, status: task.status }
+                 end
+               else
+                 []
+               end,
+        issues: Issue.visible(@user).where(project: project).where('LOWER(issues.subject) LIKE ?', "%#{q}%").limit(limit).map do |issue|
           issue_summary(issue)
-        },
+        end,
         wiki_pages: wiki_search(project, q, limit)
       }
     end
@@ -73,21 +77,20 @@ module AutomyraBridge
     private
 
     def filtered_task_comments(task)
-      task.comments.includes(:author).order(:created_at, :id).map { |comment|
+      task.comments.includes(:author).order(:created_at, :id).map do |comment|
         { id: comment.id, author: comment.author&.name, body: comment.body, created_at: comment.created_at&.iso8601 }
-      }
+      end
     end
 
     def filtered_journals(issue)
       visible_journals = issue.journals.visible.order(:created_on, :id)
-      unless @user.admin? || @user.allowed_to?(:view_private_notes, issue.project)
-        visible_journals = visible_journals.where(private_notes: false)
-      end
+      visible_journals = visible_journals.where(private_notes: false) unless @user.admin? || @user.allowed_to?(:view_private_notes, issue.project)
       visible_journals.map { |journal| { id: journal.id, author: journal.user&.name, notes: journal.notes, created_at: journal.created_on&.iso8601 } }
     end
 
     def wiki_search(project, query, limit)
       return [] unless @user.allowed_to?(:view_wiki_pages, project)
+
       WikiPage.joins(:wiki).where(wikis: { project_id: project.id }).where('LOWER(wiki_pages.title) LIKE ?', "%#{query}%").limit(limit).map { |page| { id: page.id, title: page.title } }
     end
 

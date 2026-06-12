@@ -23,14 +23,14 @@ class AutomyraBridgeContextBuilderTest < ActiveSupport::TestCase
     Journal.create!(journalized: @issue, user: @admin, notes: 'Private note', private_notes: true)
     ctx = AutomyraBridge::ContextBuilder.for_issue(@issue, @member, tier: 1)
     notes = ctx[:journals].map { |j| j[:notes] }
-    refute_includes notes, 'Private note'
+    assert_not_includes notes, 'Private note'
   end
 
   test 'issue context omits private notes' do
     Journal.create!(journalized: @issue, user: @admin, notes: 'Private note', private_notes: true)
     ctx = AutomyraBridge::ContextBuilder.for_issue(@issue, @member, tier: 1)
     notes = ctx[:journals].map { |j| j[:notes] }
-    refute_includes notes, 'Private note'
+    assert_not_includes notes, 'Private note'
   end
 
   test 'project search returns empty when user cannot view project' do

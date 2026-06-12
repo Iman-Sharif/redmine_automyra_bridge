@@ -26,12 +26,12 @@ module AutomyraBridge
         proposal.lock!
         return false unless proposal.status == 'pending'
 
-      proposal.update!(status: 'rejected', approved_by: user, decided_at: Time.current)
-      record_proposal_decision_event(proposal, user, 'rejected')
-      post_decision_comment(proposal, user, 'rejected')
-      record_chat_proposal_audit(proposal, user, 'chat_proposal_rejected')
-      true
-    end
+        proposal.update!(status: 'rejected', approved_by: user, decided_at: Time.current)
+        record_proposal_decision_event(proposal, user, 'rejected')
+        post_decision_comment(proposal, user, 'rejected')
+        record_chat_proposal_audit(proposal, user, 'chat_proposal_rejected')
+        true
+      end
     end
 
     private
@@ -59,8 +59,10 @@ module AutomyraBridge
 
     def tool_authorized?(proposal, user)
       return true if user.admin?
+
       tool = AutomyraBridge::ToolRegistry.find_by_legacy_action(proposal.action_type)
       return false unless tool
+
       tool.authorized?(proposal_job(proposal), user)
     end
 
@@ -135,7 +137,7 @@ module AutomyraBridge
     end
 
     def proposal_decision_for(event_type)
-      event_type.to_s.sub(/\Achat_proposal_/, '').presence || event_type
+      event_type.to_s.delete_prefix('chat_proposal_').presence || event_type
     end
 
     def write_approved_proposal_memory(proposal, user)

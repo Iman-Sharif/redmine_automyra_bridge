@@ -1,4 +1,4 @@
-class AutomyraBridgeAuditEvent < ActiveRecord::Base
+class AutomyraBridgeAuditEvent < ApplicationRecord
   belongs_to :user
   belongs_to :project, optional: true
 

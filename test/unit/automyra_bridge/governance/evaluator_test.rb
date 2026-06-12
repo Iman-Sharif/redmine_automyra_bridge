@@ -68,10 +68,10 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
 
   test 'valid findings pass all evaluator checks and hashes are stored' do
     result = evaluate_with([
-      finding(object_id: 101, recommended_value: 'Bad title', confidence: 0.95, action_type: 'update_wiki_title'),
-      finding(object_type: 'TaskHub::Task', object_id: 202, current_value: 'messy task', recommended_value: 'Messy task', confidence: 0.9, action_type: 'update_task_title'),
-      finding(object_type: 'Attachment', object_id: 404, finding_type: 'attachment_filename', current_value: 'Bad File Name.pdf', recommended_value: 'bad-file-name.pdf', confidence: 0.9, action_type: 'review_attachment_filename')
-    ])
+                             finding(object_id: 101, recommended_value: 'Bad title', confidence: 0.95, action_type: 'update_wiki_title'),
+                             finding(object_type: 'TaskHub::Task', object_id: 202, current_value: 'messy task', recommended_value: 'Messy task', confidence: 0.9, action_type: 'update_task_title'),
+                             finding(object_type: 'Attachment', object_id: 404, finding_type: 'attachment_filename', current_value: 'Bad File Name.pdf', recommended_value: 'bad-file-name.pdf', confidence: 0.9, action_type: 'review_attachment_filename')
+                           ])
 
     assert_empty result.errors
     assert_equal 3, result.findings.size
@@ -85,24 +85,24 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
     result = evaluate_with([finding(object_id: 999, recommended_value: 'Unknown title', confidence: 0.95)])
 
     assert_empty result.findings
-    assert result.errors.any? { |error| error.include?('unknown candidate') }
+    assert(result.errors.any? { |error| error.include?('unknown candidate') })
   end
 
   test 'low confidence findings are rejected' do
     result = evaluate_with([finding(object_id: 101, recommended_value: 'Bad title', confidence: 0.2)])
 
     assert_empty result.findings
-    assert result.errors.any? { |error| error.include?('confidence below threshold') }
+    assert(result.errors.any? { |error| error.include?('confidence below threshold') })
   end
 
   test 'duplicate recommended values are allowed but noted' do
     result = evaluate_with([
-      finding(object_id: 101, recommended_value: 'Shared title', confidence: 0.95),
-      finding(object_type: 'TaskHub::Task', object_id: 202, current_value: 'messy task', recommended_value: 'Shared title', confidence: 0.95)
-    ])
+                             finding(object_id: 101, recommended_value: 'Shared title', confidence: 0.95),
+                             finding(object_type: 'TaskHub::Task', object_id: 202, current_value: 'messy task', recommended_value: 'Shared title', confidence: 0.95)
+                           ])
 
     assert_equal 2, result.findings.size
-    assert result.notes.any? { |note| note.include?('duplicate recommended value allowed') }
+    assert(result.notes.any? { |note| note.include?('duplicate recommended value allowed') })
   end
 
   test 'malformed json response is handled gracefully' do
@@ -110,7 +110,7 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
     result = AutomyraBridge::Governance::Evaluator.call(policy: @policy, candidate_batch: @batch, provider: provider)
 
     assert_empty result.findings
-    assert result.errors.any? { |error| error.include?('malformed JSON') }
+    assert(result.errors.any? { |error| error.include?('malformed JSON') })
     assert_match(/\A[0-9a-f]{64}\z/, result.metadata[:response_hash])
   end
 
@@ -125,38 +125,38 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
 
   test 'wiki governance finding variants normalize to supported review findings' do
     result = evaluate_with([
-      finding(finding_type: 'summary_required', recommended_value: 'Add a concise summary.', action_type: 'review_summary'),
-      finding(finding_type: 'metadata_missing', recommended_value: 'Add category and tags.', action_type: 'review_metadata'),
-      finding(finding_type: 'heading_structure', recommended_value: 'Use one H1 followed by H2 sections.', action_type: 'review_heading_structure')
-    ])
+                             finding(finding_type: 'summary_required', recommended_value: 'Add a concise summary.', action_type: 'review_summary'),
+                             finding(finding_type: 'metadata_missing', recommended_value: 'Add category and tags.', action_type: 'review_metadata'),
+                             finding(finding_type: 'heading_structure', recommended_value: 'Use one H1 followed by H2 sections.', action_type: 'review_heading_structure')
+                           ])
 
     assert_empty result.errors
-    assert_equal %w[wiki_summary wiki_metadata wiki_heading_structure], result.findings.map { |entry| entry['finding_type'] }
-    assert_equal %w[review_wiki_summary review_wiki_metadata review_wiki_heading_structure], result.findings.map { |entry| entry['action_type'] }
+    assert_equal(%w[wiki_summary wiki_metadata wiki_heading_structure], result.findings.map { |entry| entry['finding_type'] })
+    assert_equal(%w[review_wiki_summary review_wiki_metadata review_wiki_heading_structure], result.findings.map { |entry| entry['action_type'] })
   end
 
   test 'attachment filename finding variants normalize to attachment_filename' do
     result = evaluate_with([
-      finding(object_type: 'Attachment', object_id: 404, finding_type: 'attachment_filename_noncompliant', recommended_value: 'bad-file-name.pdf', action_type: 'update_attachment_filename'),
-      finding(object_type: 'Attachment', object_id: 404, finding_type: 'attachment_filename_standard_violation', recommended_value: 'bad_file_name.pdf', action_type: 'update_attachment_filename'),
-      finding(object_type: 'Attachment', object_id: 404, finding_type: 'filename_noncompliance', recommended_value: 'bad-file-name-v2.pdf', action_type: 'update_attachment_filename'),
-      finding(object_type: 'Attachment', object_id: 404, finding_type: 'filename_noncompliant', recommended_value: 'bad-file-name-v3.pdf', action_type: 'update_attachment_filename'),
-      finding(object_type: 'Attachment', object_id: 404, finding_type: 'filename_violation', recommended_value: 'bad-file-name-v4.pdf', action_type: 'update_attachment_filename')
-    ])
+                             finding(object_type: 'Attachment', object_id: 404, finding_type: 'attachment_filename_noncompliant', recommended_value: 'bad-file-name.pdf', action_type: 'update_attachment_filename'),
+                             finding(object_type: 'Attachment', object_id: 404, finding_type: 'attachment_filename_standard_violation', recommended_value: 'bad_file_name.pdf', action_type: 'update_attachment_filename'),
+                             finding(object_type: 'Attachment', object_id: 404, finding_type: 'filename_noncompliance', recommended_value: 'bad-file-name-v2.pdf', action_type: 'update_attachment_filename'),
+                             finding(object_type: 'Attachment', object_id: 404, finding_type: 'filename_noncompliant', recommended_value: 'bad-file-name-v3.pdf', action_type: 'update_attachment_filename'),
+                             finding(object_type: 'Attachment', object_id: 404, finding_type: 'filename_violation', recommended_value: 'bad-file-name-v4.pdf', action_type: 'update_attachment_filename')
+                           ])
 
     assert_empty result.errors
-    assert_equal %w[attachment_filename attachment_filename attachment_filename attachment_filename attachment_filename], result.findings.map { |entry| entry['finding_type'] }
+    assert_equal(%w[attachment_filename attachment_filename attachment_filename attachment_filename attachment_filename], result.findings.map { |entry| entry['finding_type'] })
   end
 
   test 'missing requirement link variants normalize by object type' do
     result = evaluate_with([
-      finding(object_id: 101, object_type: 'WikiHub::PageSnapshot', finding_type: 'missing_requirement_link', recommended_value: 'Requirement #303', action_type: 'link_wiki_requirement'),
-      finding(object_id: 202, object_type: 'TaskHub::Task', current_value: 'messy task', finding_type: 'missing_requirement_link', recommended_value: 'Requirement #303', action_type: 'link_task_requirement')
-    ])
+                             finding(object_id: 101, object_type: 'WikiHub::PageSnapshot', finding_type: 'missing_requirement_link', recommended_value: 'Requirement #303', action_type: 'link_wiki_requirement'),
+                             finding(object_id: 202, object_type: 'TaskHub::Task', current_value: 'messy task', finding_type: 'missing_requirement_link', recommended_value: 'Requirement #303', action_type: 'link_task_requirement')
+                           ])
 
     assert_empty result.errors
-    assert_equal %w[wiki_requirement_link task_requirement_link], result.findings.map { |entry| entry['finding_type'] }
-    assert_equal %w[link_wiki_requirement link_task_requirement], result.findings.map { |entry| entry['action_type'] }
+    assert_equal(%w[wiki_requirement_link task_requirement_link], result.findings.map { |entry| entry['finding_type'] })
+    assert_equal(%w[link_wiki_requirement link_task_requirement], result.findings.map { |entry| entry['action_type'] })
   end
 
   test 'unsupported finding type falls back to policy specific finding type' do
@@ -165,20 +165,20 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
     result = evaluate_with([finding(finding_type: 'policy_violation', recommended_value: 'Add category metadata.', action_type: 'propose')])
 
     assert_empty result.errors
-    assert_equal ['wiki_metadata'], result.findings.map { |entry| entry['finding_type'] }
+    assert_equal(['wiki_metadata'], result.findings.map { |entry| entry['finding_type'] })
   end
 
   test 'metadata policy forces review metadata action and backfills current value' do
     @policy.update!(name: 'Global Wiki Metadata Required')
 
     result = evaluate_with([
-      finding(
-        finding_type: 'wiki_requirement_link',
-        current_value: nil,
-        recommended_value: { category: 'Architecture', tags: %w[automyra memory] }.to_json,
-        action_type: 'link_wiki_requirement'
-      )
-    ])
+                             finding(
+                               finding_type: 'wiki_requirement_link',
+                               current_value: nil,
+                               recommended_value: { category: 'Architecture', tags: %w[automyra memory] }.to_json,
+                               action_type: 'link_wiki_requirement'
+                             )
+                           ])
 
     assert_empty result.errors
     assert_equal 'wiki_metadata', result.findings.first['finding_type']
@@ -199,28 +199,28 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
     @policy.update!(name: 'Global Wiki Summary Required')
 
     result = evaluate_with([
-      finding(
-        finding_type: 'wiki_title',
-        current_value: 'Automyra_Architecture_Long-Term_Memory_Strategy',
-        recommended_value: 'Automyra - Architecture - long-term memory strategy',
-        action_type: 'update_wiki_title'
-      )
-    ])
+                             finding(
+                               finding_type: 'wiki_title',
+                               current_value: 'Automyra_Architecture_Long-Term_Memory_Strategy',
+                               recommended_value: 'Automyra - Architecture - long-term memory strategy',
+                               action_type: 'update_wiki_title'
+                             )
+                           ])
 
     assert_empty result.findings
-    assert result.errors.any? { |error| error.include?('summary recommendation is not a page summary') }
+    assert(result.errors.any? { |error| error.include?('summary recommendation is not a page summary') })
   end
 
   test 'summary policy accepts one sentence page summary' do
     @policy.update!(name: 'Global Wiki Summary Required')
 
     result = evaluate_with([
-      finding(
-        finding_type: 'wiki_title',
-        recommended_value: 'This page explains the long-term memory architecture used by Automyra for durable agent context.',
-        action_type: 'update_wiki_title'
-      )
-    ])
+                             finding(
+                               finding_type: 'wiki_title',
+                               recommended_value: 'This page explains the long-term memory architecture used by Automyra for durable agent context.',
+                               action_type: 'update_wiki_title'
+                             )
+                           ])
 
     assert_empty result.errors
     assert_equal 'wiki_summary', result.findings.first['finding_type']
@@ -232,13 +232,13 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
     @policy.update!(name: 'Global Wiki Summary Required')
 
     result = evaluate_with([
-      finding(
-        finding_type: 'summary_required',
-        current_value: nil,
-        recommended_value: 'This page explains the long-term memory architecture used by Automyra for durable agent context.',
-        action_type: 'review_summary'
-      )
-    ])
+                             finding(
+                               finding_type: 'summary_required',
+                               current_value: nil,
+                               recommended_value: 'This page explains the long-term memory architecture used by Automyra for durable agent context.',
+                               action_type: 'review_summary'
+                             )
+                           ])
 
     assert_empty result.errors
     assert_equal 'wiki_summary', result.findings.first['finding_type']
@@ -264,12 +264,12 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
       policy: @policy,
       candidate_batch: batch,
       provider: fake_provider([
-        finding(
-          object_id: 505,
-          current_value: 'Automyra_Architecture_Long-Term_Memory_Strategy',
-          recommended_value: 'Automyra Architecture Long-Term Memory Strategy'
-        )
-      ])
+                                finding(
+                                  object_id: 505,
+                                  current_value: 'Automyra_Architecture_Long-Term_Memory_Strategy',
+                                  recommended_value: 'Automyra Architecture Long-Term Memory Strategy'
+                                )
+                              ])
     )
 
     assert_empty result.errors
@@ -282,18 +282,18 @@ class AutomyraBridgeGovernanceEvaluatorTest < ActiveSupport::TestCase
 
     assert_equal 1, valid.findings.size
     assert_empty invalid.findings
-    assert invalid.errors.any? { |error| error.include?('references unknown requirement') }
+    assert(invalid.errors.any? { |error| error.include?('references unknown requirement') })
   end
 
   test 'structured response validator rejects missing fields and invalid types' do
     result = AutomyraBridge::Governance::StructuredResponseValidator.call([
-      { object_type: 'WikiHub::PageSnapshot', object_id: 'abc' },
-      { object_type: 'WikiHub::PageSnapshot', object_id: 101, finding_type: 'wiki_title', current_value: 'A', recommended_value: 'B', confidence: 'nope', rationale: 'Because' }
-    ])
+                                                                            { object_type: 'WikiHub::PageSnapshot', object_id: 'abc' },
+                                                                            { object_type: 'WikiHub::PageSnapshot', object_id: 101, finding_type: 'wiki_title', current_value: 'A', recommended_value: 'B', confidence: 'nope', rationale: 'Because' }
+                                                                          ])
 
     assert_empty result.findings
-    assert result.errors.any? { |error| error.include?('missing required fields') }
-    assert result.errors.any? { |error| error.include?('confidence must be numeric') }
+    assert(result.errors.any? { |error| error.include?('missing required fields') })
+    assert(result.errors.any? { |error| error.include?('confidence must be numeric') })
   end
 
   private

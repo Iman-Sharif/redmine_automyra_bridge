@@ -27,7 +27,7 @@ class AutomyraBridgeGovernanceCollectorsTest < ActiveSupport::TestCase
       exclusions: ['Draft*']
     )
 
-    assert_equal [keep.id], candidates.map { |candidate| candidate[:object_id] }
+    assert_equal([keep.id], candidates.map { |candidate| candidate[:object_id] })
     assert_not_includes candidates.map { |candidate| candidate[:object_id] }, excluded.id
     assert_not_includes candidates.map { |candidate| candidate[:object_id] }, other.id
     assert_equal 'WikiHub::PageSnapshot', candidates.first[:object_type]
@@ -54,8 +54,8 @@ class AutomyraBridgeGovernanceCollectorsTest < ActiveSupport::TestCase
 
     candidates = AutomyraBridge::Governance::Collectors::TaskCollector.call(policy: @policy, limit: 2)
 
-    assert_equal [first.id, second.id], candidates.map { |candidate| candidate[:object_id] }
-    assert_equal ['Alpha Task', 'Beta Task'], candidates.map { |candidate| candidate[:title] }
+    assert_equal([first.id, second.id], candidates.map { |candidate| candidate[:object_id] })
+    assert_equal(['Alpha Task', 'Beta Task'], candidates.map { |candidate| candidate[:title] })
   end
 
   test 'task collector supports wildcard exclusions and include closed config' do
@@ -65,7 +65,7 @@ class AutomyraBridgeGovernanceCollectorsTest < ActiveSupport::TestCase
 
     candidates = AutomyraBridge::Governance::Collectors::TaskCollector.call(policy: @policy, exclusions: ['Skip*'])
 
-    assert_equal [done.id], candidates.map { |candidate| candidate[:object_id] }
+    assert_equal([done.id], candidates.map { |candidate| candidate[:object_id] })
   end
 
   test 'requirement collector filters by configured tracker and status' do
@@ -104,7 +104,7 @@ class AutomyraBridgeGovernanceCollectorsTest < ActiveSupport::TestCase
     candidates = AutomyraBridge::Governance::Collectors::RequirementCollector.call(policy: @policy)
 
     assert_includes candidates.map { |candidate| candidate[:object_id] }, keep.id
-    assert_equal candidates.map { |candidate| candidate[:object_id] }.sort, candidates.map { |candidate| candidate[:object_id] }
+    assert_equal(candidates.map { |candidate| candidate[:object_id] }.sort, candidates.map { |candidate| candidate[:object_id] })
     assert_equal tracker.name, candidates.detect { |candidate| candidate[:object_id] == keep.id }[:tracker]
   end
 

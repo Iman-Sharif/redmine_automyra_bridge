@@ -8,7 +8,7 @@ module AutomyraBridge
   #   - issue_creation_review_webhook_dispatched: webhook sent to Hermes
   #
   class CreationReviewDispatcher
-    EVENT_TYPE = 'redmica.issue_created'.freeze
+    EVENT_TYPE = 'redmica.issue_created'
 
     def self.dispatch(issue)
       return unless issue.is_a?(Issue)

@@ -173,7 +173,7 @@ class AutomyraBridgeChatFlowTest < ActionDispatch::IntegrationTest
     job = AutomyraBridgeJob.order(:id).last
     AutomyraBridge::JobProcessor.new.process(job)
     assert_equal 'succeeded', job.reload.status
-    assert_match /open tasks/, AutomyraBridgeChatMessage.where(role: 'assistant').order(:id).last.content
+    assert_match(/open tasks/, AutomyraBridgeChatMessage.where(role: 'assistant').order(:id).last.content)
 
     post '/automyra_bridge/chat/send', params: { thread_kind: 'global', project_id: 1, content: 'Any tasks?' }
     assert_response :success
@@ -263,13 +263,13 @@ class AutomyraBridgeChatFlowTest < ActionDispatch::IntegrationTest
 
   test 'unauthenticated requests redirect to login' do
     post '/automyra_bridge/chat/toggle_thread', params: { thread_kind: 'page', page_type: 'issue', page_id: 1 }
-    assert_response 302
+    assert_response :found
 
     get '/automyra_bridge/chat/poll', params: { thread_kind: 'page', page_type: 'issue', page_id: 1 }
-    assert_response 302
+    assert_response :found
 
     post '/automyra_bridge/chat/mark_read', params: { thread_kind: 'page', page_type: 'issue', page_id: 1 }
-    assert_response 302
+    assert_response :found
   end
 
   test 'user without permission is forbidden' do

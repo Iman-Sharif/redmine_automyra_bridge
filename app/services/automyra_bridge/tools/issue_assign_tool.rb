@@ -19,6 +19,7 @@ module AutomyraBridge
         issue = source_issue(job) || raise('Issue is no longer available.')
         assigned_to_id = input.dig('assignment', 'assigned_to_id') || input['assigned_to_id']
         raise 'Assigned user is not available.' unless User.active.find_by(id: assigned_to_id)
+
         issue.update!(assigned_to_id: assigned_to_id)
         { issue_id: issue.id, assigned_to_id: issue.assigned_to_id }
       end

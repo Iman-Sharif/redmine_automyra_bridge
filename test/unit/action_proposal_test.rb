@@ -24,10 +24,10 @@ class AutomyraBridgeActionProposalTest < ActiveSupport::TestCase
 
   test 'creates pending update proposal from Automyra response without changing task' do
     AutomyraBridge::ActionProposalCreator.create_from_response(@job, {
-      'proposals' => [
-        { 'action_type' => 'update_task', 'task' => { 'title' => 'Automyra title', 'notes' => 'Automyra notes' } }
-      ]
-    })
+                                                                 'proposals' => [
+                                                                   { 'action_type' => 'update_task', 'task' => { 'title' => 'Automyra title', 'notes' => 'Automyra notes' } }
+                                                                 ]
+                                                               })
 
     proposal = AutomyraBridgeActionProposal.order(:id).last
     assert_equal 'pending', proposal.status
@@ -52,10 +52,10 @@ class AutomyraBridgeActionProposalTest < ActiveSupport::TestCase
 
   test 'supported issue proposals are persisted for approval' do
     AutomyraBridge::ActionProposalCreator.create_from_response(@job, {
-      'proposals' => [
-        { 'action_type' => 'create_issue', 'idempotency_key' => 'unsupported-create-issue', 'issue' => { 'subject' => 'No silent write' } }
-      ]
-    })
+                                                                 'proposals' => [
+                                                                   { 'action_type' => 'create_issue', 'idempotency_key' => 'unsupported-create-issue', 'issue' => { 'subject' => 'No silent write' } }
+                                                                 ]
+                                                               })
 
     proposal = AutomyraBridgeActionProposal.order(:id).last
     assert_equal 'pending', proposal.status
@@ -66,10 +66,10 @@ class AutomyraBridgeActionProposalTest < ActiveSupport::TestCase
 
   test 'create task proposals remain visible on source task' do
     AutomyraBridge::ActionProposalCreator.create_from_response(@job, {
-      'proposals' => [
-        { 'action_type' => 'create_task', 'task' => { 'title' => 'Visible create proposal' } }
-      ]
-    })
+                                                                 'proposals' => [
+                                                                   { 'action_type' => 'create_task', 'task' => { 'title' => 'Visible create proposal' } }
+                                                                 ]
+                                                               })
 
     proposal = AutomyraBridgeActionProposal.order(:id).last
     assert_equal 'pending', proposal.status
@@ -83,10 +83,10 @@ class AutomyraBridgeActionProposalTest < ActiveSupport::TestCase
     setting.save!
 
     AutomyraBridge::ActionProposalCreator.create_from_response(@job, {
-      'proposals' => [
-        { 'action_type' => 'update_task', 'task' => { 'title' => 'Disabled update' } }
-      ]
-    })
+                                                                 'proposals' => [
+                                                                   { 'action_type' => 'update_task', 'task' => { 'title' => 'Disabled update' } }
+                                                                 ]
+                                                               })
 
     proposal = AutomyraBridgeActionProposal.order(:id).last
     assert_equal 'failed', proposal.status
@@ -96,10 +96,10 @@ class AutomyraBridgeActionProposalTest < ActiveSupport::TestCase
 
   test 'malformed supported proposal is stored as failed for operator visibility' do
     AutomyraBridge::ActionProposalCreator.create_from_response(@job, {
-      'proposals' => [
-        { 'action_type' => 'create_task', 'idempotency_key' => 'malformed-create-task', 'task' => { 'notes' => 'Missing title' } }
-      ]
-    })
+                                                                 'proposals' => [
+                                                                   { 'action_type' => 'create_task', 'idempotency_key' => 'malformed-create-task', 'task' => { 'notes' => 'Missing title' } }
+                                                                 ]
+                                                               })
 
     proposal = AutomyraBridgeActionProposal.order(:id).last
     assert_equal 'failed', proposal.status
@@ -114,10 +114,10 @@ class AutomyraBridgeActionProposalTest < ActiveSupport::TestCase
     setting.save!
 
     AutomyraBridge::ActionProposalCreator.create_from_response(@job, {
-      'proposals' => [
-        { 'action_type' => 'update_task', 'task' => { 'title' => 'Read only update' } }
-      ]
-    })
+                                                                 'proposals' => [
+                                                                   { 'action_type' => 'update_task', 'task' => { 'title' => 'Read only update' } }
+                                                                 ]
+                                                               })
 
     proposal = AutomyraBridgeActionProposal.order(:id).last
     assert_equal 'failed', proposal.status
@@ -217,8 +217,11 @@ class AutomyraBridgeActionProposalTest < ActiveSupport::TestCase
 
   def grant_task_hub_permissions!(user)
     EnabledModule.find_or_create_by!(project: @project, name: 'task_hub')
-    role = Role.generate!(permissions: [:view_task_hub_tasks, :manage_task_hub_tasks])
+    role = Role.generate!(permissions: %i[view_task_hub_tasks manage_task_hub_tasks])
     Member.create!(project: @project, user: user, roles: [role]) unless user.member_of?(@project)
-    user.memberships.where(project: @project).each { |member| member.roles = [role]; member.save! }
+    user.memberships.where(project: @project).each do |member|
+      member.roles = [role]
+      member.save!
+    end
   end
 end

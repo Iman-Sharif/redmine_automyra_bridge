@@ -1,5 +1,5 @@
 module AutomyraBridge
-  class GovernanceAction < ActiveRecord::Base
+  class GovernanceAction < ApplicationRecord
     self.table_name = 'automyra_bridge_governance_actions'
 
     STATUSES = %w[pending validated proposed applied failed rolled_back].freeze
@@ -12,7 +12,6 @@ module AutomyraBridge
     validates :governance_run, :governance_finding, :governance_policy, :action_type, :object_type, :object_id, :status, presence: true
     validates :status, inclusion: { in: STATUSES }
     validates :idempotency_key, uniqueness: true, allow_blank: true
-
 
     scope :pending, -> { where(status: 'pending') }
     scope :validated, -> { where(status: 'validated') }
@@ -41,7 +40,5 @@ module AutomyraBridge
     def mark_failed!(attrs = {})
       update!(attrs.merge(status: 'failed'))
     end
-
-
   end
 end

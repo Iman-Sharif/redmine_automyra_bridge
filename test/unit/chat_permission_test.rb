@@ -23,7 +23,7 @@ class AutomyraBridgeChatPermissionTest < ActiveSupport::TestCase
     @project_a.stubs(:visible?).returns(true)
     @member.stubs(:allowed_to?).with(:use_automyra_bridge, @project_a).returns(false)
 
-    refute AutomyraBridge::ChatPermission.allowed?(@member)
+    assert_not AutomyraBridge::ChatPermission.allowed?(@member)
   end
 
   test 'global chat is allowed with permission on at least one visible project' do
@@ -39,7 +39,7 @@ class AutomyraBridgeChatPermissionTest < ActiveSupport::TestCase
     @project_b.stubs(:visible?).returns(true)
     @member.stubs(:allowed_to?).with(:use_automyra_bridge, @project_b).returns(false)
 
-    refute AutomyraBridge::ChatPermission.allowed?(@member, page_type: 'Issue', page_id: 2)
+    assert_not AutomyraBridge::ChatPermission.allowed?(@member, page_type: 'Issue', page_id: 2)
   end
 
   test 'user can access own thread only if resolved project is visible and permitted' do
@@ -58,19 +58,19 @@ class AutomyraBridgeChatPermissionTest < ActiveSupport::TestCase
     @member.stubs(:member_of?).with(@project_a).returns(false)
     @member.stubs(:allowed_to?).with(:use_automyra_bridge, @project_a).returns(true)
 
-    refute AutomyraBridge::ChatPermission.allowed?(@member, thread: thread)
+    assert_not AutomyraBridge::ChatPermission.allowed?(@member, thread: thread)
   end
 
   test 'user cannot access another users thread even when project is permitted' do
     thread = stub(user_id: @non_member.id, page_type: 'Issue', page_id: 1, project: @project_a)
 
-    refute AutomyraBridge::ChatPermission.allowed?(@member, thread: thread)
+    assert_not AutomyraBridge::ChatPermission.allowed?(@member, thread: thread)
   end
 
   test 'anonymous user is denied' do
     anon = User.anonymous
     assert_equal false, anon.logged?
-    refute AutomyraBridge::ChatPermission.allowed?(anon)
+    assert_not AutomyraBridge::ChatPermission.allowed?(anon)
   end
 
   test 'user without any permission is denied' do
@@ -78,10 +78,10 @@ class AutomyraBridgeChatPermissionTest < ActiveSupport::TestCase
     @project_a.stubs(:visible?).returns(true)
     @non_member.stubs(:allowed_to?).with(:use_automyra_bridge, @project_a).returns(false)
 
-    refute AutomyraBridge::ChatPermission.allowed?(@non_member)
+    assert_not AutomyraBridge::ChatPermission.allowed?(@non_member)
   end
 
   test 'nil user is denied' do
-    refute AutomyraBridge::ChatPermission.allowed?(nil)
+    assert_not AutomyraBridge::ChatPermission.allowed?(nil)
   end
 end

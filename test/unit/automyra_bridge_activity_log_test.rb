@@ -63,7 +63,7 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
 
   def test_idempotency_key_must_be_unique
     @log.save!
-    
+
     duplicate = AutomyraBridgeActivityLog.new(
       action_type: 'note_updated',
       source: 'trilium',
@@ -71,7 +71,7 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
       idempotency_key: 'unique-key-123',
       occurred_at: Time.current
     )
-    
+
     assert_not duplicate.valid?
     assert_includes duplicate.errors[:idempotency_key], 'has already been taken'
   end
@@ -83,7 +83,7 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
     @log.project_id = nil
     @log.user_id = nil
     @log.details = nil
-    
+
     assert @log.valid?
   end
 
@@ -114,9 +114,9 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
   def test_for_date_scope
     today = Date.current
     yesterday = today - 1.day
-    
+
     @log.update!(occurred_at: today.noon)
-    
+
     yesterday_log = AutomyraBridgeActivityLog.create!(
       action_type: 'note_deleted',
       source: 'trilium',
@@ -124,7 +124,7 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
       idempotency_key: 'yesterday-key',
       occurred_at: yesterday.noon
     )
-    
+
     today_logs = AutomyraBridgeActivityLog.for_date(today)
     assert_includes today_logs, @log
     assert_not_includes today_logs, yesterday_log
@@ -135,9 +135,9 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
       name: 'Other Project',
       identifier: 'other-project-test'
     )
-    
+
     @log.save!
-    
+
     other_log = AutomyraBridgeActivityLog.create!(
       action_type: 'note_created',
       source: 'trilium',
@@ -146,17 +146,17 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
       idempotency_key: 'other-project-key',
       occurred_at: Time.current
     )
-    
+
     project_logs = AutomyraBridgeActivityLog.for_project(@project)
     assert_includes project_logs, @log
     assert_not_includes project_logs, other_log
-    
+
     other_project.destroy
   end
 
   def test_by_action_type_scope
     @log.save!
-    
+
     other_log = AutomyraBridgeActivityLog.create!(
       action_type: 'issue_created',
       source: 'redmine',
@@ -164,7 +164,7 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
       idempotency_key: 'issue-key',
       occurred_at: Time.current
     )
-    
+
     note_logs = AutomyraBridgeActivityLog.by_action_type('note_created')
     assert_includes note_logs, @log
     assert_not_includes note_logs, other_log
@@ -178,9 +178,9 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
       idempotency_key: 'older-key',
       occurred_at: 2.days.ago
     )
-    
+
     @log.update!(occurred_at: 1.hour.ago)
-    
+
     newer_log = AutomyraBridgeActivityLog.create!(
       action_type: 'note_created',
       source: 'trilium',
@@ -188,9 +188,9 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
       idempotency_key: 'newer-key',
       occurred_at: 30.minutes.ago
     )
-    
+
     recent_logs = AutomyraBridgeActivityLog.recent(2)
-    
+
     assert_equal 2, recent_logs.count
     assert_includes recent_logs, newer_log
     assert_includes recent_logs, @log
@@ -202,7 +202,7 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
   def test_details_stores_json
     @log.details = { 'key' => 'value', 'nested' => { 'data' => 123 } }
     @log.save!
-    
+
     reloaded = AutomyraBridgeActivityLog.find(@log.id)
     assert_equal 'value', reloaded.details['key']
     assert_equal 123, reloaded.details['nested']['data']
@@ -213,7 +213,7 @@ class AutomyraBridgeActivityLogTest < ActiveSupport::TestCase
   def test_target_id_stores_string
     @log.target_id = 'trilium-note-uuid-abc123'
     @log.save!
-    
+
     reloaded = AutomyraBridgeActivityLog.find(@log.id)
     assert_equal 'trilium-note-uuid-abc123', reloaded.target_id
   end

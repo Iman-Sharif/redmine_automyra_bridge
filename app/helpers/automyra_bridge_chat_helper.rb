@@ -3,9 +3,7 @@ module AutomyraBridgeChatHelper
     return '' if text.blank?
 
     # Try to use Redmine's formatter if available
-    if defined?(Redmine::WikiFormatting) && Redmine::WikiFormatting.respond_to?(:to_html)
-      return sanitize(Redmine::WikiFormatting.to_html(:markdown, text)).html_safe
-    end
+    return sanitize(Redmine::WikiFormatting.to_html(:markdown, text)).html_safe if defined?(Redmine::WikiFormatting) && Redmine::WikiFormatting.respond_to?(:to_html)
 
     # Fallback: simple safe regex-based markdown
     html = text.dup
@@ -28,7 +26,7 @@ module AutomyraBridgeChatHelper
     html.gsub!(/_([^_]+)_/, '<em>\1</em>')
 
     # Links [text](url)
-    html.gsub!(/\[([^\]]+)\]\(([^\)]+)\)/, '<a href="\2" target="_blank" rel="noopener noreferrer">\1</a>')
+    html.gsub!(/\[([^\]]+)\]\(([^)]+)\)/, '<a href="\2" target="_blank" rel="noopener noreferrer">\1</a>')
 
     # Unordered lists
     html.gsub!(/^\s*[-*]\s+(.+)$/, '<li>\1</li>')
@@ -37,22 +35,22 @@ module AutomyraBridgeChatHelper
     html.gsub!(/^\s*\d+\.\s+(.+)$/, '<li>\1</li>')
 
     # Paragraphs (split on double newlines, wrap each in <p>)
-    paragraphs = html.split(/\n{2,}/).map { |p| p.strip }
+    paragraphs = html.split(/\n{2,}/).map(&:strip)
     paragraphs = paragraphs.map do |p|
-      if p.start_with?('<pre>') || p.start_with?('<li>')
+      if p.start_with?('<pre>', '<li>')
         p
       else
-        '<p>' + p.gsub(/\n/, '<br>') + '</p>'
+        "<p>#{p.gsub(/\n/, '<br>')}</p>"
       end
     end
 
     html = paragraphs.join("\n")
 
     # Wrap lists
-    html.gsub!(/(<li>.*?<\/li>\n*)+/) { |m|
-      items = m.scan(/<li>(.*?)<\/li>/).flatten.join('</li><li>')
-      '<ul><li>' + items + '</li></ul>'
-    }
+    html.gsub!(%r{(<li>.*?</li>\n*)+}) do |m|
+      items = m.scan(%r{<li>(.*?)</li>}).flatten.join('</li><li>')
+      "<ul><li>#{items}</li></ul>"
+    end
 
     sanitize(html).html_safe
   end

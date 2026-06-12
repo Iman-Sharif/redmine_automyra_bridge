@@ -1,5 +1,5 @@
 module AutomyraBridge
-  class GovernanceReviewState < ActiveRecord::Base
+  class GovernanceReviewState < ApplicationRecord
     self.table_name = 'automyra_bridge_governance_review_states'
 
     belongs_to :governance_policy, class_name: 'AutomyraBridge::GovernancePolicy'

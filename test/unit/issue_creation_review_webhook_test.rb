@@ -114,7 +114,7 @@ class AutomyraBridgeIssueCreationReviewWebhookTest < ActiveSupport::TestCase
   test 'description is truncated to 2000 characters' do
     long_description = 'a' * 3000
 
-    issue = Issue.create!(
+    Issue.create!(
       project: @project,
       tracker: Tracker.find(1),
       subject: 'Truncation test',

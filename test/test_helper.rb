@@ -5,10 +5,12 @@ require File.expand_path('../../../test/test_helper', __dir__)
 if defined?(Rails::LineFiltering)
   module Rails
     module LineFiltering
-      alias_method :__automyra_orig_run__, :run unless method_defined?(:__automyra_orig_run__)
+      alias __automyra_orig_run__ run unless method_defined?(:__automyra_orig_run__)
       def run(*args, **kwargs)
         if args.length >= 3
-          klass, method_name, reporter = args[0], args[1], args[2]
+          klass = args[0]
+          method_name = args[1]
+          reporter = args[2]
           reporter.prerecord klass, method_name
           result = klass.new(method_name).run
           reporter.record(result)
@@ -40,7 +42,5 @@ end
 # This monkeypatch only affects test execution and only adds a convenience
 # delegator so the test harness is not tripped up.
 class ActiveRecord::Base
-  def column_names
-    self.class.column_names
-  end
+  delegate :column_names, to: :class
 end

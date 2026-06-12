@@ -50,8 +50,6 @@ module AutomyraBridge
         defined?(TaskHub::Task) ? TaskHub::Task.find_by(id: record.object_id) : nil
       when 'WikiHub::PageSnapshot'
         defined?(WikiHub::PageSnapshot) ? WikiHub::PageSnapshot.find_by(id: record.object_id) : nil
-      else
-        nil
       end
     end
 

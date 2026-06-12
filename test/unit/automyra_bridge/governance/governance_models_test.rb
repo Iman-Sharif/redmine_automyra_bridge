@@ -87,7 +87,7 @@ class AutomyraBridgeGovernanceModelsTest < ActiveSupport::TestCase
     candidates = AutomyraBridge::Governance::Collectors::RequirementCollector.call(policy: global_policy, limit: 20)
 
     assert candidates.any?
-    assert candidates.all? { |candidate| candidate[:project_id].present? }
+    assert(candidates.all? { |candidate| candidate[:project_id].present? })
   end
 
   test 'run validates status and supports status transitions' do
@@ -210,7 +210,7 @@ class AutomyraBridgeGovernanceModelsTest < ActiveSupport::TestCase
 
     result = AutomyraBridge::Governance::PolicyValidator.call(policy: @policy)
     assert_not result.valid?
-    assert result.errors.any? { |error| error.include?('requirement linking requires') }
+    assert(result.errors.any? { |error| error.include?('requirement linking requires') })
 
     result = AutomyraBridge::Governance::PolicyValidator.call(
       policy: @policy,

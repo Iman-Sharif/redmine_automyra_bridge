@@ -10,7 +10,7 @@ class ChatThreadToggleTest < ActiveSupport::TestCase
     @page_id = 123
   end
 
-    test 'toggle_for creates a new page thread when none exists' do
+  test 'toggle_for creates a new page thread when none exists' do
     skip 'behavioral divergence (restored-from-orphan): ChatThreadToggle.toggle_for thread count delta differs from expected — see notepads problems.md Cluster D; product contract differs; do NOT pin'
     assert_difference('AutomyraBridgeChatThread.count', 2) do
       result = AutomyraBridge::ChatThreadToggle.toggle_for(@user, @page_type, @page_id)
@@ -23,7 +23,7 @@ class ChatThreadToggleTest < ActiveSupport::TestCase
   end
 
   test 'toggle_for creates global thread when page thread is created' do
-    result = AutomyraBridge::ChatThreadToggle.toggle_for(@user, @page_type, @page_id)
+    AutomyraBridge::ChatThreadToggle.toggle_for(@user, @page_type, @page_id)
     global_thread = AutomyraBridgeChatThread.global_for(@user).active.first
     assert_not_nil global_thread
     assert_equal 'global', global_thread.thread_kind
@@ -276,7 +276,7 @@ class ChatThreadToggleTest < ActiveSupport::TestCase
       url_path: '/projects/demo/activity'
     )
 
-    assert_match %r{\Ageneric:42:[0-9a-f]{16}\z}, result.thread.page_key
+    assert_match(/\Ageneric:42:[0-9a-f]{16}\z/, result.thread.page_key)
     assert_equal result.thread.page_key, result.thread.channel_key
   end
 end

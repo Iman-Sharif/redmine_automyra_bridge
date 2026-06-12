@@ -84,6 +84,6 @@ class AutomyraBridgeTaskImproverTest < ActiveSupport::TestCase
     result = service.call(user: User.find(2), project: Project.find(1), task_params: { title: 'Draft' })
 
     assert_not result.success?
-    assert_match /task.title required/, result.error
+    assert_match(/task.title required/, result.error)
   end
 end

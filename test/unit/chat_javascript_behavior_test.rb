@@ -37,8 +37,8 @@ class ChatJavascriptBehaviorTest < ActiveSupport::TestCase
   test 'poll catch handler is bound so refreshHistory fallback does not throw' do
     source = File.read(JAVASCRIPT_PATH)
 
-    refute_includes source, ".catch(function() {\n        console.warn('Automyra chat poll failed');\n        this.refreshHistory();\n      });",
-                     'unbound poll .catch handler must be replaced with a bound one'
+    assert_not_includes source, ".catch(function() {\n        console.warn('Automyra chat poll failed');\n        this.refreshHistory();\n      });",
+                        'unbound poll .catch handler must be replaced with a bound one'
     assert_includes source, "console.warn('Automyra chat poll failed');",
                     'poll failure warning should remain'
   end

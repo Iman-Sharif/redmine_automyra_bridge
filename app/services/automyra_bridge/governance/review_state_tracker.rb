@@ -76,9 +76,7 @@ module AutomyraBridge
         return 'wiki_requirement_link' if object_type == 'WikiHub::PageSnapshot' && requirement_link_scope?
         return 'task_requirement_link' if object_type == 'TaskHub::Task' && requirement_link_scope?
 
-        if object_type == 'TaskHub::Task'
-          return 'task_title'
-        end
+        return 'task_title' if object_type == 'TaskHub::Task'
 
         return 'wiki_summary' if policy_name.include?('summary')
         return 'wiki_metadata' if policy_name.include?('metadata')

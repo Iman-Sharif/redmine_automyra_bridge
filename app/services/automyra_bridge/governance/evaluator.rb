@@ -8,8 +8,8 @@ module AutomyraBridge
         update_wiki_title update_task_title update_attachment_filename review_attachment_filename link_wiki_requirement link_task_requirement
         review_wiki_summary review_wiki_metadata review_wiki_heading_structure propose
       ].freeze
-      APPROVED_WIKI_DOCUMENT_TYPES = %w[
-        Architecture Standard Runbook Specification SOP WI GL Template Decision\ Record Learning\ Notes
+      APPROVED_WIKI_DOCUMENT_TYPES = [
+        'Architecture', 'Standard', 'Runbook', 'Specification', 'SOP', 'WI', 'GL', 'Template', 'Decision Record', 'Learning Notes'
       ].freeze
 
       Result = Struct.new(:findings, :metadata, :errors, :notes, keyword_init: true) do
@@ -215,6 +215,7 @@ module AutomyraBridge
         return 'attachment_filename' if value.include?('filename_noncom')
         return 'attachment_filename' if value.include?('filename_format')
         return canonical_requirement_link_finding_type(object_type) if value.include?('requirement_link')
+
         case value
         when 'summary_required', 'summary_missing', 'missing_summary', 'wiki_summary_required' then 'wiki_summary'
         when 'metadata_required', 'metadata_missing', 'missing_metadata', 'wiki_metadata_required' then 'wiki_metadata'
@@ -275,9 +276,7 @@ module AutomyraBridge
           return nil
         end
 
-        if requirement_link_finding?(finding) && !valid_requirement_link?(finding)
-          return nil
-        end
+        return nil if requirement_link_finding?(finding) && !valid_requirement_link?(finding)
 
         if finding['finding_type'].to_s == 'wiki_summary' && plain_title_recommendation?(finding, candidate)
           @errors << "finding #{finding['object_type']}##{finding['object_id']} summary recommendation is not a page summary"

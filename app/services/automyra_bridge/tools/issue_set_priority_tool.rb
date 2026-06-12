@@ -19,6 +19,7 @@ module AutomyraBridge
         issue = source_issue(job) || raise('Issue is no longer available.')
         priority_id = input.dig('issue', 'priority_id') || input['priority_id']
         raise 'Issue priority is not available.' unless IssuePriority.find_by(id: priority_id)
+
         issue.update!(priority_id: priority_id)
         { issue_id: issue.id, priority_id: issue.priority_id }
       end

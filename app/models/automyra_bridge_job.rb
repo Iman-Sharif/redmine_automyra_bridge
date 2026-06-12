@@ -1,11 +1,10 @@
-class AutomyraBridgeJob < ActiveRecord::Base
+class AutomyraBridgeJob < ApplicationRecord
   STATUSES = %w[queued pending running succeeded failed cancelled].freeze
 
   belongs_to :project
   belongs_to :user
   has_many :action_proposals,
            class_name: 'AutomyraBridgeActionProposal',
-           foreign_key: 'automyra_bridge_job_id',
            dependent: :destroy
 
   validates :status, inclusion: { in: STATUSES }

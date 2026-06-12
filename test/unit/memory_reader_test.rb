@@ -25,7 +25,7 @@ class AutomyraBridgeMemoryReaderTest < ActiveSupport::TestCase
     )
     AutomyraBridge::MemoryReader.stubs(:recall_for_container).returns([])
 
-    assert_equal ['local-memory-event'], AutomyraBridge::MemoryReader.recent(@task).map { |row| row[:content] }
+    assert_equal(['local-memory-event'], AutomyraBridge::MemoryReader.recent(@task).map { |row| row[:content] })
   end
 
   test 'recent retrieves LanceDB memories correlated by task thread id and project id' do

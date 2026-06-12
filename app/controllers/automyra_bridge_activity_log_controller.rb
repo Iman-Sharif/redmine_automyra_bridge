@@ -13,12 +13,10 @@ class AutomyraBridgeActivityLogController < ApplicationController
         action_type: @activity_log.action_type,
         occurred_at: @activity_log.occurred_at
       }, status: :created
+    elsif @activity_log.errors[:idempotency_key].include?('has already been taken')
+      render json: { error: 'Duplicate idempotency_key' }, status: :conflict
     else
-      if @activity_log.errors[:idempotency_key].include?('has already been taken')
-        render json: { error: 'Duplicate idempotency_key' }, status: :conflict
-      else
-        render json: { errors: @activity_log.errors.full_messages }, status: :unprocessable_entity
-      end
+      render json: { errors: @activity_log.errors.full_messages }, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
     render json: { error: 'Duplicate idempotency_key' }, status: :conflict
@@ -30,9 +28,9 @@ class AutomyraBridgeActivityLogController < ApplicationController
     expected = Setting.plugin_redmine_automyra_bridge['activity_log_secret'].to_s
     supplied = request.headers['Authorization'].to_s
 
-    if expected.blank? || supplied != "Bearer #{expected}"
-      render json: { error: 'Unauthorized' }, status: :unauthorized
-    end
+    return unless expected.blank? || supplied != "Bearer #{expected}"
+
+    render json: { error: 'Unauthorized' }, status: :unauthorized
   end
 
   def activity_log_params

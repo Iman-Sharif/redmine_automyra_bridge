@@ -148,8 +148,8 @@ module AutomyraBridge
     def symbolized_context(context)
       return {} unless context.is_a?(Hash)
 
-      context.each_with_object({}) do |(key, value), normalized|
-        normalized[key.respond_to?(:to_sym) ? key.to_sym : key] = value
+      context.transform_keys do |key|
+        key.respond_to?(:to_sym) ? key.to_sym : key
       end
     end
   end

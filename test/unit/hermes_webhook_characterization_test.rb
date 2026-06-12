@@ -36,9 +36,9 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
   fixtures :users, :projects, :roles, :members, :member_roles,
            :enabled_modules, :issues, :issue_statuses, :trackers, :enumerations
 
-  AUTO_CLOSE_EVENT = 'redmica.issue_status_changed'.freeze
-  CHAR_SECRET = 'characterization-fixed-secret'.freeze
-  AUTO_CLOSE_URL = 'https://automyra.sbg-server.com/webhooks/redmica-auto-close'.freeze
+  AUTO_CLOSE_EVENT = 'redmica.issue_status_changed'
+  CHAR_SECRET = 'characterization-fixed-secret'
+  AUTO_CLOSE_URL = 'https://automyra.sbg-server.com/webhooks/redmica-auto-close'
 
   setup do
     @old_queue_adapter = ActiveJob::Base.queue_adapter
@@ -79,7 +79,7 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
                  'exactly one HermesWebhookDeliverJob must be enqueued for a Resolved transition'
 
     enqueued = enqueued_jobs.reverse.find { |j| j[:job] == AutomyraBridge::HermesWebhookDeliverJob }
-    refute_nil enqueued
+    assert_not_nil enqueued
 
     event_type, payload, delivery_id = enqueued[:args]
 
@@ -167,7 +167,7 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
     )
     notifier.deliver(event_type: fixed_event, payload: fixed_payload, delivery_id: fixed_delivery)
 
-    refute_nil captured_request, 'notifier must build a request even when the body is small'
+    assert_not_nil captured_request, 'notifier must build a request even when the body is small'
     assert_equal 'application/json', captured_request['Content-Type']
     assert_equal fixed_event, captured_request['X-GitHub-Event']
     assert_equal fixed_delivery, captured_request['X-GitHub-Delivery']
@@ -239,6 +239,7 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
 
   def enable_automyra_bridge!(project)
     return if project.module_enabled?(:automyra_bridge)
+
     EnabledModule.create!(project: project, name: 'automyra_bridge')
   end
 end

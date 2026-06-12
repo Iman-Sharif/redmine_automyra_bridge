@@ -43,10 +43,10 @@ module AutomyraBridge
 
     def id_from_instance_variable
       obj = @controller.instance_variable_get(:@issue) ||
-        @controller.instance_variable_get(:@wiki_page) ||
-        @controller.instance_variable_get(:@page) ||
-        @controller.instance_variable_get(:@task) ||
-        @controller.instance_variable_get(:@project)
+            @controller.instance_variable_get(:@wiki_page) ||
+            @controller.instance_variable_get(:@page) ||
+            @controller.instance_variable_get(:@task) ||
+            @controller.instance_variable_get(:@project)
       obj&.id&.to_s
     end
 
@@ -55,9 +55,9 @@ module AutomyraBridge
       return pid if pid
 
       obj = @controller.instance_variable_get(:@project) ||
-        @controller.instance_variable_get(:@issue)&.project ||
-        @controller.instance_variable_get(:@wiki_page)&.wiki&.project ||
-        @controller.instance_variable_get(:@task)&.project
+            @controller.instance_variable_get(:@issue)&.project ||
+            @controller.instance_variable_get(:@wiki_page)&.wiki&.project ||
+            @controller.instance_variable_get(:@task)&.project
       obj&.id&.to_s
     end
 
@@ -75,10 +75,10 @@ module AutomyraBridge
 
     def object_title
       obj = @controller.instance_variable_get(:@issue) ||
-        @controller.instance_variable_get(:@wiki_page) ||
-        @controller.instance_variable_get(:@page) ||
-        @controller.instance_variable_get(:@task) ||
-        @controller.instance_variable_get(:@project)
+            @controller.instance_variable_get(:@wiki_page) ||
+            @controller.instance_variable_get(:@page) ||
+            @controller.instance_variable_get(:@task) ||
+            @controller.instance_variable_get(:@project)
       title = obj.try(:subject) || obj.try(:title) || obj.try(:name)
       title&.to_s
     end

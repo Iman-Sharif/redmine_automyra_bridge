@@ -39,11 +39,11 @@ module AutomyraBridge
 
     private
 
-      def proposals
-        legacy = Array(@parsed['proposals'].presence || @parsed['actions']).select { |item| item.is_a?(Hash) }
-        tool_proposals = Array(@parsed['tool_calls']).filter_map { |item| tool_call_to_proposal(item) }
-        legacy + tool_proposals
-      end
+    def proposals
+      legacy = Array(@parsed['proposals'].presence || @parsed['actions']).select { |item| item.is_a?(Hash) }
+      tool_proposals = Array(@parsed['tool_calls']).filter_map { |item| tool_call_to_proposal(item) }
+      legacy + tool_proposals
+    end
 
     def tool_call_to_proposal(item)
       return unless item.is_a?(Hash)
@@ -51,7 +51,11 @@ module AutomyraBridge
       tool = AutomyraBridge::ToolRegistry.find(item['tool'] || item['name'])
       return unless tool
 
-      input = item['input'].is_a?(Hash) ? item['input'] : item['arguments'].is_a?(Hash) ? item['arguments'] : {}
+      input = if item['input'].is_a?(Hash)
+                item['input']
+              else
+                item['arguments'].is_a?(Hash) ? item['arguments'] : {}
+              end
       input.merge(
         'action_type' => tool.legacy_action_type,
         'tool' => tool.name,
@@ -65,6 +69,7 @@ module AutomyraBridge
 
     def source_task
       return @source_task if defined?(@source_task)
+
       @source_task = nil
       return @source_task unless @job.source_type == 'TaskHub::TaskComment'
 
@@ -108,6 +113,7 @@ module AutomyraBridge
       return proposal.dig('wiki', 'title').present? if %w[read_wiki create_wiki_page update_wiki create_wiki_draft summarize_wiki wiki_backlinks wiki_related_pages].include?(action_type)
       return true if action_type == 'search_wiki'
       return true if action_type.start_with?('context_') || action_type == 'project_status_summary'
+
       task = task_from_proposal(proposal)
       return task.present? if %w[cancel_task complete_task reopen_task search_tasks].include?(action_type)
       return task.present? && proposal.dig('assignment', 'assigned_to_id').present? if action_type == 'assign_task'
@@ -145,7 +151,8 @@ module AutomyraBridge
       return 'Unsupported Automyra write proposal.' unless AutomyraBridgeActionProposal::SUPPORTED_ACTION_TYPES.include?(action_type)
       return 'Malformed Automyra write proposal.' unless valid
       return 'Automyra action is disabled for this project.' unless enabled
-      return nil if AutomyraBridgeActionProposal::SUPPORTED_ACTION_TYPES.include?(action_type)
+
+      nil if AutomyraBridgeActionProposal::SUPPORTED_ACTION_TYPES.include?(action_type)
     end
 
     def record_chat_proposal_created(record)

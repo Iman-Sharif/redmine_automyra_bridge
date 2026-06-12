@@ -122,9 +122,9 @@ class AutomyraBridgeChatContextBuilderTest < ActiveSupport::TestCase
     controller.stubs(:params).returns({})
     ctx = AutomyraBridge::ChatContextBuilder.from_controller(controller)
 
-    refute ctx.key?(:page_id)
-    refute ctx.key?(:project_id)
-    refute ctx.key?(:page_title)
+    assert_not ctx.key?(:page_id)
+    assert_not ctx.key?(:project_id)
+    assert_not ctx.key?(:page_title)
     assert ctx.key?(:page_type)
     assert ctx.key?(:url_path)
     assert ctx.key?(:user_id)

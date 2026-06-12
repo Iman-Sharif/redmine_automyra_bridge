@@ -1,5 +1,5 @@
 module AutomyraBridge
-  class GovernancePolicy < ActiveRecord::Base
+  class GovernancePolicy < ApplicationRecord
     self.table_name = 'automyra_bridge_governance_policies'
 
     MODES = %w[report_only propose apply_after_validation].freeze

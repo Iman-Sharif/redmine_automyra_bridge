@@ -19,6 +19,7 @@ module AutomyraBridge
         issue = source_issue(job) || raise('Issue is no longer available.')
         attrs = issue_attributes(input['issue'] || input)
         raise 'No issue fields supplied.' if attrs.empty?
+
         issue.update!(attrs)
         { issue_id: issue.id }
       end

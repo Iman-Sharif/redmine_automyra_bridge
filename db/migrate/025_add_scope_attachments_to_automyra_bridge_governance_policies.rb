@@ -2,9 +2,9 @@ class AddScopeAttachmentsToAutomyraBridgeGovernancePolicies < ActiveRecord::Migr
   def up
     return unless table_exists?(:automyra_bridge_governance_policies)
 
-    unless column_exists?(:automyra_bridge_governance_policies, :scope_attachments)
-      add_column :automyra_bridge_governance_policies, :scope_attachments, :boolean, null: false, default: false
-    end
+    return if column_exists?(:automyra_bridge_governance_policies, :scope_attachments)
+
+    add_column :automyra_bridge_governance_policies, :scope_attachments, :boolean, null: false, default: false
   end
 
   def down

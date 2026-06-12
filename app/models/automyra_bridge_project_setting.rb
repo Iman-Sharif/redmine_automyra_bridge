@@ -1,4 +1,4 @@
-class AutomyraBridgeProjectSetting < ActiveRecord::Base
+class AutomyraBridgeProjectSetting < ApplicationRecord
   self.table_name = 'automyra_bridge_project_settings'
 
   ACTIONS = AutomyraBridgeActionProposal::ACTION_TYPES.reject { |action| action == 'unsupported_action' }.freeze

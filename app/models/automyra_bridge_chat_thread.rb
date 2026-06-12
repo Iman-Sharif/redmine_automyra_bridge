@@ -1,4 +1,4 @@
-class AutomyraBridgeChatThread < ActiveRecord::Base
+class AutomyraBridgeChatThread < ApplicationRecord
   belongs_to :user, class_name: 'User'
   belongs_to :project, class_name: 'Project', optional: true
   has_many :chat_messages,
@@ -51,6 +51,7 @@ class AutomyraBridgeChatThread < ActiveRecord::Base
 
   def increment_unread!(sender_user_id, sender_type: nil)
     return if sender_user_id == user_id && sender_type != 'assistant' && sender_type != 'system'
+
     increment!(:unread_count)
   end
 
@@ -59,7 +60,7 @@ class AutomyraBridgeChatThread < ActiveRecord::Base
   end
 
   def title_display
-    title.presence || page_key.presence || "Chat"
+    title.presence || page_key.presence || 'Chat'
   end
 
   def canonical_channel_key

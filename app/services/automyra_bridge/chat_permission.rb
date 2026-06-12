@@ -9,9 +9,7 @@ module AutomyraBridge
       return allowed_for_thread?(user, thread) if thread
 
       project ||= ChatProjectResolver.from_page(page_type, page_id)
-      if project
-        return project_visible_to_user?(user, project) && user.allowed_to?(:use_automyra_bridge, project)
-      end
+      return project_visible_to_user?(user, project) && user.allowed_to?(:use_automyra_bridge, project) if project
 
       allowed_for_any_visible_project?(user)
     end

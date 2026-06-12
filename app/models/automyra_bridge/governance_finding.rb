@@ -1,5 +1,5 @@
 module AutomyraBridge
-  class GovernanceFinding < ActiveRecord::Base
+  class GovernanceFinding < ApplicationRecord
     self.table_name = 'automyra_bridge_governance_findings'
 
     FINDING_TYPES = %w[

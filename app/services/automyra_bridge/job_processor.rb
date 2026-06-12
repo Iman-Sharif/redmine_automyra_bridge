@@ -78,8 +78,8 @@ module AutomyraBridge
       return false if job.backoff_seconds.to_i.positive? && job.updated_at && job.updated_at > Time.current
 
       claimed = AutomyraBridgeJob.where(id: job.id, status: %w[queued pending])
-        .where('backoff_seconds <= 0 OR updated_at <= ?', Time.current)
-        .update_all(status: 'running', started_at: Time.current, last_heartbeat_at: Time.current, updated_at: Time.current)
+                                 .where('backoff_seconds <= 0 OR updated_at <= ?', Time.current)
+                                 .update_all(status: 'running', started_at: Time.current, last_heartbeat_at: Time.current, updated_at: Time.current)
       return false unless claimed == 1
 
       job.reload
@@ -217,8 +217,8 @@ module AutomyraBridge
       message = raw_message.to_s
       return nil if message.blank?
 
-      sanitized = message.lines.reject { |line| line.match?(/\.rb:\d+:in\s/) || line.match?(/^\s*from\s+.+:\d+/) || line.match?(/^\s*\/[^\s]+:\d+/) }.join(' ')
-      sanitized.gsub!(/https?:\/\/\S+/i, '[url]')
+      sanitized = message.lines.reject { |line| line.match?(/\.rb:\d+:in\s/) || line.match?(/^\s*from\s+.+:\d+/) || line.match?(%r{^\s*/[^\s]+:\d+}) }.join(' ')
+      sanitized.gsub!(%r{https?://\S+}i, '[url]')
       sanitized.gsub!(/\b(?:[a-z0-9-]+\.)+(?:local|internal|localhost|lan|test|invalid)\b/i, '[host]')
       sanitized.gsub!(/\b(?:localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})\b/i, '[host]')
       sanitized.gsub!(/\b(?:token|api[_-]?key|secret|password|authorization|bearer)\b\s*[:=]\s*\S+/i, '\\1=[redacted]')
@@ -250,6 +250,7 @@ module AutomyraBridge
 
     def post_payload(job)
       raise 'Automyra endpoint is not configured.' if endpoint.blank?
+
       uri = safe_endpoint_uri!
       request = Net::HTTP::Post.new(uri.request_uri)
       request['Content-Type'] = 'application/json'
@@ -259,7 +260,7 @@ module AutomyraBridge
       request.body = (@outbound_payload || payload(job)).to_json
 
       Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https', read_timeout: timeout, open_timeout: timeout) do |http|
-          AutomyraBridge::UrlValidator.validate_connected_peer!(http, uri.host, @settings)
+        AutomyraBridge::UrlValidator.validate_connected_peer!(http, uri.host, @settings)
         response = http.request(request)
         raise adapter_response_error(response) unless response.is_a?(Net::HTTPSuccess)
 
@@ -287,8 +288,8 @@ module AutomyraBridge
         decision = AutomyraBridge::AutonomyPolicy.decide(job: job, proposal: proposal, tool: tool)
         if decision.execute?
           execute_proposal_tool(proposal, tool, job, decision.skip_authorization)
-        else
-          proposal.update!(status: 'failed', error_message: decision.reason) if %w[reject readonly].include?(decision.outcome)
+        elsif %w[reject readonly].include?(decision.outcome)
+          proposal.update!(status: 'failed', error_message: decision.reason)
         end
         write_action_memory(job, proposal.reload)
       end
@@ -515,7 +516,11 @@ module AutomyraBridge
       return [] unless container && defined?(AutomyraBridgeMemoryEvent) && AutomyraBridgeMemoryEvent.table_exists?
 
       AutomyraBridgeMemoryEvent.where(container_type: container.class.name, container_id: container.id, event_type: 'assistant_run_summary').order(created_at: :desc).limit(5).map do |event|
-        parsed = JSON.parse(event.payload.to_s.presence || '{}') rescue {}
+        parsed = begin
+          JSON.parse(event.payload.to_s.presence || '{}')
+        rescue StandardError
+          {}
+        end
         {
           summary: parsed['summary'].presence || event.content.to_s,
           run_id: parsed['run_id'],
@@ -553,9 +558,7 @@ module AutomyraBridge
     def response_text(parsed)
       source = parsed['response'].presence || parsed['message'].presence || parsed['body'].presence || parsed['text'].presence
       source = nil if tool_call_json_text?(source)
-      if source.blank? && parsed['tool_calls'].is_a?(Array) && parsed['tool_calls'].any?
-        source = 'Automyra reviewed the page context and requested additional Redmica context.'
-      end
+      source = 'Automyra reviewed the page context and requested additional Redmica context.' if source.blank? && parsed['tool_calls'].is_a?(Array) && parsed['tool_calls'].any?
       source.to_s.presence || 'Automyra completed the request without a message.'
     end
 
@@ -638,7 +641,6 @@ module AutomyraBridge
     rescue ArgumentError => e
       raise e.message
     end
-
 
     def token
       @settings['automyra_token'].to_s.strip

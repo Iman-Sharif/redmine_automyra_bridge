@@ -98,7 +98,7 @@ class AutomyraBridge::ChatPollServiceTest < ActiveSupport::TestCase
     )
 
     assert_equal true, result[:has_updates]
-    assert_equal [pending.id], result[:new_messages].map { |message| message[:id] }
+    assert_equal([pending.id], result[:new_messages].map { |message| message[:id] })
     assert_equal 'pending', result[:new_messages].first[:status]
     assert_equal updated_time.utc.iso8601(3), result[:new_messages].first[:updated_at]
   end
@@ -114,7 +114,7 @@ class AutomyraBridge::ChatPollServiceTest < ActiveSupport::TestCase
     result = AutomyraBridge::ChatPollService.poll(@thread, since_updated_at: cursor_time.iso8601(3))
 
     assert_equal true, result[:has_updates]
-    assert_equal [updated.id], result[:new_messages].map { |message| message[:id] }
+    assert_equal([updated.id], result[:new_messages].map { |message| message[:id] })
     assert_equal 'Updated pending bubble', result[:new_messages].first[:content]
   end
 
@@ -132,7 +132,7 @@ class AutomyraBridge::ChatPollServiceTest < ActiveSupport::TestCase
       since_updated_at: cursor_time.iso8601(3)
     )
 
-    assert_equal [overlapping.id], result[:new_messages].map { |message| message[:id] }
+    assert_equal([overlapping.id], result[:new_messages].map { |message| message[:id] })
   end
 
   def test_poll_with_since_updated_at_returns_empty_when_no_messages_changed
@@ -159,7 +159,7 @@ class AutomyraBridge::ChatPollServiceTest < ActiveSupport::TestCase
       since_updated_at: 'not-a-time'
     )
 
-    assert_equal [newer.id], result[:new_messages].map { |message| message[:id] }
+    assert_equal([newer.id], result[:new_messages].map { |message| message[:id] })
   end
 
   # --- empty thread ---

@@ -24,6 +24,7 @@ module AutomyraBridge
       def verify!(result, input)
         issue = Issue.find_by(id: result[:issue_id])
         raise 'Issue create verification failed.' unless issue
+
         subject = (input['issue'] || input)['subject'].to_s
         raise 'Issue subject verification failed.' unless issue.subject == subject
       end

@@ -1,6 +1,6 @@
 class AutomyraBridgeActionProposalsController < ApplicationController
   accept_api_auth :index, :create, :status, :approve, :reject
-  skip_before_action :verify_authenticity_token, only: %i[create status approve reject], if: :api_request?
+  skip_before_action :verify_authenticity_token, only: %i[create status approve reject]
 
   before_action :require_login
   before_action :find_proposal, except: %i[index create]
@@ -11,7 +11,7 @@ class AutomyraBridgeActionProposalsController < ApplicationController
   def index
     scope = AutomyraBridgeActionProposal.where(project: @project)
     scope = scope.where(status: params[:status].to_s) if params[:status].present?
-    scope = scope.where("request_payload LIKE ?", "%\"source\":\"#{sanitize_sql_like(params[:source].to_s)}\"%") if params[:source].present?
+    scope = scope.where('request_payload LIKE ?', "%\"source\":\"#{sanitize_sql_like(params[:source].to_s)}\"%") if params[:source].present?
 
     render json: { proposals: scope.order(updated_at: :desc).limit(100).map { |proposal| proposal_json(proposal) } }
   end
@@ -37,8 +37,7 @@ class AutomyraBridgeActionProposalsController < ApplicationController
     render json: { error: e.message }, status: :internal_server_error
   end
 
-  def show
-  end
+  def show; end
 
   def status
     if request.post? && params[:status].to_s == 'implemented'
@@ -173,7 +172,7 @@ class AutomyraBridgeActionProposalsController < ApplicationController
       return value[key] if value[key].present?
       return value[key.to_sym] if value[key.to_sym].present?
 
-      value.values.each do |nested|
+      value.each_value do |nested|
         found = recursive_param(nested, key)
         return found if found.present?
       end

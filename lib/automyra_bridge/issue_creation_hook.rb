@@ -22,7 +22,7 @@ module AutomyraBridge
         return unless project
 
         AutomyraBridge::CreationReviewDispatcher.dispatch(self)
-      rescue => e
+      rescue StandardError => e
         Rails.logger.error("[AutomyraBridge::IssueCreationHook] Error: #{e.message}")
       end
     end

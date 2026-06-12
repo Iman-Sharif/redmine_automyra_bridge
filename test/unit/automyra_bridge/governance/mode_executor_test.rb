@@ -71,7 +71,7 @@ class AutomyraBridgeGovernanceModeExecutorTest < ActiveSupport::TestCase
 
     assert_equal 2, result.actions.size
     assert_equal 1, result.applied_count
-    assert_equal 1, result.actions.count { |action| action.reload.applied? }
+    assert_equal(1, result.actions.count { |action| action.reload.applied? })
     assert_equal 'New task title', @task.reload.title
     assert_equal 1, AutomyraBridge::GovernanceFinding.applied.count
     assert_equal 1, run.reload.applied_count

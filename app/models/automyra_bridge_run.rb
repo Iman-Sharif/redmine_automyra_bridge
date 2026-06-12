@@ -1,4 +1,4 @@
-class AutomyraBridgeRun < ActiveRecord::Base
+class AutomyraBridgeRun < ApplicationRecord
   STATUSES = %w[queued running retrying failed completed cancelled].freeze
 
   belongs_to :source, polymorphic: true, optional: true
@@ -6,7 +6,6 @@ class AutomyraBridgeRun < ActiveRecord::Base
   belongs_to :user
   has_many :run_events,
            class_name: 'AutomyraBridgeRunEvent',
-           foreign_key: 'automyra_bridge_run_id',
            dependent: :destroy
 
   validates :source_type, :source_id, :project, :user, presence: true

@@ -32,7 +32,7 @@ module AutomyraBridge
       context = normalize_context(user, page_type, page_id, project_id: project_id, url_path: url_path)
 
       # Ensure global thread exists
-      global_thread = ensure_global_thread(user, project_id)
+      ensure_global_thread(user, project_id)
 
       # Check for existing page thread
       page_thread = find_page_thread(user, context)
@@ -60,9 +60,9 @@ module AutomyraBridge
       else
         # Fall back to global thread
         global_thread = AutomyraBridgeChatThread
-          .global_for(user)
-          .active
-          .first
+                        .global_for(user)
+                        .active
+                        .first
 
         if global_thread
           Result.new(global_thread, 'global', 'using_global')
@@ -97,14 +97,12 @@ module AutomyraBridge
       end
     end
 
-    private
-
     # Ensure a global thread exists for the user
     def self.ensure_global_thread(user, project_id)
       global_thread = AutomyraBridgeChatThread
-        .global_for(user)
-        .active
-        .first
+                      .global_for(user)
+                      .active
+                      .first
 
       if global_thread
         global_thread.update_column(:project_id, project_id) if global_thread.project_id.blank? && project_id.present?
@@ -173,9 +171,9 @@ module AutomyraBridge
         key: context[:page_key]
       )
       thread = exact_scope.first || AutomyraBridgeChatThread
-          .for_page(user, context[:page_type], context[:page_id], project_id: context[:project_id], url_path: context[:url_path])
-          .active
-          .first
+               .for_page(user, context[:page_type], context[:page_id], project_id: context[:project_id], url_path: context[:url_path])
+               .active
+               .first
       backfill_channel_key(thread) if thread
       thread
     end

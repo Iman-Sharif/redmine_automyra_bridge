@@ -3,7 +3,7 @@ class AddKindToAutomyraBridgeChatMessages < ActiveRecord::Migration[6.1]
     return unless table_exists?(:automyra_bridge_chat_messages)
 
     add_column :automyra_bridge_chat_messages, :kind, :string, default: 'message', null: false unless column_exists?(:automyra_bridge_chat_messages, :kind)
-    add_index :automyra_bridge_chat_messages, [:chat_thread_id, :kind], name: 'index_chat_messages_on_thread_and_kind' unless index_exists?(:automyra_bridge_chat_messages, [:chat_thread_id, :kind], name: 'index_chat_messages_on_thread_and_kind')
+    add_index :automyra_bridge_chat_messages, %i[chat_thread_id kind], name: 'index_chat_messages_on_thread_and_kind' unless index_exists?(:automyra_bridge_chat_messages, %i[chat_thread_id kind], name: 'index_chat_messages_on_thread_and_kind')
   end
 
   def down

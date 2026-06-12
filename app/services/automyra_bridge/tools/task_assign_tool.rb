@@ -19,6 +19,7 @@ module AutomyraBridge
         task = source_task(job) || raise('Task is no longer available.')
         assigned_to_id = input.dig('assignment', 'assigned_to_id') || input['assigned_to_id']
         raise 'Assigned user is not available.' unless User.active.find_by(id: assigned_to_id)
+
         task.update!(assigned_to_id: assigned_to_id)
         { task_id: task.id, assigned_to_id: task.assigned_to_id }
       end

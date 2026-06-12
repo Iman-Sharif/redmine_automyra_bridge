@@ -40,9 +40,9 @@ RedmineApp::Application.routes.draw do
           post :toggle_enabled
         end
       end
-       resources :runs, only: %i[index show]
-       resources :findings, only: %i[index show]
-       resources :actions, only: %i[index show]
-     end
+      resources :runs, only: %i[index show]
+      resources :findings, only: %i[index show]
+      resources :actions, only: %i[index show]
+    end
   end
 end

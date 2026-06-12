@@ -11,7 +11,7 @@ class AutomyraBridgeUrlValidatorTest < ActiveSupport::TestCase
     assert_not AutomyraBridge::UrlValidator.safe?('http://example.com/api')
     validator = AutomyraBridge::UrlValidator.new('http://example.com/api')
     validator.safe?
-    assert_match /HTTP URLs are disabled/, validator.error
+    assert_match(/HTTP URLs are disabled/, validator.error)
   end
 
   test 'permits HTTP when explicitly allowed' do
@@ -24,7 +24,7 @@ class AutomyraBridgeUrlValidatorTest < ActiveSupport::TestCase
     assert_not AutomyraBridge::UrlValidator.safe?('https://localhost/api')
     validator = AutomyraBridge::UrlValidator.new('https://localhost/api')
     validator.safe?
-    assert_match /blocked address/, validator.error
+    assert_match(/blocked address/, validator.error)
   end
 
   test 'blocks loopback IPv6' do
@@ -32,7 +32,7 @@ class AutomyraBridgeUrlValidatorTest < ActiveSupport::TestCase
     assert_not AutomyraBridge::UrlValidator.safe?('https://localhost/api')
     validator = AutomyraBridge::UrlValidator.new('https://localhost/api')
     validator.safe?
-    assert_match /blocked address/, validator.error
+    assert_match(/blocked address/, validator.error)
   end
 
   test 'blocks private IPv4 10.x.x.x' do
@@ -88,7 +88,7 @@ class AutomyraBridgeUrlValidatorTest < ActiveSupport::TestCase
     io.stubs(:peeraddr).returns(['AF_INET', 443, 'localhost', '127.0.0.1'])
 
     error = assert_raises(ArgumentError) { AutomyraBridge::UrlValidator.validate_connected_peer!(http) }
-    assert_match /connected peer is a blocked address/, error.message
+    assert_match(/connected peer is a blocked address/, error.message)
   end
 
   test 'allows connected peer when address is public' do
@@ -108,14 +108,14 @@ class AutomyraBridgeUrlValidatorTest < ActiveSupport::TestCase
     assert_not AutomyraBridge::UrlValidator.safe?('https://does-not-resolve.test/api')
     validator = AutomyraBridge::UrlValidator.new('https://does-not-resolve.test/api')
     validator.safe?
-    assert_match /did not resolve/, validator.error
+    assert_match(/did not resolve/, validator.error)
   end
 
   test 'blocks invalid URI' do
     assert_not AutomyraBridge::UrlValidator.safe?('not a url')
     validator = AutomyraBridge::UrlValidator.new('not a url')
     validator.safe?
-    assert_match /invalid/, validator.error
+    assert_match(/invalid/, validator.error)
   end
 
   test 'validates all resolved addresses' do
@@ -152,6 +152,6 @@ class AutomyraBridgeUrlValidatorTest < ActiveSupport::TestCase
     assert_not AutomyraBridge::UrlValidator.safe?('https:///path')
     validator = AutomyraBridge::UrlValidator.new('https:///path')
     validator.safe?
-    assert_match /hostname/, validator.error
+    assert_match(/hostname/, validator.error)
   end
 end

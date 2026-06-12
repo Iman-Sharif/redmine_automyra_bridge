@@ -15,12 +15,12 @@ module AutomyraBridge
                      Project.find(params[:project_id])
                    elsif params[:policy_id].present?
                      ::AutomyraBridge::GovernancePolicy.find(params[:policy_id]).project
-                    elsif params[:id].present? && controller_name == 'policies'
-                      ::AutomyraBridge::GovernancePolicy.find(params[:id]).project
-                    elsif controller_name == 'policies'
-                      nil
-                    elsif User.current.admin?
-                      nil
+                   elsif params[:id].present? && controller_name == 'policies'
+                     ::AutomyraBridge::GovernancePolicy.find(params[:id]).project
+                   elsif controller_name == 'policies'
+                     nil
+                   elsif User.current.admin?
+                     nil
                    else
                      Project.visible.detect { |project| User.current.allowed_to?(:manage_automyra_bridge, project) }
                    end

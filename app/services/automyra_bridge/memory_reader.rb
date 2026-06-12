@@ -36,21 +36,21 @@ module AutomyraBridge
       return [] unless AutomyraBridgeMemoryEvent.table_exists?
 
       AutomyraBridgeMemoryEvent.for_container(container.class.name, container.id)
-        .order(created_at: :desc, id: :desc)
-        .limit(limit)
-        .to_a
-        .reverse
-        .map do |event|
-          {
-            id: event.id,
-            role: event.role,
-            event_type: event.event_type,
-            user: event.user&.name,
-            content: event.content,
-            payload: event.payload_hash,
-            created_at: event.created_at&.iso8601
-          }
-        end
+                               .order(created_at: :desc, id: :desc)
+                               .limit(limit)
+                               .to_a
+                               .reverse
+                               .map do |event|
+        {
+          id: event.id,
+          role: event.role,
+          event_type: event.event_type,
+          user: event.user&.name,
+          content: event.content,
+          payload: event.payload_hash,
+          created_at: event.created_at&.iso8601
+        }
+      end
     end
 
     def self.recall_for_container(container, limit: 30)
@@ -128,7 +128,11 @@ module AutomyraBridge
     def self.normalize_lancedb_row(row)
       cache_key = row['cache_key'].presence || row['id'].presence || row['metadata'].to_s
       @metadata_cache ||= {}
-      metadata = @metadata_cache[cache_key] ||= (JSON.parse(row['metadata'].to_s.presence || '{}') rescue {})
+      metadata = @metadata_cache[cache_key] ||= begin
+        JSON.parse(row['metadata'].to_s.presence || '{}')
+      rescue StandardError
+        {}
+      end
       content = row['content'].presence || row['text'].presence || metadata['l2_content'].presence || metadata['l1_overview']
       return nil if content.blank?
 

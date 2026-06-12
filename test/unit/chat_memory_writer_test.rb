@@ -209,7 +209,7 @@ class AutomyraBridgeChatMemoryWriterTest < ActiveSupport::TestCase
     assert_equal 200, payload['final_answer'].length
     assert_equal 'What did we decide about issue 42?', payload['user_query']
     assert_equal %w[issue_search context_current_page], payload['tool_calls']
-    assert_equal %w[started tool_call completed], payload['timeline'].map { |event| event['type'] }
+    assert_equal(%w[started tool_call completed], payload['timeline'].map { |event| event['type'] })
     assert_includes memory.content, "Run ID: #{run&.id || 'unknown'}"
     assert_includes memory.content, 'Query: What did we decide about issue 42?'
     assert_includes memory.content, 'Answer: '

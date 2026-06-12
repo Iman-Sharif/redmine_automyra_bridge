@@ -5,7 +5,7 @@ module AutomyraBridge
         new(**kwargs).call
       end
 
-      def initialize(run:, policy: nil, findings:, created_by: nil)
+      def initialize(run:, findings:, policy: nil, created_by: nil)
         @run = run
         @policy = policy || run.governance_policy
         @findings = Array(findings)

@@ -189,7 +189,7 @@ class AutomyraBridgeJobCreatorTest < ActiveSupport::TestCase
 
   def grant_automyra_bridge_permission!(user, project)
     EnabledModule.create!(project: project, name: 'automyra_bridge') unless project.module_enabled?(:automyra_bridge)
-    role = Role.generate!(permissions: [:use_automyra_bridge, :view_task_hub_tasks, :view_issues])
+    role = Role.generate!(permissions: %i[use_automyra_bridge view_task_hub_tasks view_issues])
     member = Member.find_or_initialize_by(project: project, user: user)
     member.roles = [role]
     member.save!

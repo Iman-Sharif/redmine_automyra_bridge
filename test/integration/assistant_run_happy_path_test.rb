@@ -33,7 +33,7 @@ class AssistantRunHappyPathTest < ActionDispatch::IntegrationTest
 
     assert_equal 'succeeded', job.reload.status
     assistant = AutomyraBridgeChatMessage.where(role: 'assistant').order(:id).last
-    assert_match /3 open tasks/, assistant.content
+    assert_match(/3 open tasks/, assistant.content)
     run = AutomyraBridgeRun.find_by(source_type: job.source_type, source_id: job.source_id)
     completed = run.run_events.where(event_type: 'run.completed').last
     payload = completed.payload.is_a?(Hash) ? completed.payload : JSON.parse(completed.payload.to_s.presence || '{}')
@@ -65,7 +65,7 @@ class AssistantRunHappyPathTest < ActionDispatch::IntegrationTest
     AutomyraBridge::JobProcessor.new.process(job)
 
     assert_equal 'failed', job.reload.status
-    assert_match /User is not authorized/, job.error_message
+    assert_match(/User is not authorized/, job.error_message)
   end
 
   test 'provider timeout fails with timeout error' do
@@ -77,7 +77,7 @@ class AssistantRunHappyPathTest < ActionDispatch::IntegrationTest
     AutomyraBridge::JobProcessor.new.process(job)
 
     assert_equal 'failed', job.reload.status
-    assert_match /provider timeout/, job.error_message
+    assert_match(/provider timeout/, job.error_message)
   end
 
   test 'tool unavailable fails with tool error' do
@@ -90,7 +90,7 @@ class AssistantRunHappyPathTest < ActionDispatch::IntegrationTest
     AutomyraBridge::JobProcessor.new.process(job)
 
     assert_equal 'failed', job.reload.status
-    assert_match /Tool error.*Unknown tool/, job.error_message
+    assert_match(/Tool error.*Unknown tool/, job.error_message)
   end
 
   private

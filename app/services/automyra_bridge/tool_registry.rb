@@ -89,20 +89,18 @@ module AutomyraBridge
       )
 
       checks = all.select { |tool| tool.risk_level == 'read' }.map do |tool|
-        begin
-          if actor.nil? || project.nil?
-            { name: tool.name, healthy: false, error: 'No user or project available for health check.' }
-          elsif !tool.available?(job)
-            { name: tool.name, healthy: false, error: 'Tool is unavailable.' }
-          elsif !tool.authorized?(job, actor)
-            { name: tool.name, healthy: false, error: 'Health check actor is not authorized.' }
-          else
-            tool.call(job, actor, {})
-            { name: tool.name, healthy: true }
-          end
-        rescue StandardError => e
-          { name: tool.name, healthy: false, error: e.message.to_s.truncate(160) }
+        if actor.nil? || project.nil?
+          { name: tool.name, healthy: false, error: 'No user or project available for health check.' }
+        elsif !tool.available?(job)
+          { name: tool.name, healthy: false, error: 'Tool is unavailable.' }
+        elsif !tool.authorized?(job, actor)
+          { name: tool.name, healthy: false, error: 'Health check actor is not authorized.' }
+        else
+          tool.call(job, actor, {})
+          { name: tool.name, healthy: true }
         end
+      rescue StandardError => e
+        { name: tool.name, healthy: false, error: e.message.to_s.truncate(160) }
       end
 
       { total: checks.length, healthy: checks.count { |check| check[:healthy] }, checks: checks }

@@ -56,10 +56,10 @@
 module ToolSnapshot
   module_function
 
-  UUID_RE = /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/.freeze
-  ISO_TS_RE = /\A\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}/.freeze
-  ID_KEY_RE = /\A(id|.*_id)\z/.freeze
-  TS_KEY_RE = /(_at|_on)\z/.freeze
+  UUID_RE = /\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/
+  ISO_TS_RE = /\A\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}/
+  ID_KEY_RE = /\A(id|.*_id)\z/
+  TS_KEY_RE = /(_at|_on)\z/
 
   def capture(tools_and_inputs)
     snapshot = {}
@@ -93,12 +93,12 @@ module ToolSnapshot
 
   def scrub_scalar(value, key)
     k = key.to_s
-    return '<ID>' if k =~ ID_KEY_RE
-    return '<TS>' if k =~ TS_KEY_RE
+    return '<ID>' if ID_KEY_RE.match?(k)
+    return '<TS>' if TS_KEY_RE.match?(k)
 
     if value.is_a?(String)
-      return '<UUID>' if value =~ UUID_RE
-      return '<TS>' if value =~ ISO_TS_RE
+      return '<UUID>' if UUID_RE.match?(value)
+      return '<TS>' if ISO_TS_RE.match?(value)
     end
     value
   end

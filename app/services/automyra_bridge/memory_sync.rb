@@ -36,7 +36,7 @@ module AutomyraBridge
       request['Authorization'] = "Bearer #{token}"
       request.body = { tool: tool, args: args, sessionKey: session_key }.to_json
       response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https', read_timeout: 20, open_timeout: 10) do |http|
-          AutomyraBridge::UrlValidator.validate_connected_peer!(http, uri.host, @settings)
+        AutomyraBridge::UrlValidator.validate_connected_peer!(http, uri.host, @settings)
         http.request(request)
       end
       raise "memory sync returned HTTP #{response.code}: #{response.body.to_s.truncate(300)}" unless response.is_a?(Net::HTTPSuccess)
@@ -49,16 +49,16 @@ module AutomyraBridge
 
     def invoke_chat_store(event)
       chat_completion([
-        { role: 'system', content: 'You are Automyra memory ingestion. Store the supplied Redmica event in the active Lossless/LanceDB memory stack. Return JSON only.' },
-        { role: 'user', content: { action: 'memory_store', event_id: event.id, text: memory_text(event), category: category(event), importance: importance(event) }.to_json }
-      ])
+                        { role: 'system', content: 'You are Automyra memory ingestion. Store the supplied Redmica event in the active Lossless/LanceDB memory stack. Return JSON only.' },
+                        { role: 'user', content: { action: 'memory_store', event_id: event.id, text: memory_text(event), category: category(event), importance: importance(event) }.to_json }
+                      ])
     end
 
     def invoke_chat_recall(query, limit: 5)
       chat_completion([
-        { role: 'system', content: 'You are Automyra memory recall. Search the active Lossless/LanceDB memory stack. Return JSON only with a results array.' },
-        { role: 'user', content: { action: 'memory_recall', query: query, limit: limit }.to_json }
-      ])
+                        { role: 'system', content: 'You are Automyra memory recall. Search the active Lossless/LanceDB memory stack. Return JSON only with a results array.' },
+                        { role: 'user', content: { action: 'memory_recall', query: query, limit: limit }.to_json }
+                      ])
     end
 
     def chat_completion(messages)
@@ -68,14 +68,18 @@ module AutomyraBridge
       request['Authorization'] = "Bearer #{token}"
       request.body = { model: memory_model, messages: messages, temperature: 0.0, response_format: { type: 'json_object' } }.to_json
       response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https', read_timeout: 60, open_timeout: 10) do |http|
-          AutomyraBridge::UrlValidator.validate_connected_peer!(http, uri.host, @settings)
+        AutomyraBridge::UrlValidator.validate_connected_peer!(http, uri.host, @settings)
         http.request(request)
       end
       raise "memory chat returned HTTP #{response.code}: #{response.body.to_s.truncate(300)}" unless response.is_a?(Net::HTTPSuccess)
 
       parsed = JSON.parse(response.body.to_s.presence || '{}')
       content = parsed.dig('choices', 0, 'message', 'content').to_s
-      decoded = JSON.parse(content) rescue { 'response' => content }
+      decoded = begin
+        JSON.parse(content)
+      rescue StandardError
+        { 'response' => content }
+      end
       decoded['id'] ||= parsed['id']
       decoded
     end

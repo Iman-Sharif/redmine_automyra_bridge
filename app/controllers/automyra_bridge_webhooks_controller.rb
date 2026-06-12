@@ -13,9 +13,7 @@ class AutomyraBridgeWebhooksController < ApplicationController
     user = webhook_user
     return render json: { error: 'webhook user not found' }, status: :unprocessable_entity unless user
 
-    unless valid_email_payload?
-      return render json: { error: 'subject and body are required' }, status: :unprocessable_entity
-    end
+    return render json: { error: 'subject and body are required' }, status: :unprocessable_entity unless valid_email_payload?
 
     job = AutomyraBridge::JobCreator.create_for_webhook(
       user: user,

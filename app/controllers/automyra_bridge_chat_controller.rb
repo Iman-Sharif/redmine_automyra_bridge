@@ -161,17 +161,17 @@ class AutomyraBridgeChatController < ApplicationController
     new_kind = requested_thread_kind
     current_context = page_context
 
-    if new_kind == 'global'
-      result = AutomyraBridge::ChatThreadToggle.switch_to_global(User.current, project_id: current_context[:project_id])
-    else
-      result = AutomyraBridge::ChatThreadToggle.switch_to_page(
-        User.current,
-        current_context[:page_type],
-        current_context[:page_id],
-        project_id: current_context[:project_id],
-        url_path: current_context[:url_path]
-      )
-    end
+    result = if new_kind == 'global'
+               AutomyraBridge::ChatThreadToggle.switch_to_global(User.current, project_id: current_context[:project_id])
+             else
+               AutomyraBridge::ChatThreadToggle.switch_to_page(
+                 User.current,
+                 current_context[:page_type],
+                 current_context[:page_id],
+                 project_id: current_context[:project_id],
+                 url_path: current_context[:url_path]
+               )
+             end
     thread = result.thread
 
     render json: {
@@ -197,11 +197,12 @@ class AutomyraBridgeChatController < ApplicationController
   end
 
   def upload_attachment
-    return render json: { error: 'No file provided' }, status: :bad_request unless params[:file].present?
+    return render json: { error: 'No file provided' }, status: :bad_request if params[:file].blank?
 
     context = chat_context
     thread = authorized_thread || find_or_create_thread(requested_thread_kind, context)
     return head :forbidden unless AutomyraBridge::ChatPermission.allowed?(User.current, thread: thread)
+
     message = if params[:message_id].present?
                 thread.chat_messages.find_by(id: params[:message_id])
               else
@@ -301,9 +302,9 @@ class AutomyraBridgeChatController < ApplicationController
                 AutomyraBridge::ChatPermission.allowed?(User.current, project: resolved_project, page_type: page_context[:page_type], page_id: page_context[:page_id])
               end
 
-    unless allowed
-      render json: { success: false, error: 'Access denied' }, status: :forbidden
-    end
+    return if allowed
+
+    render json: { success: false, error: 'Access denied' }, status: :forbidden
   end
 
   def require_valid_chat_scope
@@ -312,9 +313,9 @@ class AutomyraBridgeChatController < ApplicationController
       return
     end
 
-    if requested_thread_kind == 'page' && params[:thread_id].blank? && !AutomyraBridge::ChatPermission.valid_page_type?(page_context[:page_type])
-      render json: { success: false, error: 'Invalid page type' }, status: :bad_request
-    end
+    return unless requested_thread_kind == 'page' && params[:thread_id].blank? && !AutomyraBridge::ChatPermission.valid_page_type?(page_context[:page_type])
+
+    render json: { success: false, error: 'Invalid page type' }, status: :bad_request
   end
 
   def find_thread(kind)
@@ -426,7 +427,7 @@ class AutomyraBridgeChatController < ApplicationController
   end
 
   def job_summary_for_message(chat_message)
-    return nil unless chat_message&.job_id.present?
+    return nil if chat_message&.job_id.blank?
     return nil unless AutomyraBridge::ChatPermission.allowed?(User.current, thread: chat_message.chat_thread)
 
     job = AutomyraBridgeJob.find_by(id: chat_message.job_id)
@@ -480,7 +481,7 @@ class AutomyraBridgeChatController < ApplicationController
   end
 
   def proposal_event_payload(event)
-    return nil unless event.event_type.to_s.start_with?('action_proposal.') || event.event_type.to_s.start_with?('proposal.')
+    return nil unless event.event_type.to_s.start_with?('action_proposal.', 'proposal.')
 
     payload = event.payload.is_a?(Hash) ? event.payload.deep_dup : JSON.parse(event.payload.to_s.presence || '{}')
     proposal = AutomyraBridgeActionProposal.find_by(id: payload['proposal_id'] || payload[:proposal_id])
@@ -541,27 +542,25 @@ class AutomyraBridgeChatController < ApplicationController
     heartbeat_at = Time.current
 
     loop do
-      begin
-        events = run_events_scope(run).where('id > ?', after_id).order(:id).limit(100)
-        events.each do |event|
-          response.stream.write("data: #{run_event_json(event).to_json}\n\n")
-          after_id = event.id
-        end
-
-        run.reload
-        break if run_terminal?(run) && !run_events_scope(run).where('id > ?', after_id).exists?
-
-        if heartbeat_at <= 25.seconds.ago
-          response.stream.write(": heartbeat\n\n")
-          heartbeat_at = Time.current
-        end
-
-        sleep 1
-      rescue ActiveRecord::ActiveRecordError => e
-        response.stream.write("event: error\n")
-        response.stream.write("data: #{ { error: 'Database unavailable', message: e.message }.to_json }\n\n")
-        break
+      events = run_events_scope(run).where('id > ?', after_id).order(:id).limit(100)
+      events.each do |event|
+        response.stream.write("data: #{run_event_json(event).to_json}\n\n")
+        after_id = event.id
       end
+
+      run.reload
+      break if run_terminal?(run) && !run_events_scope(run).where('id > ?', after_id).exists?
+
+      if heartbeat_at <= 25.seconds.ago
+        response.stream.write(": heartbeat\n\n")
+        heartbeat_at = Time.current
+      end
+
+      sleep 1
+    rescue ActiveRecord::ActiveRecordError => e
+      response.stream.write("event: error\n")
+      response.stream.write("data: #{{ error: 'Database unavailable', message: e.message }.to_json}\n\n")
+      break
     end
   end
 
@@ -581,7 +580,7 @@ class AutomyraBridgeChatController < ApplicationController
     Rails.logger.warn("AutomyraBridge SSE stream failed: #{error.class}: #{error.message}") if defined?(Rails)
 
     response.stream.write("event: error\n")
-    response.stream.write("data: #{ { error: 'SSE stream unavailable' }.to_json }\n\n")
+    response.stream.write("data: #{{ error: 'SSE stream unavailable' }.to_json}\n\n")
   rescue IOError, ActionController::Live::ClientDisconnected
     nil
   end
@@ -631,7 +630,7 @@ class AutomyraBridgeChatController < ApplicationController
     return nil if message.blank?
 
     sanitized = message.lines.reject { |line| stack_trace_line?(line) }.join(' ')
-    sanitized.gsub!(/https?:\/\/\S+/i, '[url]')
+    sanitized.gsub!(%r{https?://\S+}i, '[url]')
     sanitized.gsub!(/\b(?:[a-z0-9-]+\.)+(?:local|internal|localhost|lan|test|invalid)\b/i, '[host]')
     sanitized.gsub!(/\b(?:localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})\b/i, '[host]')
     sanitized.gsub!(/\b(?:token|api[_-]?key|secret|password|authorization|bearer)\b\s*[:=]\s*\S+/i, '\\1=[redacted]')
@@ -641,7 +640,7 @@ class AutomyraBridgeChatController < ApplicationController
   end
 
   def stack_trace_line?(line)
-    line.match?(/\.rb:\d+:in\s/) || line.match?(/^\s*from\s+.+:\d+/) || line.match?(/^\s*\/[^\s]+:\d+/)
+    line.match?(/\.rb:\d+:in\s/) || line.match?(/^\s*from\s+.+:\d+/) || line.match?(%r{^\s*/[^\s]+:\d+})
   end
 
   def job_column?(job, column_name)
@@ -708,6 +707,7 @@ class AutomyraBridgeChatController < ApplicationController
 
   def authorized_thread
     return nil if params[:thread_id].blank?
+
     @authorized_thread ||= AutomyraBridgeChatThread.where(user: User.current).find_by(id: params[:thread_id])
   end
 
@@ -724,9 +724,7 @@ class AutomyraBridgeChatController < ApplicationController
 
     if job.source_type == 'AutomyraBridgeChatMessage'
       placeholder = AutomyraBridgeChatMessage.where(job_id: job.id).first
-      if placeholder
-        return AutomyraBridge::ChatPermission.allowed?(User.current, thread: placeholder.chat_thread)
-      end
+      return AutomyraBridge::ChatPermission.allowed?(User.current, thread: placeholder.chat_thread) if placeholder
     end
 
     project = job.project
@@ -737,7 +735,7 @@ class AutomyraBridgeChatController < ApplicationController
     AutomyraBridgeJob.where(id: job.id, status: job.status)
                      .update_all(
                        status: 'queued',
-                        retry_count: (job.retry_count.to_i + 1).clamp(0, job.max_retries.to_i),
+                       retry_count: (job.retry_count.to_i + 1).clamp(0, job.max_retries.to_i),
                        error_message: nil,
                        backoff_seconds: 0,
                        started_at: nil,

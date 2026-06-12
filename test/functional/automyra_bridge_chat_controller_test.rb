@@ -19,32 +19,32 @@ class AutomyraBridgeChatControllerTest < ActionController::TestCase
 
   test 'requires login for send_message' do
     post :send_message
-    assert_response 302
+    assert_response :found
   end
 
   test 'requires login for history' do
     get :history
-    assert_response 302
+    assert_response :found
   end
 
   test 'requires login for poll' do
     get :poll
-    assert_response 302
+    assert_response :found
   end
 
   test 'requires login for toggle_thread' do
     post :toggle_thread
-    assert_response 302
+    assert_response :found
   end
 
   test 'requires login for mark_read' do
     post :mark_read
-    assert_response 302
+    assert_response :found
   end
 
   test 'requires login for upload_attachment' do
     post :upload_attachment
-    assert_response 302
+    assert_response :found
   end
 
   # ------------------------------------------------------------------
@@ -222,7 +222,10 @@ class AutomyraBridgeChatControllerTest < ActionController::TestCase
       status: 'active'
     )
 
-    AutomyraBridge::ChatPollService.stub(:poll, ->(*args, **kwargs) { captured_args = [args, kwargs]; service_result }) do
+    AutomyraBridge::ChatPollService.stub(:poll, lambda { |*args, **kwargs|
+      captured_args = [args, kwargs]
+      service_result
+    }) do
       get :poll, params: {
         thread_kind: 'page',
         page_type: 'issue',

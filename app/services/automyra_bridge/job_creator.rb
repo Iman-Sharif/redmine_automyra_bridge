@@ -30,7 +30,8 @@ module AutomyraBridge
       if handle_mentions?
         correlation_id = SecureRandom.uuid
         idempotency_key = SecureRandom.uuid
-        payload.merge!(correlation_id: correlation_id, idempotency_key: idempotency_key)
+        payload[:correlation_id] = correlation_id
+        payload[:idempotency_key] = idempotency_key
 
         ::AutomyraBridge::HermesWebhookDeliverJob.perform_later(
           'redmica.task_comment_mention', payload, "task-comment-#{comment.id}"
@@ -51,8 +52,10 @@ module AutomyraBridge
         job = create_job(source_type: 'TaskHub::TaskComment', source_id: comment.id,
                          user: comment.author, project: project, payload: payload)
         write_mention_memory(task, comment.author, comment.body, job, comment.id) if job
-        enqueue_hermes_webhook(event_type: 'redmica.task_comment_mention', job: job,
-                               delivery_id: "task-comment-#{comment.id}") if job
+        if job
+          enqueue_hermes_webhook(event_type: 'redmica.task_comment_mention', job: job,
+                                 delivery_id: "task-comment-#{comment.id}")
+        end
         if job
           AutomyraBridge::ActivityLogger.log!(
             action_type: 'mention_response',
@@ -93,7 +96,8 @@ module AutomyraBridge
       if handle_mentions?
         correlation_id = SecureRandom.uuid
         idempotency_key = SecureRandom.uuid
-        payload.merge!(correlation_id: correlation_id, idempotency_key: idempotency_key)
+        payload[:correlation_id] = correlation_id
+        payload[:idempotency_key] = idempotency_key
 
         ::AutomyraBridge::HermesWebhookDeliverJob.perform_later(
           'redmica.issue_mention', payload, "issue-journal-#{journal.id}"
@@ -114,8 +118,10 @@ module AutomyraBridge
         job = create_job(source_type: 'Journal', source_id: journal.id,
                          user: journal.user, project: issue.project, payload: payload)
         write_mention_memory(issue, journal.user, journal.notes, job, journal.id) if job
-        enqueue_hermes_webhook(event_type: 'redmica.issue_mention', job: job,
-                               delivery_id: "issue-journal-#{journal.id}") if job
+        if job
+          enqueue_hermes_webhook(event_type: 'redmica.issue_mention', job: job,
+                                 delivery_id: "issue-journal-#{journal.id}")
+        end
         if job
           AutomyraBridge::ActivityLogger.log!(
             action_type: 'mention_response',
@@ -217,7 +223,7 @@ module AutomyraBridge
         container: container,
         user: user,
         role: 'user',
-          event_type: 'user_mention',
+        event_type: 'user_mention',
         content: content,
         payload: job.payload,
         correlation_id: job.correlation_id,

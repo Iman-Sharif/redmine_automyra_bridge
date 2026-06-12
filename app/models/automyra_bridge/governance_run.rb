@@ -1,5 +1,5 @@
 module AutomyraBridge
-  class GovernanceRun < ActiveRecord::Base
+  class GovernanceRun < ApplicationRecord
     self.table_name = 'automyra_bridge_governance_runs'
 
     STATUSES = %w[queued running completed failed cancelled].freeze

@@ -1,6 +1,6 @@
 class AutomyraBridgeController < ApplicationController
   accept_api_auth :improve_task
-  skip_before_action :verify_authenticity_token, only: :improve_task, if: :api_request?
+  skip_before_action :verify_authenticity_token, only: :improve_task
 
   before_action :require_login
   before_action :find_project
@@ -48,9 +48,9 @@ class AutomyraBridgeController < ApplicationController
 
   def task_params
     params.fetch(:task, ActionController::Parameters.new)
-      .permit(:title, :notes, :status, :priority, :due_date, :project_id, :category_id, tags: [])
-      .to_h
-      .symbolize_keys
+          .permit(:title, :notes, :status, :priority, :due_date, :project_id, :category_id, tags: [])
+          .to_h
+          .symbolize_keys
   end
 
   def assistant_params

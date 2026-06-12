@@ -12,6 +12,7 @@ module AutomyraBridge
     def self.dispatch(journal)
       issue = journal.journalized
       return unless issue.is_a?(Issue)
+
       old_status_detail = journal.details.detect { |d| d.property == 'attr' && d.prop_key == 'status_id' }
       return unless old_status_detail
 
@@ -24,6 +25,7 @@ module AutomyraBridge
     rescue StandardError => e
       Rails.logger.error("[AutomyraBridge::AutoCloseDispatcher] dispatch failed: #{e.class}: #{e.message}")
     end
+
     def self.build_payload(journal, issue, old_status, new_status)
       {
         event_type: EVENT_TYPE,

@@ -21,8 +21,8 @@ module AutomyraBridge
       def stable_json(value)
         case value
         when Hash
-          ordered = value.keys.map(&:to_s).sort.each_with_object({}) do |key, memo|
-            memo[key] = JSON.parse(stable_json(value[key]))
+          ordered = value.keys.map(&:to_s).sort.index_with do |key|
+            JSON.parse(stable_json(value[key]))
           end
           JSON.generate(ordered)
         when Array

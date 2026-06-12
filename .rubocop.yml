@@ -1,0 +1,172 @@
+# RuboCop configuration for the Automyra Bridge plugin.
+#
+# Scope: this config is intentionally standalone (Redmica core excludes
+# **/plugins/**) and deliberately conservative. The goal is a clean, low-risk,
+# mechanical style baseline -- not maximal cop enforcement. Churn-heavy and
+# behavior-affecting cops are disabled below with documented reasons so that
+# `rubocop -A` only produces safe, style-only changes.
+#
+# TargetRubyVersion 3.3 matches production (Ruby 3.3.11, per Task 3).
+
+plugins:
+  - rubocop-performance
+  - rubocop-rails
+
+# This plugin repo is linted standalone (its own CI checkout), where plain
+# `rubocop` honours this file directly. When linted in-place inside a Redmica
+# checkout, RuboCop auto-discovers and unconditionally merges the core
+# /usr/src/redmica/.rubocop.yml (which excludes '**/plugins/**/*'), so this dir
+# gets skipped. There is no override for an auto-discovered parent's Exclude, so
+# in that nested case invoke with `--config .rubocop.yml --force-exclusion`.
+
+AllCops:
+  TargetRubyVersion: 3.3
+  TargetRailsVersion: 7.2
+  NewCops: disable
+  SuggestExtensions: false
+  Exclude:
+    # Vendored / sibling plugins that happen to live under this dir -- not ours.
+    - 'plugins/**/*'
+    - 'repositories/**/*'
+    - 'themes/**/*'
+    # Abandoned backup trees kept only for reference; never reformat.
+    - 'redmine_task_hub_broken_backup/**/*'
+    - 'redmine_wiki_hub_broken_backup/**/*'
+    # Generated / non-source.
+    - 'db/schema.rb'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'assets/**/*'
+
+# --- Migrations: freeze formatting (never re-churn applied migrations) -------
+# Migrations are immutable history; reformatting them adds risk for zero value.
+Layout/LineLength:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  # Mass-adding magic comments is high-churn and offers no behavior benefit here.
+  Enabled: false
+Style/Documentation:
+  # Requiring class/module docs would touch nearly every file -- pure noise.
+  Enabled: false
+
+# --- Metrics: opinionated size thresholds, not mechanical style --------------
+Metrics/AbcSize:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/ModuleLength:
+  Enabled: false
+Metrics/ParameterLists:
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+# --- Behavior-affecting auto-corrects: DISABLED to guarantee style-only ------
+# These cops can subtly alter runtime behavior when auto-corrected. Disabling
+# them keeps the `rubocop -A` diff provably style-only (per Task 12 MUST DO).
+Style/SafeNavigation:
+  # `a && a.b` -> `a&.b` is NOT always equivalent (e.g. when `a` is redefined
+  # or has side effects); skip to avoid semantic drift.
+  Enabled: false
+Lint/AssignmentInCondition:
+  Enabled: false
+
+# Unsafe auto-corrects that change loading, structure, or query semantics.
+# `-A` would rewrite these; we keep behavior frozen instead.
+Rails/ApplicationRecord:
+  # Plugin models intentionally inherit ActiveRecord::Base (no plugin-local
+  # ApplicationRecord); rewriting the base class risks load/behavior change.
+  Enabled: false
+Rails/ApplicationJob:
+  # Same rationale as ApplicationRecord, for ActiveJob::Base.
+  Enabled: false
+Rails/DynamicFindBy:
+  # `find_by_x` -> `find_by(x:)` can alter finder/SQL semantics; leave as-is.
+  Enabled: false
+Rails/FindEach:
+  # `.each` -> `.find_each` changes batching and row ordering (behavioral).
+  Enabled: false
+Style/ClassAndModuleChildren:
+  # Compact vs nested module nesting changes constant resolution.
+  Enabled: false
+Lint/InterpolationCheck:
+  # Auto-correct rewrites string literal content; not a pure style change.
+  Enabled: false
+Style/ClassEqualityComparison:
+  # `==` vs `instance_of?` differ for subclasses (behavioral).
+  Enabled: false
+
+# --- Migrations excluded from a couple of Rails cops -------------------------
+Rails/ThreeStateBooleanColumn:
+  Exclude:
+    - 'db/migrate/**/*'
+Rails/BulkChangeTable:
+  Exclude:
+    - 'db/migrate/**/*'
+
+# --- Non-autocorrectable offenses: DISABLED (fixing them = logic change) -----
+# Each of these requires editing code, not whitespace. Resolving them is out of
+# scope for a style-only pass and would risk behavior. Disabled here; the real
+# code smells are left for targeted later Wave 3 work, not this mechanical pass.
+Rails/SkipsModelValidations:
+  # update_column/update_all/touch are deliberate in the bridge's job/run
+  # bookkeeping; "fixing" would change validation/callback behavior.
+  Enabled: false
+Naming/VariableNumber:
+  # Existing names like `status_id1`/`v2` are domain/API-aligned; renaming is a
+  # behavioral risk (some feed serialized payload keys).
+  Enabled: false
+Lint/IneffectiveAccessModifier:
+  # private-after-self.method pattern is pre-existing; correcting needs code
+  # restructuring (logic change), not style.
+  Enabled: false
+Lint/SuppressedException:
+  # Empty rescues are the characterized "swallow sites" (Task 10) -- intentional
+  # and pinned; must not be altered by a style pass.
+  Enabled: false
+Naming/PredicateName:
+  # `has_*`/`is_*` method names are part of the existing API surface; renaming
+  # would break callers.
+  Enabled: false
+Rails/InverseOf:
+  # Adding :inverse_of changes association object identity/caching (behavioral).
+  Enabled: false
+Rails/OutputSafety:
+  # html_safe usage is deliberate in view helpers; auto-removing it would break
+  # rendering or (worse) mask an XSS review decision.
+  Enabled: false
+Style/OptionalBooleanParameter:
+  # Boolean positional params are part of existing method signatures; changing
+  # them breaks callers.
+  Enabled: false
+Layout/BlockAlignment:
+  # Single remaining instance conflicts with a surrounding disabled cop's region
+  # and cannot be safely auto-corrected in isolation.
+  Enabled: false
+Lint/DuplicateMethods:
+  # Pre-existing duplicate definition; removing one is a logic change to be
+  # handled in dedicated Wave 3 work, not here.
+  Enabled: false
+Lint/NonLocalExitFromIterator:
+  # `return` inside a block is intentional control flow; rewriting changes
+  # semantics.
+  Enabled: false
+Lint/ShadowedException:
+  # Pre-existing rescue ordering; reordering changes which handler runs.
+  Enabled: false
+Lint/ShadowingOuterLocalVariable:
+  # Block-local shadowing is pre-existing; renaming risks subtle scope bugs.
+  Enabled: false
+Lint/UnderscorePrefixedVariableName:
+  # `_foo` then used is intentional naming; correcting needs a rename.
+  Enabled: false
+Style/HashLikeCase:
+  # Converting case/when to a hash lookup is a structural rewrite, not style.
+  Enabled: false

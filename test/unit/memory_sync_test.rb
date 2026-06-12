@@ -53,7 +53,7 @@ class AutomyraBridgeMemorySyncTest < ActiveSupport::TestCase
     ).sync_event(@event)
 
     assert_equal 'failed', @event.reload.sync_status
-    assert_match /memory unavailable/, @event.sync_error
+    assert_match(/memory unavailable/, @event.sync_error)
   end
 
   test 'recalls memory through OpenAI-compatible chat endpoint' do

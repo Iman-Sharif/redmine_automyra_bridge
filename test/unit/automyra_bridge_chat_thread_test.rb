@@ -23,34 +23,34 @@ class AutomyraBridgeChatThreadTest < ActiveSupport::TestCase
   test 'should require user_id' do
     @thread.user_id = nil
     assert_not @thread.valid?
-    assert_includes @thread.errors[:user_id], "cannot be blank"
+    assert_includes @thread.errors[:user_id], 'cannot be blank'
   end
 
   test 'should require thread_kind' do
     @thread.thread_kind = nil
     assert_not @thread.valid?
-    assert_includes @thread.errors[:thread_kind], "cannot be blank"
+    assert_includes @thread.errors[:thread_kind], 'cannot be blank'
   end
 
   test 'should require page_key' do
     skip 'behavioral divergence (restored-from-orphan): set_page_key_defaults before_validation auto-fills page_key, so presence validator can never fail on new records — see notepads problems.md Cluster B-C residual; do NOT pin'
     @thread.page_key = nil
     assert_not @thread.valid?
-    assert_includes @thread.errors[:page_key], "cannot be blank"
+    assert_includes @thread.errors[:page_key], 'cannot be blank'
   end
 
   test 'should require page_type when thread_kind is page' do
     @thread.thread_kind = 'page'
     @thread.page_type = nil
     assert_not @thread.valid?
-    assert_includes @thread.errors[:page_type], "cannot be blank"
+    assert_includes @thread.errors[:page_type], 'cannot be blank'
   end
 
   test 'should require page_id when thread_kind is page' do
     @thread.thread_kind = 'page'
     @thread.page_id = nil
     assert_not @thread.valid?
-    assert_includes @thread.errors[:page_id], "cannot be blank"
+    assert_includes @thread.errors[:page_id], 'cannot be blank'
   end
 
   test 'should validate page_key uniqueness within user scope' do

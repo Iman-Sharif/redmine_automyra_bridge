@@ -16,8 +16,8 @@ class CreateAutomyraBridgeMemoryEvents < ActiveRecord::Migration[6.1]
     end
 
     add_index :automyra_bridge_memory_events,
-      %i[container_type container_id created_at],
-      name: 'idx_automyra_memory_container_time'
+              %i[container_type container_id created_at],
+              name: 'idx_automyra_memory_container_time'
     add_index :automyra_bridge_memory_events, :correlation_id, name: 'idx_automyra_memory_correlation'
     add_index :automyra_bridge_memory_events, :journal_id, name: 'idx_automyra_memory_journal'
   end

@@ -96,11 +96,11 @@ module AutomyraBridge
 
     def self.sanitize_summary_text(value)
       value.to_s.squish
-        .gsub(/https?:\/\/\S+/i, '[url]')
-        .gsub(/\b(?:token|api[_-]?key|secret|password|authorization|bearer)\b\s*[:=]\s*\S+/i, '\\1=[redacted]')
-        .gsub(/\bBearer\s+\S+/i, 'Bearer [redacted]')
-        .gsub(/\b[A-Za-z0-9_\-.]{32,}\b/, '[redacted]')
-        .truncate(300)
+           .gsub(%r{https?://\S+}i, '[url]')
+           .gsub(/\b(?:token|api[_-]?key|secret|password|authorization|bearer)\b\s*[:=]\s*\S+/i, '\\1=[redacted]')
+           .gsub(/\bBearer\s+\S+/i, 'Bearer [redacted]')
+           .gsub(/\b[A-Za-z0-9_\-.]{32,}\b/, '[redacted]')
+           .truncate(300)
     end
   end
 end

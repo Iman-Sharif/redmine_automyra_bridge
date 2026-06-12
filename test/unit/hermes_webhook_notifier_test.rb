@@ -55,7 +55,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
     result = notifier.deliver(event_type: @event_type, payload: @payload, delivery_id: @delivery_id)
 
     assert_equal response, result
-    refute_nil captured_request
+    assert_not_nil captured_request
     assert_equal 'application/json', captured_request['Content-Type']
     assert_equal @event_type, captured_request['X-GitHub-Event']
     assert_equal @delivery_id, captured_request['X-GitHub-Delivery']
@@ -130,7 +130,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
     notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
     notifier.deliver(event_type: 'redmica.issue_created', payload: @payload, delivery_id: @delivery_id)
 
-    refute_nil captured_request
+    assert_not_nil captured_request
   end
 
   test 'routes redmica.issue_mention to hermes_webhook_url_mentions' do
@@ -153,7 +153,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
     notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
     notifier.deliver(event_type: 'redmica.issue_mention', payload: @payload, delivery_id: @delivery_id)
 
-    refute_nil captured_request
+    assert_not_nil captured_request
   end
 
   test 'routes redmica.issue_status_changed to hermes_webhook_url_auto_close' do
@@ -176,7 +176,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
     notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
     notifier.deliver(event_type: 'redmica.issue_status_changed', payload: @payload, delivery_id: @delivery_id)
 
-    refute_nil captured_request
+    assert_not_nil captured_request
   end
 
   test 'falls back to hermes_webhook_url when per-event url is blank' do
@@ -198,6 +198,6 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
     notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
     notifier.deliver(event_type: 'redmica.issue_created', payload: @payload, delivery_id: @delivery_id)
 
-    refute_nil captured_request
+    assert_not_nil captured_request
   end
 end

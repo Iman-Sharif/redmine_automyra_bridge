@@ -39,7 +39,7 @@ module AutomyraBridge
       lines = messages.limit(200).map do |message|
         "#{message.role}: #{message.content.to_s.squish.truncate(300)}"
       end
-      "Earlier chat summary:\n" + lines.join("\n").truncate(SUMMARY_LIMIT)
+      "Earlier chat summary:\n#{lines.join("\n").truncate(SUMMARY_LIMIT)}"
     end
   end
 end

@@ -1,4 +1,4 @@
-class AutomyraBridgeMemoryEvent < ActiveRecord::Base
+class AutomyraBridgeMemoryEvent < ApplicationRecord
   self.table_name = 'automyra_bridge_memory_events'
 
   ROLES = %w[user assistant action audit system error].freeze

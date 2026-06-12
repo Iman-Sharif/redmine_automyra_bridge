@@ -1,4 +1,4 @@
-class AutomyraBridgeActivityLog < ActiveRecord::Base
+class AutomyraBridgeActivityLog < ApplicationRecord
   self.table_name = 'automyra_activity_logs'
 
   belongs_to :project, optional: true

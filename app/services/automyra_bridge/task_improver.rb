@@ -62,7 +62,7 @@ module AutomyraBridge
       request.body = payload(user, task_params, project).to_json
 
       Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https', read_timeout: timeout, open_timeout: timeout) do |http|
-          AutomyraBridge::UrlValidator.validate_connected_peer!(http, uri.host, @settings)
+        AutomyraBridge::UrlValidator.validate_connected_peer!(http, uri.host, @settings)
         response = http.request(request)
         raise "Automyra returned HTTP #{response.code}: #{response.body.to_s.truncate(500)}" unless response.is_a?(Net::HTTPSuccess)
 

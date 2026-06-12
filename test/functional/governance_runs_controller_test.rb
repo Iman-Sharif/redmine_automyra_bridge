@@ -153,7 +153,7 @@ class AutomyraBridgeGovernanceFindingsControllerTest < ActionController::TestCas
     assert_response :success
     assert_match(/attachment_filename/, @response.body)
     assert_match(/No actions/, @response.body)
-    assert_no_match(/policy_id=\"/, @response.body)
+    assert_no_match(/policy_id="/, @response.body)
     assert finding.governance_actions.empty?
   end
 

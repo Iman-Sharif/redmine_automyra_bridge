@@ -19,6 +19,7 @@ module AutomyraBridge
         task = source_task(job) || raise('Task is no longer available.')
         body = input.dig('comment', 'body').to_s.strip
         raise 'Comment body is blank.' if body.blank?
+
         comment = task.comments.create!(author: user, body: body)
         { task_id: task.id, comment_id: comment.id }
       end

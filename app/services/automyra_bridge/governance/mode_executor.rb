@@ -7,7 +7,7 @@ module AutomyraBridge
         new(**kwargs).call
       end
 
-      def initialize(run:, policy: nil, findings:, config: nil, created_by: nil)
+      def initialize(run:, findings:, policy: nil, config: nil, created_by: nil)
         @run = run
         @policy = policy || run.governance_policy
         @findings = Array(findings)
@@ -22,9 +22,7 @@ module AutomyraBridge
           proposals = []
           applied_count = 0
 
-          if %w[propose apply_after_validation].include?(mode)
-            actions = ActionBuilder.call(run: @run, policy: @policy, findings: persisted_findings, created_by: @created_by)
-          end
+          actions = ActionBuilder.call(run: @run, policy: @policy, findings: persisted_findings, created_by: @created_by) if %w[propose apply_after_validation].include?(mode)
 
           if mode == 'propose'
             proposals = ProposalIntegrator.call(run: @run, actions: actions, created_by: @created_by)

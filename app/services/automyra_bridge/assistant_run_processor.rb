@@ -114,7 +114,11 @@ module AutomyraBridge
     def execute_read_tool(job, tool, tool_call)
       return { tool: tool.name, error: 'User is not authorized for this tool.' } unless tool.authorized?(job, job.user)
 
-      input = tool_call['input'].is_a?(Hash) ? tool_call['input'] : tool_call['arguments'].is_a?(Hash) ? tool_call['arguments'] : {}
+      input = if tool_call['input'].is_a?(Hash)
+                tool_call['input']
+              else
+                tool_call['arguments'].is_a?(Hash) ? tool_call['arguments'] : {}
+              end
       { tool: tool.name, result: tool.call(job, job.user, input) }
     rescue StandardError => e
       { tool: tool.name, error: e.message }
@@ -226,7 +230,7 @@ module AutomyraBridge
       snapshot = @job.payload['context_snapshot'] || @job.payload.dig('context', 'context_snapshot') || {}
       [
         *tools_used(parsed, events).map { |name| { type: 'tool', name: name } },
-        ({ type: 'page_context', context: snapshot.dig('page') || snapshot[:page] } if (snapshot.dig('page') || snapshot[:page]).present?),
+        ({ type: 'page_context', context: snapshot['page'] || snapshot[:page] } if (snapshot['page'] || snapshot[:page]).present?),
         *Array(@memory_events_referenced).map { |event| { type: 'memory_event', id: event.id, event_type: event.event_type } }
       ].compact
     end
@@ -300,7 +304,7 @@ module AutomyraBridge
 
     def ensure_not_cancelled!
       @job.reload
-      raise 'Automyra job was cancelled.' if @job.status == 'cancelled' || @job.respond_to?(:cancelled?) && @job.cancelled? || @run&.respond_to?(:cancelled?) && @run.cancelled?
+      raise 'Automyra job was cancelled.' if @job.status == 'cancelled' || @job.respond_to?(:cancelled?) && @job.cancelled? || @run.respond_to?(:cancelled?) && @run.cancelled?
     end
 
     def response_text(parsed)

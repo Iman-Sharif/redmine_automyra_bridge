@@ -23,9 +23,7 @@ module AutomyraBridge
 
         # Workflow-safe transition check
         allowed_statuses = issue.new_statuses_allowed_to(User.current, false)
-        unless allowed_statuses.include?(new_status) || issue.status_id == new_status.id
-          raise "Status transition from #{issue.status} to #{new_status} is not allowed by the workflow."
-        end
+        raise "Status transition from #{issue.status} to #{new_status} is not allowed by the workflow." unless allowed_statuses.include?(new_status) || issue.status_id == new_status.id
 
         issue.init_journal(User.current)
         issue.status = new_status

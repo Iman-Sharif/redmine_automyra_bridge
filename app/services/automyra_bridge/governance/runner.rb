@@ -101,8 +101,8 @@ module AutomyraBridge
 
       def stale_runs
         AutomyraBridge::GovernanceRun.active
-                                   .where(governance_policy_id: @policy.id)
-                                   .where('COALESCE(started_at, created_at) < ?', STALE_RUN_THRESHOLD.ago)
+                                     .where(governance_policy_id: @policy.id)
+                                     .where('COALESCE(started_at, created_at) < ?', STALE_RUN_THRESHOLD.ago)
       end
 
       def collect_candidates
@@ -110,9 +110,7 @@ module AutomyraBridge
         candidates.concat(Collectors::WikiPageCollector.call(policy: @policy, limit: batch_size)) if truthy?(config['scope_wiki_pages']) || truthy?(config['scope_wiki_requirement_links']) || truthy?(config['scope_requirement_links'])
         candidates.concat(Collectors::TaskCollector.call(policy: @policy, limit: batch_size)) if truthy?(config['scope_tasks']) || truthy?(config['scope_task_requirement_links']) || truthy?(config['scope_requirement_links'])
         candidates.concat(Collectors::AttachmentCollector.call(policy: @policy, limit: batch_size)) if truthy?(config['scope_attachments'])
-        if truthy?(config['scope_requirement_links']) || truthy?(config['scope_wiki_requirement_links']) || truthy?(config['scope_task_requirement_links'])
-          candidates.concat(Collectors::RequirementCollector.call(policy: @policy, limit: batch_size))
-        end
+        candidates.concat(Collectors::RequirementCollector.call(policy: @policy, limit: batch_size)) if truthy?(config['scope_requirement_links']) || truthy?(config['scope_wiki_requirement_links']) || truthy?(config['scope_task_requirement_links'])
         candidates
       end
 

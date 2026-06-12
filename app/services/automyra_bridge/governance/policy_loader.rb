@@ -64,8 +64,8 @@ module AutomyraBridge
           exclusions: policy.exclusions,
           scope_wiki_pages: policy.scope_wiki_pages,
           scope_tasks: policy.scope_tasks,
-           scope_requirement_links: policy.scope_requirement_links,
-           scope_wiki_requirement_links: policy.scope_wiki_requirement_links,
+          scope_requirement_links: policy.scope_requirement_links,
+          scope_wiki_requirement_links: policy.scope_wiki_requirement_links,
           scope_task_requirement_links: policy.scope_task_requirement_links,
           scope_attachments: policy.respond_to?(:scope_attachments) ? policy.scope_attachments : nil
         }.compact
