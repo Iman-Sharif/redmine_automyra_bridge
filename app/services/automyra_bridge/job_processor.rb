@@ -302,7 +302,10 @@ module AutomyraBridge
         return
       end
 
-      result = tool.call(proposal_job_for_tool(job, proposal), actor, proposal.payload)
+      outcome = tool.safe_call(proposal_job_for_tool(job, proposal), actor, proposal.payload)
+      raise outcome[:error] if outcome[:error]
+
+      result = outcome[:result]
       tool.verify!(result, proposal.payload)
       proposal.update!(status: 'executed', result_payload: result.to_json, executed_at: Time.current)
     rescue StandardError => e

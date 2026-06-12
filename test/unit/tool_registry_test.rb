@@ -4,11 +4,17 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
   fixtures :users, :projects, :issues
 
   setup do
+    @old_queue_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = :test
     @user = User.find(2)
     @project = Project.find(1)
     @task = TaskHub::Task.create!(title: 'Registry task', user: @user, author: @user, project: @project, status: 'todo')
     @comment = @task.comments.create!(author: @user, body: '@automyra help')
     @job = AutomyraBridgeJob.create!(status: 'queued', source_type: 'TaskHub::TaskComment', source_id: @comment.id, user: @user, project: @project, correlation_id: SecureRandom.uuid, idempotency_key: SecureRandom.uuid, request_payload: { source: 'task_hub_comment' }.to_json)
+  end
+
+  teardown do
+    ActiveJob::Base.queue_adapter = @old_queue_adapter if @old_queue_adapter
   end
 
   test 'registry exposes task and issue tools with schemas' do

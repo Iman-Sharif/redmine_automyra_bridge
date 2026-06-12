@@ -4,6 +4,8 @@ class AutomyraBridgeGovernanceExecutorsTest < ActiveSupport::TestCase
   fixtures :users, :projects, :roles, :members, :member_roles, :trackers, :issue_statuses, :enumerations
 
   setup do
+    @old_queue_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = :test
     WikiHub::PageLink.delete_all if defined?(WikiHub::PageLink)
     WikiHub::PageSnapshot.delete_all if defined?(WikiHub::PageSnapshot)
     AutomyraBridge::GovernanceAction.delete_all
@@ -20,6 +22,10 @@ class AutomyraBridgeGovernanceExecutorsTest < ActiveSupport::TestCase
     grant_permissions!(@user, %i[manage_task_hub_tasks edit_wiki_pages view_wiki_pages edit_issues manage_files])
     @policy = create_policy(@user)
     @run = AutomyraBridge::GovernanceRun.create!(governance_policy: @policy, created_by: @user, status: 'running')
+  end
+
+  teardown do
+    ActiveJob::Base.queue_adapter = @old_queue_adapter if @old_queue_adapter
   end
 
   test 'attachment filename executor applies rename and captures rollback payload' do

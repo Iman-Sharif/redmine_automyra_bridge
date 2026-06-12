@@ -22,6 +22,8 @@ class IssueTaskPairsCharacterizationTest < ActiveSupport::TestCase
            :issues, :issue_categories
 
   setup do
+    @old_queue_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = :test
     @user = User.find(2)
     @project = Project.find(1)
 
@@ -43,6 +45,10 @@ class IssueTaskPairsCharacterizationTest < ActiveSupport::TestCase
       idempotency_key: SecureRandom.uuid,
       request_payload: { source: 'issue_journal', issue_id: @issue.id }.to_json
     )
+  end
+
+  teardown do
+    ActiveJob::Base.queue_adapter = @old_queue_adapter if @old_queue_adapter
   end
 
   def tool(name)

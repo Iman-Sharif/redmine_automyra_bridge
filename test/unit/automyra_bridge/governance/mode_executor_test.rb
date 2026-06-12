@@ -4,6 +4,8 @@ class AutomyraBridgeGovernanceModeExecutorTest < ActiveSupport::TestCase
   fixtures :users, :projects
 
   setup do
+    @old_queue_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = :test
     AutomyraBridgeActionProposal.delete_all if defined?(AutomyraBridgeActionProposal)
     AutomyraBridgeJob.delete_all
     AutomyraBridge::GovernanceAction.delete_all
@@ -16,6 +18,10 @@ class AutomyraBridgeGovernanceModeExecutorTest < ActiveSupport::TestCase
     @project = Project.find(1)
     grant_permissions!(@user, %i[manage_task_hub_tasks edit_wiki_pages view_wiki_pages edit_issues manage_files])
     @task = TaskHub::Task.create!(title: 'Old task title', user: @user, author: @user, project: @project, status: 'todo', priority: 2)
+  end
+
+  teardown do
+    ActiveJob::Base.queue_adapter = @old_queue_adapter if @old_queue_adapter
   end
 
   test 'apply after validation applies attachment filename changes' do
