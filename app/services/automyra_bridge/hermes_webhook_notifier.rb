@@ -98,7 +98,7 @@ module AutomyraBridge
 
     def webhook_url_for_event_type(event_type)
       case event_type.to_s
-      when 'redmica.issue_created'
+      when 'redmica.issue_created', 'redmica.task_created'
         @settings['hermes_webhook_url_creation_review'].presence || @settings['hermes_webhook_url'].to_s.strip
       when 'redmica.issue_mention', 'redmica.task_comment_mention'
         @settings['hermes_webhook_url_mentions'].presence || @settings['hermes_webhook_url'].to_s.strip

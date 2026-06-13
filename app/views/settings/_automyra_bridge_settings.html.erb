@@ -80,7 +80,7 @@
   <p>
     <label>Creation review webhook URL</label>
     <%= text_field_tag 'settings[hermes_webhook_url_creation_review]', @settings['hermes_webhook_url_creation_review'], size: 80 %>
-    <em class="info">URL for new issue creation review (redmica.issue_created). Falls back to legacy URL if blank.</em>
+    <em class="info">URL for new issue/task creation review (redmica.issue_created, redmica.task_created). Falls back to legacy URL if blank.</em>
   </p>
   <p>
     <label>Auto-close webhook URL</label>
