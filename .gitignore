@@ -46,11 +46,16 @@ debug_wiki_hub.rb
 .tmp_erb_check.rb
 .tmp_wiki_audit.py
 
+# Docker artifacts
+dir:*/
+git:*/
+
 # Large binary data
 db_data.tar.gz
 redmine_backup.sql
 kanban_board.png
 kanban_dom.txt
+check_hub_route_docs_parity
 
 # Test results
 test-results/
@@ -74,4 +79,8 @@ package.json
 package-lock.json
 
 # Misc junk
+en.yml
 login-snapshot.yml
+
+# Pre-cutover backups
+*.precutover.bak
