@@ -203,6 +203,74 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
     assert_not_nil captured_request
   end
 
+  test 'routes redmica.wiki_created to hermes_webhook_url_wiki_review' do
+    wiki_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-wiki-review'
+    settings = @settings.merge('hermes_webhook_url_wiki_review' => wiki_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(wiki_review_url, anything).returns(URI.parse(wiki_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.wiki_created', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.wiki_updated to hermes_webhook_url_wiki_review' do
+    wiki_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-wiki-review'
+    settings = @settings.merge('hermes_webhook_url_wiki_review' => wiki_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(wiki_review_url, anything).returns(URI.parse(wiki_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.wiki_updated', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'falls back to hermes_webhook_url for redmica.wiki_created when wiki-review url is blank' do
+    settings = @settings.merge('hermes_webhook_url_wiki_review' => '')
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(URL, anything).returns(URI.parse(URL))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.wiki_created', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
   test 'falls back to hermes_webhook_url for redmica.task_created when creation-review url is blank' do
     settings = @settings.merge('hermes_webhook_url_creation_review' => '')
 

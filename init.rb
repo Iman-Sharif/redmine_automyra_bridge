@@ -28,6 +28,7 @@ Redmine::Plugin.register :redmine_automyra_bridge do
              'hermes_webhook_url_mentions' => '',
              'hermes_webhook_url_creation_review' => '',
              'hermes_webhook_url_auto_close' => '',
+             'hermes_webhook_url_wiki_review' => '',
              'hermes_webhook_secret' => '',
              'activity_log_secret' => 'change-me-in-production',
              'auto_close_enabled' => '0',
@@ -162,6 +163,8 @@ prepare_automyra_bridge = proc do
   AutomyraBridge::IssueStatusHook.install!
   require_dependency File.expand_path('lib/automyra_bridge/issue_creation_hook', __dir__)
   AutomyraBridge::IssueCreationHook.install!
+  require_dependency File.expand_path('lib/automyra_bridge/wiki_creation_hook', __dir__)
+  AutomyraBridge::WikiCreationHook.install!
 end
 
 prepare_automyra_bridge.call

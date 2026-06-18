@@ -104,6 +104,8 @@ module AutomyraBridge
         @settings['hermes_webhook_url_mentions'].presence || @settings['hermes_webhook_url'].to_s.strip
       when 'redmica.issue_status_changed'
         @settings['hermes_webhook_url_auto_close'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.wiki_created', 'redmica.wiki_updated'
+        @settings['hermes_webhook_url_wiki_review'].presence || @settings['hermes_webhook_url'].to_s.strip
       else
         @settings['hermes_webhook_url'].to_s.strip
       end
