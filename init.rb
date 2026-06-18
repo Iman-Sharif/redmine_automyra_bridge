@@ -175,6 +175,10 @@ prepare_automyra_bridge = proc do
   AutomyraBridge::IssueCreationHook.install!
   require_dependency File.expand_path('lib/automyra_bridge/wiki_creation_hook', __dir__)
   AutomyraBridge::WikiCreationHook.install!
+  require_dependency File.expand_path('lib/automyra_bridge/env', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/task_hub_review_dispatcher', __dir__)
+  require_dependency File.expand_path('lib/automyra_bridge/task_hub_creation_hook', __dir__)
+  AutomyraBridge::TaskHubCreationHook.install!
 end
 
 prepare_automyra_bridge.call
