@@ -249,6 +249,264 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
     assert_not_nil captured_request
   end
 
+  test 'routes redmica.faq_hub.faq_created to hermes_webhook_url_faq_review' do
+    faq_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-faq-review'
+    settings = @settings.merge('hermes_webhook_url_faq_review' => faq_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(faq_review_url, anything).returns(URI.parse(faq_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.faq_hub.faq_created', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.faq_hub.faq_updated to hermes_webhook_url_faq_review' do
+    faq_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-faq-review'
+    settings = @settings.merge('hermes_webhook_url_faq_review' => faq_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(faq_review_url, anything).returns(URI.parse(faq_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.faq_hub.faq_updated', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.faq_hub.faq_status_changed to hermes_webhook_url_faq_status_changed' do
+    faq_status_changed_url = 'https://automyra.sbg-server.com/webhooks/redmica-faq-status'
+    settings = @settings.merge('hermes_webhook_url_faq_status_changed' => faq_status_changed_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(faq_status_changed_url, anything).returns(URI.parse(faq_status_changed_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.faq_hub.faq_status_changed', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.error_hub.error_created to hermes_webhook_url_error_review' do
+    error_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-error-review'
+    settings = @settings.merge('hermes_webhook_url_error_review' => error_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(error_review_url, anything).returns(URI.parse(error_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.error_hub.error_created', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.error_hub.error_status_changed to hermes_webhook_url_error_status_changed' do
+    error_status_changed_url = 'https://automyra.sbg-server.com/webhooks/redmica-error-status'
+    settings = @settings.merge('hermes_webhook_url_error_status_changed' => error_status_changed_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(error_status_changed_url, anything)
+                                .returns(URI.parse(error_status_changed_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.error_hub.error_status_changed', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.task_hub.task_updated to hermes_webhook_url_task_review' do
+    task_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-task-hub-review'
+    settings = @settings.merge('hermes_webhook_url_task_review' => task_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(task_review_url, anything).returns(URI.parse(task_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.task_hub.task_updated', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.task_hub.task_status_changed to hermes_webhook_url_task_status_changed' do
+    task_status_changed_url = 'https://automyra.sbg-server.com/webhooks/redmica-task-hub-status'
+    settings = @settings.merge('hermes_webhook_url_task_status_changed' => task_status_changed_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(task_status_changed_url, anything)
+                                .returns(URI.parse(task_status_changed_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.task_hub.task_status_changed', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.contacts_hub.contact_created to hermes_webhook_url_contacts_review' do
+    contacts_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-contacts-review'
+    settings = @settings.merge('hermes_webhook_url_contacts_review' => contacts_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(contacts_review_url, anything)
+                                .returns(URI.parse(contacts_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.contacts_hub.contact_created', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.contacts_hub.contact_status_changed to hermes_webhook_url_contacts_status_changed' do
+    contacts_status_changed_url = 'https://automyra.sbg-server.com/webhooks/redmica-contacts-status'
+    settings = @settings.merge('hermes_webhook_url_contacts_status_changed' => contacts_status_changed_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(contacts_status_changed_url, anything)
+                                .returns(URI.parse(contacts_status_changed_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.contacts_hub.contact_status_changed', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.document_hub.document_updated to hermes_webhook_url_document_review' do
+    document_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-document-review'
+    settings = @settings.merge('hermes_webhook_url_document_review' => document_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(document_review_url, anything)
+                                .returns(URI.parse(document_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.document_hub.document_updated', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'routes redmica.repo_hub.repository_created to hermes_webhook_url_repo_review' do
+    repo_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-repo-review'
+    settings = @settings.merge('hermes_webhook_url_repo_review' => repo_review_url)
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(repo_review_url, anything).returns(URI.parse(repo_review_url))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.repo_hub.repository_created', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
   test 'falls back to hermes_webhook_url for redmica.wiki_created when wiki-review url is blank' do
     settings = @settings.merge('hermes_webhook_url_wiki_review' => '')
 
@@ -311,6 +569,28 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
 
     notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
     notifier.deliver(event_type: 'redmica.issue_created', payload: @payload, delivery_id: @delivery_id)
+
+    assert_not_nil captured_request
+  end
+
+  test 'falls back to hermes_webhook_url for redmica.faq_hub.faq_created when faq-review url is blank' do
+    settings = @settings.merge('hermes_webhook_url_faq_review' => '')
+
+    captured_request = nil
+    response = Net::HTTPOK.new('1.1', '202', 'Accepted')
+    response.stubs(:body).returns('{"status":"accepted"}')
+    http = mock('http')
+    http.stubs(:request).with do |req|
+      captured_request = req
+      true
+    end.returns(response)
+
+    AutomyraBridge::UrlValidator.stubs(:validate!).with(URL, anything).returns(URI.parse(URL))
+    AutomyraBridge::UrlValidator.stubs(:validate_connected_peer!).returns(true)
+    Net::HTTP.stubs(:start).yields(http).returns(response)
+
+    notifier = AutomyraBridge::HermesWebhookNotifier.new(settings)
+    notifier.deliver(event_type: 'redmica.faq_hub.faq_created', payload: @payload, delivery_id: @delivery_id)
 
     assert_not_nil captured_request
   end

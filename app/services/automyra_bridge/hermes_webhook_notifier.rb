@@ -106,6 +106,26 @@ module AutomyraBridge
         @settings['hermes_webhook_url_auto_close'].presence || @settings['hermes_webhook_url'].to_s.strip
       when 'redmica.wiki_created', 'redmica.wiki_updated'
         @settings['hermes_webhook_url_wiki_review'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.faq_hub.faq_created', 'redmica.faq_hub.faq_updated'
+        @settings['hermes_webhook_url_faq_review'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.faq_hub.faq_status_changed'
+        @settings['hermes_webhook_url_faq_status_changed'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.error_hub.error_created', 'redmica.error_hub.error_updated'
+        @settings['hermes_webhook_url_error_review'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.error_hub.error_status_changed'
+        @settings['hermes_webhook_url_error_status_changed'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.task_hub.task_created', 'redmica.task_hub.task_updated'
+        @settings['hermes_webhook_url_task_review'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.task_hub.task_status_changed'
+        @settings['hermes_webhook_url_task_status_changed'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.contacts_hub.contact_created', 'redmica.contacts_hub.contact_updated'
+        @settings['hermes_webhook_url_contacts_review'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.contacts_hub.contact_status_changed'
+        @settings['hermes_webhook_url_contacts_status_changed'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.document_hub.document_created', 'redmica.document_hub.document_updated'
+        @settings['hermes_webhook_url_document_review'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.repo_hub.repository_created', 'redmica.repo_hub.repository_updated'
+        @settings['hermes_webhook_url_repo_review'].presence || @settings['hermes_webhook_url'].to_s.strip
       else
         @settings['hermes_webhook_url'].to_s.strip
       end

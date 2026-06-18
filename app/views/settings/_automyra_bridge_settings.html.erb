@@ -92,6 +92,58 @@
     <%= text_field_tag 'settings[hermes_webhook_url_wiki_review]', @settings['hermes_webhook_url_wiki_review'], size: 80 %>
     <em class="info">URL for wiki page creation/update review (redmica.wiki_created, redmica.wiki_updated). Falls back to legacy URL if blank.</em>
   </p>
+  <h4>Review webhooks</h4>
+  <p>
+    <label>FAQ review webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_faq_review]', @settings['hermes_webhook_url_faq_review'], size: 80 %>
+    <em class="info">URL for FAQ creation/update review (redmica.faq_hub.faq_created, redmica.faq_hub.faq_updated). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Error review webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_error_review]', @settings['hermes_webhook_url_error_review'], size: 80 %>
+    <em class="info">URL for error page creation/update review (redmica.error_hub.error_created, redmica.error_hub.error_updated). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Task review webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_task_review]', @settings['hermes_webhook_url_task_review'], size: 80 %>
+    <em class="info">URL for task creation/update review (redmica.task_hub.task_created, redmica.task_hub.task_updated). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Contacts review webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_contacts_review]', @settings['hermes_webhook_url_contacts_review'], size: 80 %>
+    <em class="info">URL for contact creation/update review (redmica.contacts_hub.contact_created, redmica.contacts_hub.contact_updated). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Document review webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_document_review]', @settings['hermes_webhook_url_document_review'], size: 80 %>
+    <em class="info">URL for document creation/update review (redmica.document_hub.document_created, redmica.document_hub.document_updated). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Repo review webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_repo_review]', @settings['hermes_webhook_url_repo_review'], size: 80 %>
+    <em class="info">URL for repository creation/update review (redmica.repo_hub.repository_created, redmica.repo_hub.repository_updated). Falls back to legacy URL if blank.</em>
+  </p>
+  <h4>Status changed webhooks</h4>
+  <p>
+    <label>FAQ status changed webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_faq_status_changed]', @settings['hermes_webhook_url_faq_status_changed'], size: 80 %>
+    <em class="info">URL for FAQ status change events (redmica.faq_hub.faq_status_changed). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Error status changed webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_error_status_changed]', @settings['hermes_webhook_url_error_status_changed'], size: 80 %>
+    <em class="info">URL for error status change events (redmica.error_hub.error_status_changed). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Task status changed webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_task_status_changed]', @settings['hermes_webhook_url_task_status_changed'], size: 80 %>
+    <em class="info">URL for task status change events (redmica.task_hub.task_status_changed). Falls back to legacy URL if blank.</em>
+  </p>
+  <p>
+    <label>Contacts status changed webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_contacts_status_changed]', @settings['hermes_webhook_url_contacts_status_changed'], size: 80 %>
+    <em class="info">URL for contact status change events (redmica.contacts_hub.contact_status_changed). Falls back to legacy URL if blank.</em>
+  </p>
   <p>
     <label>Hermes webhook secret</label>
     <%= password_field_tag 'settings[hermes_webhook_secret]', @settings['hermes_webhook_secret'], size: 80, autocomplete: 'new-password' %>
