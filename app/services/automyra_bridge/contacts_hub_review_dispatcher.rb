@@ -114,9 +114,9 @@ module AutomyraBridge
       return [] unless contact.custom_field_values
 
       contact.custom_field_values
-              .map { |cv| cv.custom_field&.name }
-              .compact
-              .uniq
+             .map { |cv| cv.custom_field&.name }
+             .compact
+             .uniq
     rescue StandardError
       []
     end

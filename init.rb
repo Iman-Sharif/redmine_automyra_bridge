@@ -176,12 +176,24 @@ prepare_automyra_bridge = proc do
   require_dependency File.expand_path('lib/automyra_bridge/wiki_creation_hook', __dir__)
   AutomyraBridge::WikiCreationHook.install!
   require_dependency File.expand_path('lib/automyra_bridge/env', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/faq_hub_review_dispatcher', __dir__)
+  require_dependency File.expand_path('lib/automyra_bridge/faq_hub_creation_hook', __dir__)
+  AutomyraBridge::FaqHubCreationHook.install!
+  require_dependency File.expand_path('app/services/automyra_bridge/error_hub_review_dispatcher', __dir__)
+  require_dependency File.expand_path('lib/automyra_bridge/error_hub_creation_hook', __dir__)
+  AutomyraBridge::ErrorHubCreationHook.install!
   require_dependency File.expand_path('app/services/automyra_bridge/task_hub_review_dispatcher', __dir__)
   require_dependency File.expand_path('lib/automyra_bridge/task_hub_creation_hook', __dir__)
   AutomyraBridge::TaskHubCreationHook.install!
+  require_dependency File.expand_path('app/services/automyra_bridge/contacts_hub_review_dispatcher', __dir__)
+  require_dependency File.expand_path('lib/automyra_bridge/contacts_hub_creation_hook', __dir__)
+  AutomyraBridge::ContactsHubCreationHook.install!
   require_dependency File.expand_path('lib/automyra_bridge/document_hub_creation_hook', __dir__)
   AutomyraBridge::DocumentHubCreationHook.install!
   require_dependency File.expand_path('app/services/automyra_bridge/document_hub_review_dispatcher', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/repo_hub_review_dispatcher', __dir__)
+  require_dependency File.expand_path('lib/automyra_bridge/repo_hub_creation_hook', __dir__)
+  AutomyraBridge::RepoHubCreationHook.install!
 end
 
 prepare_automyra_bridge.call
