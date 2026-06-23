@@ -180,24 +180,21 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
                  'X-Hub-Signature-256 algorithm + value pinned to sha256 HMAC of the wire body'
   end
 
-  test 'deliver job retry policy is pinned: StandardError, polynomially_longer, 5 attempts' do
+  test 'deliver job has no custom retry_on (uses ActiveJob default)' do
     job_class = AutomyraBridge::HermesWebhookDeliverJob
 
-    # ActiveJob stores retry_on registrations as rescue_from entries on
-    # rescue_handlers; this is the public-ish surface for runtime inspection.
+    # After the F4 scope cleanup, the job no longer defines a custom retry_on
+    # so it falls through to ActiveJob::Base.default. Verify no custom handler.
     handlers = job_class.rescue_handlers
-    assert handlers.any? { |h| h[0] == 'StandardError' || h[0] == StandardError.name },
-           'retry_on registers a StandardError rescue handler — pinned'
+    refute handlers.any? { |h| h[0] == 'StandardError' || h[0] == StandardError.name },
+           'HermesWebhookDeliverJob must NOT have a custom StandardError retry_on after F4 cleanup'
 
-    # Second pin via source regex — independent of ActiveJob internals so the
-    # exact policy line stays self-evident even if framework introspection
-    # surfaces shift.
     src_path = File.expand_path(
       '../../app/jobs/automyra_bridge/hermes_webhook_deliver_job.rb', __dir__
     )
     src = File.read(src_path)
-    assert_match(/retry_on\s+StandardError,\s*wait:\s*:polynomially_longer,\s*attempts:\s*5/, src,
-                 'retry policy pinned: StandardError + :polynomially_longer (Rails 7.2) + attempts: 5')
+    refute_match(/retry_on\s+StandardError/, src,
+                 'HermesWebhookDeliverJob source must not contain a custom retry_on for StandardError')
   end
 
   test 'notifier timeout baseline is pinned: default 15s, clamped to [1, 30]' do

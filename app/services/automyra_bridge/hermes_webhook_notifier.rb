@@ -31,7 +31,6 @@ module AutomyraBridge
       return nil unless uri
 
       delivery = delivery_id.presence || SecureRandom.uuid
-      return nil if already_delivered?(delivery, event_type)
 
       body_bytes = { event_type: event_type, payload: payload }.to_json
       return nil if payload_too_large?(body_bytes, event_type, delivery)
@@ -57,34 +56,12 @@ module AutomyraBridge
           raise message
         end
 
-        record_delivery(delivery, event_type)
         Rails.logger.info("[AutomyraBridge::HermesWebhookNotifier] delivered event=#{event_type} delivery_id=#{delivery} status=#{response.code}")
         response
       end
     end
 
     private
-
-    # A delivery is idempotent-skipped only after a prior SUCCESSFUL send was
-    # recorded; failed attempts leave no record so retries still proceed.
-    def already_delivered?(delivery, event_type)
-      return false unless AutomyraBridgeWebhookDelivery.table_exists?
-      return false unless AutomyraBridgeWebhookDelivery.already_delivered?(delivery)
-
-      Rails.logger.info("[AutomyraBridge::HermesWebhookNotifier] skipping already-delivered event=#{event_type} delivery_id=#{delivery}")
-      true
-    rescue StandardError => e
-      Rails.logger.warn("[AutomyraBridge::HermesWebhookNotifier] idempotency check failed, proceeding: #{e.message}")
-      false
-    end
-
-    def record_delivery(delivery, event_type)
-      return unless AutomyraBridgeWebhookDelivery.table_exists?
-
-      AutomyraBridgeWebhookDelivery.record_delivery!(idempotency_key: delivery, event_type: event_type.to_s)
-    rescue StandardError => e
-      Rails.logger.warn("[AutomyraBridge::HermesWebhookNotifier] idempotency record failed: #{e.message}")
-    end
 
     def payload_too_large?(body_bytes, event_type, delivery)
       return false if body_bytes.bytesize <= MAX_PAYLOAD_BYTES

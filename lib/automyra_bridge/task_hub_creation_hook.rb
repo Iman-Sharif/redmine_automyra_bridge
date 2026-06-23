@@ -32,11 +32,18 @@ module AutomyraBridge
 
     def self.install!
       return unless defined?(::TaskHub::Task)
-      return if ::TaskHub::Task.included_modules.include?(InstanceMethods)
 
-      ::TaskHub::Task.include InstanceMethods
-      ::TaskHub::Task.after_commit :automyra_bridge_dispatch_task_hub_review_create, on: :create
-      ::TaskHub::Task.after_commit :automyra_bridge_dispatch_task_hub_review_update, on: :update
+      unless ::TaskHub::Task.included_modules.include?(InstanceMethods)
+        ::TaskHub::Task.include InstanceMethods
+        ::TaskHub::Task.after_commit :automyra_bridge_dispatch_task_hub_review_create, on: :create
+        ::TaskHub::Task.after_commit :automyra_bridge_dispatch_task_hub_review_update, on: :update
+      end
+
+      # TaskHub::Task ends with a `private` modifier, so any module included
+      # into it after class load inherits that visibility. Re-declare the bot
+      # check as public so `self.dispatch` (a class method) can call it on a
+      # task instance without raising NoMethodError: private method.
+      ::TaskHub::Task.send(:public, :automyra_bridge_task_hub_review_authored_by_automyra?)
     end
 
     module InstanceMethods

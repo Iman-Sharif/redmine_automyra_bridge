@@ -33,10 +33,12 @@ class AutomyraBridgeTaskHubCreationReviewWebhookTest < ActiveSupport::TestCase
   # --- 1. Create hook --------------------------------------------------------
 
   test 'fires redmica.task_hub.task_created when TaskHub::Task is created' do
+    puts "DEBUG callbacks before create: #{TaskHub::Task._commit_callbacks.select { |c| c.kind == :after }.map(&:filter).inspect}"
     assert_enqueued_with(job: AutomyraBridge::HermesWebhookDeliverJob) do
       create_task(title: 'New review task')
     end
 
+    puts "DEBUG enqueued jobs: #{enqueued_jobs.map { |j| [j[:job], j[:args].first] }.inspect}"
     job = enqueued_jobs.find { |j| j[:job] == AutomyraBridge::HermesWebhookDeliverJob }
     assert_not_nil job, 'expected a HermesWebhookDeliverJob to be enqueued'
 
@@ -90,7 +92,10 @@ class AutomyraBridgeTaskHubCreationReviewWebhookTest < ActiveSupport::TestCase
         task.update!(attr => new_value)
       end
 
-      job = enqueued_jobs.find { |j| j[:job] == AutomyraBridge::HermesWebhookDeliverJob }
+      # TaskStatusHook is registered after TaskHubCreationHook and Rails fires
+      # after_commit in reverse order, so a status update enqueues the
+      # status-changed job first; filter to the update event explicitly.
+      job = enqueued_jobs.find { |j| j[:job] == AutomyraBridge::HermesWebhookDeliverJob && j[:args][0] == 'redmica.task_hub.task_updated' }
       assert_equal 'redmica.task_hub.task_updated', job[:args][0],
                    "expected update event for watched attribute #{attr}"
     end

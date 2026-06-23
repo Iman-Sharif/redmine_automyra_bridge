@@ -44,3 +44,13 @@ end
 class ActiveRecord::Base
   delegate :column_names, to: :class
 end
+
+# When a plugin test is invoked as the main script with additional test files
+# on the command line (e.g. `ruby -Itest test/a_test.rb test/b_test.rb`), Ruby
+# only loads the first file. Load the remaining test files here so Minitest
+# runs the full suite together.
+if $0 && File.basename($0).end_with?('_test.rb') && ARGV.any? { |arg| arg.end_with?('_test.rb') }
+  ARGV.each do |arg|
+    require File.expand_path(arg) if arg.end_with?('_test.rb') && File.file?(arg)
+  end
+end

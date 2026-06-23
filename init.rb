@@ -179,15 +179,27 @@ prepare_automyra_bridge = proc do
   require_dependency File.expand_path('app/services/automyra_bridge/faq_hub_review_dispatcher', __dir__)
   require_dependency File.expand_path('lib/automyra_bridge/faq_hub_creation_hook', __dir__)
   AutomyraBridge::FaqHubCreationHook.install!
+  require_dependency File.expand_path('lib/automyra_bridge/faq_status_hook', __dir__) unless defined?(AutomyraBridge::FaqStatusHook)
+  require_dependency File.expand_path('app/services/automyra_bridge/faq_hub_status_dispatcher', __dir__)
+  AutomyraBridge::FaqStatusHook.install!
   require_dependency File.expand_path('app/services/automyra_bridge/error_hub_review_dispatcher', __dir__)
   require_dependency File.expand_path('lib/automyra_bridge/error_hub_creation_hook', __dir__)
   AutomyraBridge::ErrorHubCreationHook.install!
+  require_dependency File.expand_path('lib/automyra_bridge/error_status_hook', __dir__) unless defined?(AutomyraBridge::ErrorStatusHook)
+  require_dependency File.expand_path('app/services/automyra_bridge/error_hub_status_dispatcher', __dir__)
+  AutomyraBridge::ErrorStatusHook.install!
   require_dependency File.expand_path('app/services/automyra_bridge/task_hub_review_dispatcher', __dir__)
   require_dependency File.expand_path('lib/automyra_bridge/task_hub_creation_hook', __dir__)
   AutomyraBridge::TaskHubCreationHook.install!
+  require_dependency File.expand_path('lib/automyra_bridge/task_status_hook', __dir__) unless defined?(AutomyraBridge::TaskStatusHook)
+  require_dependency File.expand_path('app/services/automyra_bridge/task_hub_status_dispatcher', __dir__)
+  AutomyraBridge::TaskStatusHook.install!
   require_dependency File.expand_path('app/services/automyra_bridge/contacts_hub_review_dispatcher', __dir__)
   require_dependency File.expand_path('lib/automyra_bridge/contacts_hub_creation_hook', __dir__)
   AutomyraBridge::ContactsHubCreationHook.install!
+  require_dependency File.expand_path('lib/automyra_bridge/contacts_status_hook', __dir__) unless defined?(AutomyraBridge::ContactsStatusHook)
+  require_dependency File.expand_path('app/services/automyra_bridge/contacts_hub_status_dispatcher', __dir__)
+  AutomyraBridge::ContactsStatusHook.install!
   require_dependency File.expand_path('lib/automyra_bridge/document_hub_creation_hook', __dir__)
   AutomyraBridge::DocumentHubCreationHook.install!
   require_dependency File.expand_path('app/services/automyra_bridge/document_hub_review_dispatcher', __dir__)
