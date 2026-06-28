@@ -628,7 +628,7 @@ module AutomyraBridge
     end
 
     def status_author(job)
-      User.where(login: 'Automyra', type: 'User', status: Principal::STATUS_ACTIVE).order(:id).last || job.user
+      AutomyraBridge::BotUser.call(@settings) || job.user
     end
 
     def endpoint

@@ -7,6 +7,8 @@ RedmineApp::Application.routes.draw do
   get 'automyra_bridge/diagnostics', to: 'automyra_bridge_operator#diagnostics', as: 'automyra_bridge_global_diagnostics'
   post 'projects/:project_id/automyra_bridge/jobs/:id/retry', to: 'automyra_bridge_operator#retry_job', as: 'automyra_bridge_retry_job'
   post 'projects/:project_id/automyra_bridge/jobs/:id/cancel', to: 'automyra_bridge_operator#cancel_job', as: 'automyra_bridge_cancel_job'
+  post 'projects/:project_id/automyra_bridge/deliveries/:id/retry', to: 'automyra_bridge_operator#retry_delivery', as: 'automyra_bridge_retry_delivery'
+  post 'projects/:project_id/automyra_bridge/deliveries/:id/cancel', to: 'automyra_bridge_operator#cancel_delivery', as: 'automyra_bridge_cancel_delivery'
   patch 'projects/:project_id/automyra_bridge/settings', to: 'automyra_bridge_operator#update_settings', as: 'automyra_bridge_project_settings'
   get 'automyra_bridge/proposals/:id', to: 'automyra_bridge_action_proposals#show', as: 'automyra_bridge_proposal'
   post 'automyra_bridge/proposals/:id/approve', to: 'automyra_bridge_action_proposals#approve', as: 'automyra_bridge_approve_proposal'

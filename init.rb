@@ -39,10 +39,13 @@ Redmine::Plugin.register :redmine_automyra_bridge do
              'hermes_webhook_url_contacts_status_changed' => '',
              'hermes_webhook_url_document_review' => '',
              'hermes_webhook_url_repo_review' => '',
-             'hermes_webhook_secret' => '',
-             'activity_log_secret' => 'change-me-in-production',
-             'auto_close_enabled' => '0',
-             'auto_close_trigger_status_name' => 'Resolved'
+              'hermes_webhook_secret' => '',
+              'activity_log_secret' => 'change-me-in-production',
+              'auto_close_enabled' => '0',
+              'auto_close_trigger_status_name' => 'Resolved',
+              'hermes_webhook_retry_interval_minutes' => '30',
+              'hermes_webhook_retry_max_retries' => '3',
+              'hermes_webhook_retry_timeout_minutes' => '60'
            },
            partial: 'settings/automyra_bridge_settings'
 
@@ -108,6 +111,9 @@ prepare_automyra_bridge = proc do
   require_dependency File.expand_path('app/services/automyra_bridge/job_creator', __dir__)
   require_dependency File.expand_path('app/services/automyra_bridge/run_event_recorder', __dir__)
   require_dependency File.expand_path('app/services/automyra_bridge/job_processor', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/bot_user', __dir__)
+  require_dependency File.expand_path('app/services/automyra_bridge/retry_checker', __dir__)
+  require_dependency File.expand_path('app/models/automyra_bridge_webhook_delivery', __dir__)
   require_dependency File.expand_path('app/services/automyra_bridge/memory_writer', __dir__)
   require_dependency File.expand_path('app/services/automyra_bridge/memory_reader', __dir__)
   require_dependency File.expand_path('app/services/automyra_bridge/memory_sync', __dir__)

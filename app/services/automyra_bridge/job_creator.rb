@@ -27,6 +27,8 @@ module AutomyraBridge
       return unless comment.author && project
       return unless comment.author.admin? || comment.author.allowed_to?(:use_automyra_bridge, project)
 
+      cancel_pending_retries('TaskHub::Task', task.id)
+
       if handle_mentions?
         correlation_id = SecureRandom.uuid
         idempotency_key = SecureRandom.uuid
@@ -92,6 +94,8 @@ module AutomyraBridge
       }
       return unless journal.user && issue.project
       return unless journal.user.admin? || journal.user.allowed_to?(:use_automyra_bridge, issue.project)
+
+      cancel_pending_retries('Issue', issue.id)
 
       if handle_mentions?
         correlation_id = SecureRandom.uuid
@@ -178,6 +182,12 @@ module AutomyraBridge
 
     def self.bridge_generated?(text)
       text.to_s.include?(AutomyraBridge::JobProcessor::STATUS_MARKER)
+    end
+
+    def self.cancel_pending_retries(target_type, target_id)
+      AutomyraBridgeWebhookDelivery.for_target(target_type, target_id).pending.update_all(status: 'cancelled', updated_at: Time.current)
+    rescue StandardError => e
+      Rails.logger.warn("[AutomyraBridge::JobCreator] failed to cancel pending retries: #{e.class}: #{e.message}")
     end
 
     def self.handle_mentions?

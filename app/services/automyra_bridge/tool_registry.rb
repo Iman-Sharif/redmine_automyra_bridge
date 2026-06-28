@@ -16,6 +16,8 @@ module AutomyraBridge
       Tools::TaskHubGetMyOpenTasksTool,
       Tools::TaskHubSearchMyTasksTool,
       Tools::TaskSearchTool,
+      Tools::TaskRelatedTool,
+      Tools::TaskLinkRelatedTool,
       Tools::IssueCreateTool,
       Tools::IssueUpdateTool,
       Tools::IssueAssignTool,

@@ -148,6 +148,23 @@
     <label>Hermes webhook secret</label>
     <%= password_field_tag 'settings[hermes_webhook_secret]', @settings['hermes_webhook_secret'], size: 80, autocomplete: 'new-password' %>
   </p>
+  <hr>
+  <h3>Retry queue</h3>
+  <p>
+    <label>Retry interval (minutes)</label>
+    <%= text_field_tag 'settings[hermes_webhook_retry_interval_minutes]', @settings['hermes_webhook_retry_interval_minutes'], size: 10 %>
+    <em class="info">How long to wait between retry attempts when Hermes fails or times out.</em>
+  </p>
+  <p>
+    <label>Max retries</label>
+    <%= text_field_tag 'settings[hermes_webhook_retry_max_retries]', @settings['hermes_webhook_retry_max_retries'], size: 10 %>
+    <em class="info">Maximum retry attempts before giving up (total attempts = max retries + 1).</em>
+  </p>
+  <p>
+    <label>Hard timeout (minutes)</label>
+    <%= text_field_tag 'settings[hermes_webhook_retry_timeout_minutes]', @settings['hermes_webhook_retry_timeout_minutes'], size: 10 %>
+    <em class="info">If no bot response appears after this duration, treat as failure and retry.</em>
+  </p>
   <p>
     <label>Governance</label>
     <%= link_to 'Manage Governance Policies', '/automyra_bridge/governance/policies', class: 'icon icon-settings' %>

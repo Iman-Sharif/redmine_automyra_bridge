@@ -16,6 +16,7 @@ module AutomyraBridge
       return if ::TaskHub::Task.included_modules.include?(InstanceMethods)
 
       ::TaskHub::Task.include InstanceMethods
+      ::TaskHub::Task.send(:public, :automyra_bridge_task_hub_review_authored_by_automyra?)
     end
 
     module InstanceMethods
@@ -24,8 +25,6 @@ module AutomyraBridge
       included do
         after_commit :automyra_bridge_task_hub_status_review, on: :update
       end
-
-      private
 
       def automyra_bridge_task_hub_status_review
         return unless ENV['AUTOMYRA_BRIDGE_TASK_STATUS'].to_s == '1'

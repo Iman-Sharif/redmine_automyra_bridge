@@ -3,6 +3,7 @@ class AutomyraBridgeOperatorController < ApplicationController
   before_action :find_project
   before_action :authorize_manage!
   before_action :find_job, only: %i[retry_job cancel_job]
+  before_action :find_delivery, only: %i[retry_delivery cancel_delivery]
 
   def index
     @project_setting = AutomyraBridgeProjectSetting.for_project(@project)
@@ -13,6 +14,9 @@ class AutomyraBridgeOperatorController < ApplicationController
     @pending_proposals = proposal_scope.where(status: 'pending').order(created_at: :desc).limit(50)
     @failed_proposals = proposal_scope.where(status: 'failed').order(updated_at: :desc).limit(50)
     @failed_jobs = AutomyraBridgeJob.where(project: @project, status: 'failed').order(updated_at: :desc).limit(50)
+    @pending_deliveries = AutomyraBridgeWebhookDelivery.where(status: 'pending').order(created_at: :desc).limit(50)
+    @exhausted_deliveries = AutomyraBridgeWebhookDelivery.where(status: 'exhausted').order(updated_at: :desc).limit(50)
+    @pending_deliveries_count = @pending_deliveries.count
     @audit_events = audit_scope.order(created_at: :desc).limit(50)
     @queue_depth = AutomyraBridgeJob.where(project: @project, status: 'queued').count
     @running_jobs_count = AutomyraBridgeJob.where(project: @project, status: 'running').count
@@ -59,6 +63,23 @@ class AutomyraBridgeOperatorController < ApplicationController
     redirect_to operator_path, notice: 'Automyra job cancelled.'
   end
 
+  def retry_delivery
+    @delivery.update!(
+      status: 'pending',
+      retry_count: 0,
+      last_error: nil,
+      next_retry_at: Time.current
+    )
+    audit!('delivery.retry_requested', 'pending', SecureRandom.uuid, SecureRandom.uuid)
+    redirect_to operator_path, notice: 'Webhook delivery queued for retry.'
+  end
+
+  def cancel_delivery
+    @delivery.update!(status: 'cancelled')
+    audit!('delivery.cancelled', 'cancelled', SecureRandom.uuid, SecureRandom.uuid)
+    redirect_to operator_path, notice: 'Webhook delivery cancelled.'
+  end
+
   def update_settings
     setting = AutomyraBridgeProjectSetting.for_project(@project)
     setting.enabled_action_list = Array(params.dig(:automyra_bridge_project_setting, :enabled_actions))
@@ -95,6 +116,12 @@ class AutomyraBridgeOperatorController < ApplicationController
 
   def find_job
     @job = AutomyraBridgeJob.where(project: @project).find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render_404
+  end
+
+  def find_delivery
+    @delivery = AutomyraBridgeWebhookDelivery.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render_404
   end

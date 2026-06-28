@@ -15,7 +15,9 @@ module AutomyraBridge
             properties: {
               title: { type: 'string' }, notes: { type: 'string' }, status: { type: 'string' },
               due_date: { type: 'string' }, assigned_to_id: { type: 'integer' }, priority: { type: 'integer' },
-              tags: { type: 'string' }, category_id: { type: 'integer' }
+              tags: { type: 'string' }, category_id: { type: 'integer' },
+              reminder_at: { type: 'string', description: 'Reminder datetime ISO 8601 (e.g. 2026-06-25T08:00:00Z)' },
+              reminded: { type: 'boolean', description: 'Whether the reminder has been sent' }
             }
           }
         }

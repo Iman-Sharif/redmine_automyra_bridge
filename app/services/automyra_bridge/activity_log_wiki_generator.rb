@@ -60,7 +60,7 @@ module AutomyraBridge
         lines << ''
 
         entries.each do |entry|
-          time_str = entry.occurred_at.strftime('%H:%M')
+          time_str = entry.occurred_at.strftime('%Y-%m-%d %H:%M')
           lines << "### #{time_str} — #{entry.action_type}: #{entry.summary}"
 
           meta_parts = []

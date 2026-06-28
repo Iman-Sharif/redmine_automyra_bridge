@@ -49,9 +49,7 @@ class AutomyraBridgeWebhooksController < ApplicationController
   end
 
   def webhook_user
-    login = settings['webhook_user_login'].to_s.presence
-    user = User.find_by(login: login) if login
-    user || User.active.where(admin: true).order(:id).first
+    AutomyraBridge::BotUser.call(settings)
   end
 
   def find_project

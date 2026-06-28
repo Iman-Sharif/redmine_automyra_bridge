@@ -20,7 +20,7 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
   test 'registry exposes task and issue tools with schemas' do
     names = AutomyraBridge::ToolRegistry.all.map(&:name)
 
-    %w[task.create task.update task.cancel task.complete task.reopen task.assign task.set_priority task.set_due_date task.add_comment task.link_issue task.promote_to_issue task.search].each do |name|
+    %w[task.create task.update task.cancel task.complete task.reopen task.assign task.set_priority task.set_due_date task.add_comment task.link_issue task.promote_to_issue task.search task.related task.link_related].each do |name|
       assert_includes names, name
     end
     assert_includes names, 'issue.assign_to_requester'
@@ -265,6 +265,84 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
     search = AutomyraBridge::ToolRegistry.find('task.search')
     result = search.call(@job, @user, { 'query' => 'Other', 'limit' => 10 })
     assert_not(result[:tasks].any? { |t| t[:title] == 'Other project task' })
+  end
+
+  test 'task.related returns weighted candidates for a task' do
+    related_task = TaskHub::Task.create!(title: 'Related candidate', user: @user, author: @user, project: @project, status: 'todo')
+    tool = AutomyraBridge::ToolRegistry.find('task.related')
+
+    result = tool.call(@job, @user, { 'task_id' => @task.id })
+
+    assert result.key?(:related_tasks)
+    assert_kind_of Array, result[:related_tasks]
+    assert result[:related_tasks].size <= 10
+    result[:related_tasks].each do |item|
+      assert item.key?(:id)
+      assert item.key?(:title)
+      assert item.key?(:status)
+      assert item.key?(:match_reason)
+    end
+  end
+
+  test 'task.related returns error for non-existent task' do
+    tool = AutomyraBridge::ToolRegistry.find('task.related')
+
+    result = tool.call(@job, @user, { 'task_id' => 999_999 })
+
+    assert result.key?(:error)
+  end
+
+  test 'task.related respects visibility scope' do
+    private_project = Project.generate!(name: 'RelatedPrivate', is_public: false)
+    hidden_task = TaskHub::Task.create!(title: 'Hidden related task', user: @user, author: @user, project: private_project, status: 'todo')
+    other_user = User.generate!(login: 'related_reader')
+    Member.create!(user: other_user, project: @project, role_ids: [Role.find_by_name('Manager').id])
+
+    tool = AutomyraBridge::ToolRegistry.find('task.related')
+    job = AutomyraBridgeJob.create!(
+      status: 'queued', source_type: 'TaskHub::TaskComment',
+      source_id: @comment.id, user: other_user, project: @project,
+      correlation_id: SecureRandom.uuid, idempotency_key: SecureRandom.uuid,
+      request_payload: { source: 'task_hub_comment' }.to_json
+    )
+
+    result = tool.call(job, other_user, { 'task_id' => hidden_task.id })
+
+    assert result.key?(:error)
+  end
+
+  test 'task.link_related creates TaskDependency' do
+    target_task = TaskHub::Task.create!(title: 'Link target', user: @user, author: @user, project: @project, status: 'todo')
+    tool = AutomyraBridge::ToolRegistry.find('task.link_related')
+
+    result = tool.call(@job, @user, { 'task_id' => @task.id, 'related_task_id' => target_task.id })
+
+    assert result.key?(:dependency_id)
+    assert_equal @task.id, result[:source_task_id]
+    assert_equal target_task.id, result[:related_task_id]
+    assert TaskHub::TaskDependency.exists?(predecessor_id: @task.id, successor_id: target_task.id)
+  end
+
+  test 'task.link_related rejects self-links' do
+    tool = AutomyraBridge::ToolRegistry.find('task.link_related')
+
+    result = tool.call(@job, @user, { 'task_id' => @task.id, 'related_task_id' => @task.id })
+
+    assert result.key?(:error)
+    assert_equal 0, TaskHub::TaskDependency.where(predecessor_id: @task.id, successor_id: @task.id).count
+  end
+
+  test 'task.link_related is idempotent for duplicate links' do
+    target_task = TaskHub::Task.create!(title: 'Idempotent target', user: @user, author: @user, project: @project, status: 'todo')
+    tool = AutomyraBridge::ToolRegistry.find('task.link_related')
+
+    first = tool.call(@job, @user, { 'task_id' => @task.id, 'related_task_id' => target_task.id })
+    assert first.key?(:dependency_id)
+
+    second = tool.call(@job, @user, { 'task_id' => @task.id, 'related_task_id' => target_task.id })
+    assert second.key?(:dependency_id)
+
+    assert_equal 1, TaskHub::TaskDependency.where(predecessor_id: @task.id, successor_id: target_task.id).count
   end
 
   test 'audit events are recorded for tool execution' do
