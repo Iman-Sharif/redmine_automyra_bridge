@@ -1,6 +1,6 @@
 module AutomyraBridge
   class ActionProposalExecutor
-    ALLOWED_ATTRIBUTES = %w[title notes status due_date assigned_to_id priority tags category_id reminder_at reminded].freeze
+    ALLOWED_ATTRIBUTES = %w[title notes status due_date assigned_to_id priority tags category_id reminder_at reminded waiting_for_contact_id].freeze
 
     def approve(proposal, user, skip_permission: false, silent: false)
       return forbidden(proposal) unless skip_permission || tool_authorized?(proposal, user)
