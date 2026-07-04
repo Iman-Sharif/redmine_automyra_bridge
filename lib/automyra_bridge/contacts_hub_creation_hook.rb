@@ -13,8 +13,10 @@ module AutomyraBridge
   # visibility / organization_id) so metadata-only edits (e.g. touched
   # timestamps, follow-up dates) do not flood the review queue.
   #
-  # The Automyra-author loop guard prevents webhooks from re-firing on edits
-  # made by the configured bot user.
+  # The Automyra-author loop guard is applied only to the update callback;
+  # create events (including bot-authored records from MCP tools) always
+  # dispatch so the bot can review records it creates. Global contacts
+  # (project_id = nil) are dispatched without a project guard.
   #
   # Payload redaction is implemented in ContactsHubReviewDispatcher — PII
   # fields (email, secondary_email, phone, mobile, address_*, birthday,
@@ -40,8 +42,6 @@ module AutomyraBridge
       def automyra_bridge_contacts_hub_review
         return unless ENV['AUTOMYRA_BRIDGE_CONTACTS_REVIEW'].to_s == '1'
         return if Thread.current[:automyra_bridge_skip_webhook]
-        return unless project
-        return if automyra_bridge_authored_by_automyra?
 
         AutomyraBridge::ContactsHubReviewDispatcher.dispatch_create(self)
       rescue StandardError => e
@@ -51,7 +51,6 @@ module AutomyraBridge
       def automyra_bridge_contacts_hub_update_review
         return unless ENV['AUTOMYRA_BRIDGE_CONTACTS_REVIEW'].to_s == '1'
         return if Thread.current[:automyra_bridge_skip_webhook]
-        return unless project
         return if automyra_bridge_authored_by_automyra?
         return unless contacts_hub_review_relevant_change?
 

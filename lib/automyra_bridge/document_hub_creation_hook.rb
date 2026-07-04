@@ -14,7 +14,8 @@ module AutomyraBridge
   # Gating (mirroring FAQ/Error Hub hooks):
   #   - feature-flagged via `ENV['AUTOMYRA_BRIDGE_DOCUMENT_REVIEW']`
   #   - thread-local `:automyra_bridge_skip_webhook` opt-out
-  #   - skips records authored by the configured bot user
+  #   - skips updates authored by the configured bot user (loop prevention);
+  #     create events always dispatch so bot-created records get reviewed
   module DocumentHubCreationHook
     def self.install!
       return unless defined?(::DocumentHub)
@@ -41,14 +42,15 @@ module AutomyraBridge
       return unless ENV['AUTOMYRA_BRIDGE_DOCUMENT_REVIEW'].to_s == '1'
       return if Thread.current[:automyra_bridge_skip_webhook]
       return unless document.is_a?(::Document) && document.project
-      return if authored_by_automyra?(document)
-      return if authored_by_automyra?(resolve_item(document))
 
       action = detect_action(document)
 
       if action == :create
         AutomyraBridge::DocumentHubReviewDispatcher.dispatch_create(document)
       else
+        return if authored_by_automyra?(document)
+        return if authored_by_automyra?(resolve_item(document))
+
         AutomyraBridge::DocumentHubReviewDispatcher.dispatch_update(document)
       end
     rescue StandardError => e
@@ -59,9 +61,7 @@ module AutomyraBridge
       return unless ENV['AUTOMYRA_BRIDGE_DOCUMENT_REVIEW'].to_s == '1'
       return if Thread.current[:automyra_bridge_skip_webhook]
       return unless attachment.is_a?(::Attachment)
-      return if authored_by_automyra?(attachment)
       return unless attachment.container_type == 'Document' && attachment.container
-      return if authored_by_automyra?(resolve_item(attachment.container))
 
       AutomyraBridge::DocumentHubReviewDispatcher.dispatch_attachment_create(attachment)
     rescue StandardError => e

@@ -21,7 +21,6 @@ module AutomyraBridge
         return unless ENV['AUTOMYRA_BRIDGE_FAQ_REVIEW'].to_s == '1'
         return if Thread.current[:automyra_bridge_skip_webhook]
         return unless project
-        return if automyra_bridge_authored_by_automyra?
 
         AutomyraBridge::FaqHubReviewDispatcher.dispatch_create(self)
       rescue StandardError => e
