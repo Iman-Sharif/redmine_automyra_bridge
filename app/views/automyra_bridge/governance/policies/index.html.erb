@@ -23,7 +23,7 @@
         </td>
         <td><%= policy.global? ? 'Global' : 'Project' %></td>
         <td><%= h policy.project&.name %></td>
-        <td><span class="hub-badge"><%= h policy.mode %></span></td>
+        <td><span class="hub-badge hub-badge--<%= policy.report_only? ? 'neutral' : (policy.propose? ? 'warning' : 'success') %>"><%= h policy.mode %></span></td>
         <td><%= policy.enabled? ? 'Yes' : 'No' %></td>
         <td><%= policy.max_changes_per_run || 'Not set' %></td>
         <td><%= format_time(policy.last_run_at) if policy.last_run_at %></td>
