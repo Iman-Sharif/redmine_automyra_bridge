@@ -57,7 +57,7 @@ class AutomyraBridgeGovernanceUiControllerTest < ActionController::TestCase
     get :show, params: { id: @policy.id }
     assert_response :success
     assert_select 'h3', text: 'Run now'
-    assert_select 'span.badge', text: 'valid'
+    assert_select 'span.hub-badge', text: 'valid'
     assert_select 'a', text: 'Approval queue'
     assert_select 'button.automyra-copy-run-details[data-copy-text*=?]', 'Run URL:'
     assert_match(/full troubleshooting details/, @response.body)
