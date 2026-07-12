@@ -89,7 +89,10 @@
     </tbody>
   </table>
 <% else %>
-  <p class="nodata">No pending Automyra proposals.</p>
+  <div class="hub-empty-state">
+    <div class="hub-empty-state__icon">📋</div>
+    <p class="hub-empty-state__title">No pending Automyra proposals.</p>
+  </div>
 <% end %>
 
 <h3>Failed and unsupported proposals</h3>
@@ -110,7 +113,10 @@
     </tbody>
   </table>
 <% else %>
-  <p class="nodata">No failed or unsupported Automyra proposals.</p>
+  <div class="hub-empty-state">
+    <div class="hub-empty-state__icon">⚠️</div>
+    <p class="hub-empty-state__title">No failed or unsupported Automyra proposals.</p>
+  </div>
 <% end %>
 
 <h3>Failed jobs and retry decisions</h3>
@@ -133,7 +139,10 @@
     </tbody>
   </table>
 <% else %>
-  <p class="nodata">No failed Automyra jobs.</p>
+  <div class="hub-empty-state">
+    <div class="hub-empty-state__icon">🔧</div>
+    <p class="hub-empty-state__title">No failed Automyra jobs.</p>
+  </div>
 <% end %>
 
 <h3>Audit search</h3>
@@ -162,5 +171,8 @@
     </tbody>
   </table>
 <% else %>
-  <p class="nodata">No Automyra audit events match the current filters.</p>
+  <div class="hub-empty-state">
+    <div class="hub-empty-state__icon">🔍</div>
+    <p class="hub-empty-state__title">No Automyra audit events match the current filters.</p>
+  </div>
 <% end %>
