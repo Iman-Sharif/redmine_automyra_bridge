@@ -62,7 +62,7 @@ Settings live under Redmine administration plugin settings for `redmine_automyra
 | `memory_lancedb_table` | `memories` | Default memory table. |
 | `memory_lancedb_redmine_table` | `redmine-memories` | Redmine memory table. |
 | `webhook_secret` / `webhook_user_login` | _(empty)_ | Inbound webhook auth + acting user. |
-| `hermes_webhook_url` | `https://automyra.sbg-server.com/webhooks/redmica-mentions` | Default Hermes webhook. |
+| `hermes_webhook_url` | `https://automyra.bundecca.co.uk/webhooks/redmica-mentions` | Default Hermes webhook. |
 | `hermes_webhook_url_mentions` / `_creation_review` / `_auto_close` | _(empty)_ | Per-event Hermes overrides. |
 | `hermes_webhook_secret` | _(empty)_ | Hermes signing secret. |
 | `activity_log_secret` | `change-me-in-production` | Secret for the activity-log API. |

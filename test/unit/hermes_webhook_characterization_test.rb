@@ -39,7 +39,7 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
 
   AUTO_CLOSE_EVENT = 'redmica.issue_status_changed'
   CHAR_SECRET = 'characterization-fixed-secret'
-  AUTO_CLOSE_URL = 'https://automyra.sbg-server.com/webhooks/redmica-auto-close'
+  AUTO_CLOSE_URL = 'https://automyra.bundecca.co.uk/webhooks/redmica-auto-close'
 
   setup do
     @old_queue_adapter = ActiveJob::Base.queue_adapter

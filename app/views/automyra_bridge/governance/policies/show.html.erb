@@ -2,7 +2,7 @@
 
 <div class="box">
   <p><strong>Project:</strong> <%= h @policy.project&.name %></p>
-  <p><strong>Mode:</strong> <span class="badge"><%= h @policy.mode %></span></p>
+  <p><strong>Mode:</strong> <span class="hub-badge"><%= h @policy.mode %></span></p>
   <p><strong>Provider model:</strong> <%= h @policy.provider_model %></p>
   <p><strong>Linked Wiki Hub policy page ID:</strong> <%= @policy.policy_page_id || 'None' %></p>
   <p><strong>Max-change guardrail:</strong> <%= @policy.max_changes_per_run || 'Not set' %></p>

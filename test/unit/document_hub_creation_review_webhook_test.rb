@@ -17,8 +17,8 @@ class AutomyraBridgeDocumentHubCreationReviewWebhookTest < ActiveSupport::TestCa
 
     Setting.plugin_redmine_automyra_bridge = Setting.plugin_redmine_automyra_bridge.merge(
       'webhook_user_login' => 'admin',
-      'hermes_webhook_url' => 'https://automyra.sbg-server.com/webhooks/redmica-mentions',
-      'hermes_webhook_url_document_review' => 'https://automyra.sbg-server.com/webhooks/redmica-document-review',
+      'hermes_webhook_url' => 'https://automyra.bundecca.co.uk/webhooks/redmica-mentions',
+      'hermes_webhook_url_document_review' => 'https://automyra.bundecca.co.uk/webhooks/redmica-document-review',
       'hermes_webhook_secret' => 'test-secret'
     )
 

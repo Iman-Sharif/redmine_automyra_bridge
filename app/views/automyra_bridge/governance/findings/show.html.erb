@@ -39,7 +39,7 @@
         </tr>
         <tr>
           <th>Status</th>
-          <td><span class="badge <%= @finding.status == 'valid' ? 'badge-status-closed' : 'badge-status-open' %>"><%= h @finding.status %></span></td>
+          <td><span class="hub-badge hub-badge--<%= @finding.status == 'valid' ? 'success' : 'warning' %>"><%= h @finding.status %></span></td>
         </tr>
         <tr>
           <th>Confidence</th>
@@ -86,6 +86,9 @@
   <% if @finding.governance_actions.any? %>
     <%= render partial: 'automyra_bridge/governance/actions/table', locals: { actions: @finding.governance_actions.order(created_at: :desc).limit(20) } %>
   <% else %>
-    <p class="nodata">No actions recorded.</p>
+    <div class="hub-empty-state">
+      <div class="hub-empty-state__icon">📋</div>
+      <p class="hub-empty-state__title">No actions recorded.</p>
+    </div>
   <% end %>
 </div>

@@ -2,7 +2,7 @@
 
 <div class="box">
   <p><strong>Policy:</strong> <%= link_to @run.governance_policy.name, automyra_bridge_governance_policy_path(@run.governance_policy) %></p>
-  <p><strong>Status:</strong> <span class="badge"><%= h @run.status %></span></p>
+  <p><strong>Status:</strong> <span class="hub-badge"><%= h @run.status %></span></p>
   <p><strong>Findings:</strong> <%= @run.findings_count %> <strong>Actions:</strong> <%= @run.actions_count %> <strong>Applied:</strong> <%= @run.applied_count %></p>
   <p><strong>Provider model used:</strong> <%= h @run.provider_model_used %></p>
   <p><strong>Policy source hash:</strong> <%= h @run.policy_source_hash %></p>

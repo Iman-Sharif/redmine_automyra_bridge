@@ -43,7 +43,7 @@ Rails.application.config.after_initialize do
     EVENT_TYPE    = 'redmica.issue_created'
     GATEWAY_PORT  = (ENV['HERMES_GATEWAY_PORT'] || '8644').to_i
     SECRET        = ENV['HERMES_CREATION_REVIEW_SECRET'] || 'maaE-RpKtwjU0te8whhbJ-K8Eoa-laerjf89YmA13e8'
-    PUBLIC_BASE   = (ENV['REDMINE_PUBLIC_URL'] || 'https://redmica.sbg-server.com').chomp('/')
+    PUBLIC_BASE   = (ENV['REDMINE_PUBLIC_URL'] || 'https://redmica.bundecca.co.uk').chomp('/')
     TIMEOUT       = 10
 
     module_function

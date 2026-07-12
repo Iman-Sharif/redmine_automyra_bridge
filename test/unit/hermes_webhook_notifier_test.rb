@@ -5,7 +5,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   fixtures :users, :projects
 
   SECRET = 'test-secret-very-long-random-value'.freeze
-  URL = 'https://automyra.sbg-server.com/webhooks/redmica-mentions'.freeze
+  URL = 'https://automyra.bundecca.co.uk/webhooks/redmica-mentions'.freeze
 
   setup do
     @event_type = 'redmica.test_event'
@@ -112,7 +112,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.issue_created to hermes_webhook_url_creation_review' do
-    creation_url = 'https://automyra.sbg-server.com/webhooks/redmica-creation-review'
+    creation_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-creation-review'
     settings = @settings.merge('hermes_webhook_url_creation_review' => creation_url)
 
     captured_request = nil
@@ -135,7 +135,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.issue_mention to hermes_webhook_url_mentions' do
-    mentions_url = 'https://automyra.sbg-server.com/webhooks/redmica-mentions-v2'
+    mentions_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-mentions-v2'
     settings = @settings.merge('hermes_webhook_url_mentions' => mentions_url)
 
     captured_request = nil
@@ -158,7 +158,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.issue_status_changed to hermes_webhook_url_auto_close' do
-    auto_close_url = 'https://automyra.sbg-server.com/webhooks/redmica-auto-close'
+    auto_close_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-auto-close'
     settings = @settings.merge('hermes_webhook_url_auto_close' => auto_close_url)
 
     captured_request = nil
@@ -181,7 +181,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.task_created to hermes_webhook_url_creation_review' do
-    creation_url = 'https://automyra.sbg-server.com/webhooks/redmica-task-creation-review'
+    creation_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-task-creation-review'
     settings = @settings.merge('hermes_webhook_url_creation_review' => creation_url)
 
     captured_request = nil
@@ -204,7 +204,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.wiki_created to hermes_webhook_url_wiki_review' do
-    wiki_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-wiki-review'
+    wiki_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-wiki-review'
     settings = @settings.merge('hermes_webhook_url_wiki_review' => wiki_review_url)
 
     captured_request = nil
@@ -227,7 +227,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.wiki_updated to hermes_webhook_url_wiki_review' do
-    wiki_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-wiki-review'
+    wiki_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-wiki-review'
     settings = @settings.merge('hermes_webhook_url_wiki_review' => wiki_review_url)
 
     captured_request = nil
@@ -250,7 +250,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.faq_hub.faq_created to hermes_webhook_url_faq_review' do
-    faq_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-faq-review'
+    faq_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-faq-review'
     settings = @settings.merge('hermes_webhook_url_faq_review' => faq_review_url)
 
     captured_request = nil
@@ -273,7 +273,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.faq_hub.faq_updated to hermes_webhook_url_faq_review' do
-    faq_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-faq-review'
+    faq_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-faq-review'
     settings = @settings.merge('hermes_webhook_url_faq_review' => faq_review_url)
 
     captured_request = nil
@@ -296,7 +296,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.faq_hub.faq_status_changed to hermes_webhook_url_faq_status_changed' do
-    faq_status_changed_url = 'https://automyra.sbg-server.com/webhooks/redmica-faq-status'
+    faq_status_changed_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-faq-status'
     settings = @settings.merge('hermes_webhook_url_faq_status_changed' => faq_status_changed_url)
 
     captured_request = nil
@@ -319,7 +319,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.error_hub.error_created to hermes_webhook_url_error_review' do
-    error_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-error-review'
+    error_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-error-review'
     settings = @settings.merge('hermes_webhook_url_error_review' => error_review_url)
 
     captured_request = nil
@@ -342,7 +342,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.error_hub.error_status_changed to hermes_webhook_url_error_status_changed' do
-    error_status_changed_url = 'https://automyra.sbg-server.com/webhooks/redmica-error-status'
+    error_status_changed_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-error-status'
     settings = @settings.merge('hermes_webhook_url_error_status_changed' => error_status_changed_url)
 
     captured_request = nil
@@ -366,7 +366,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.task_hub.task_updated to hermes_webhook_url_task_review' do
-    task_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-task-hub-review'
+    task_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-task-hub-review'
     settings = @settings.merge('hermes_webhook_url_task_review' => task_review_url)
 
     captured_request = nil
@@ -389,7 +389,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.task_hub.task_status_changed to hermes_webhook_url_task_status_changed' do
-    task_status_changed_url = 'https://automyra.sbg-server.com/webhooks/redmica-task-hub-status'
+    task_status_changed_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-task-hub-status'
     settings = @settings.merge('hermes_webhook_url_task_status_changed' => task_status_changed_url)
 
     captured_request = nil
@@ -413,7 +413,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.contacts_hub.contact_created to hermes_webhook_url_contacts_review' do
-    contacts_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-contacts-review'
+    contacts_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-contacts-review'
     settings = @settings.merge('hermes_webhook_url_contacts_review' => contacts_review_url)
 
     captured_request = nil
@@ -437,7 +437,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.contacts_hub.contact_status_changed to hermes_webhook_url_contacts_status_changed' do
-    contacts_status_changed_url = 'https://automyra.sbg-server.com/webhooks/redmica-contacts-status'
+    contacts_status_changed_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-contacts-status'
     settings = @settings.merge('hermes_webhook_url_contacts_status_changed' => contacts_status_changed_url)
 
     captured_request = nil
@@ -461,7 +461,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.document_hub.document_updated to hermes_webhook_url_document_review' do
-    document_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-document-review'
+    document_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-document-review'
     settings = @settings.merge('hermes_webhook_url_document_review' => document_review_url)
 
     captured_request = nil
@@ -485,7 +485,7 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
   end
 
   test 'routes redmica.repo_hub.repository_created to hermes_webhook_url_repo_review' do
-    repo_review_url = 'https://automyra.sbg-server.com/webhooks/redmica-repo-review'
+    repo_review_url = 'https://automyra.bundecca.co.uk/webhooks/redmica-repo-review'
     settings = @settings.merge('hermes_webhook_url_repo_review' => repo_review_url)
 
     captured_request = nil

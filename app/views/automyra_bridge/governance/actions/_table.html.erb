@@ -9,7 +9,7 @@
         <td><%= h action.object_type %> #<%= action.object_id %></td>
         <td><%= link_to "##{action.id}", automyra_bridge_governance_action_path(action, { project_id: action.governance_policy.project_id }.compact) %></td>
         <td><%= h action.action_type %></td>
-        <td><span class="badge"><%= h action.status %></span></td>
+        <td><span class="hub-badge"><%= h action.status %></span></td>
         <td><%= link_to('Approval queue', automyra_bridge_operator_path(action.governance_policy.project, proposal_status: 'pending')) if action.proposed? && action.governance_policy.project %></td>
         <td><%= format_time(action.applied_at) if action.applied_at %></td>
       </tr>

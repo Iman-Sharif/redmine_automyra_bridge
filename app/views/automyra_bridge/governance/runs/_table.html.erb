@@ -5,7 +5,7 @@
       <tr class="<%= cycle('odd', 'even') %>">
         <td><%= link_to "##{run.id}", automyra_bridge_governance_run_path(run, { project_id: run.governance_policy.project_id }.compact) %></td>
         <td><%= link_to run.governance_policy.name, automyra_bridge_governance_policy_path(run.governance_policy) %></td>
-        <td><span class="badge"><%= h run.status %></span></td>
+        <td><span class="hub-badge"><%= h run.status %></span></td>
         <td><%= run.error_message.present? ? h(truncate(run.error_message, length: 120)) : '—' %></td>
         <td><%= run.findings_count %></td><td><%= run.actions_count %></td><td><%= run.applied_count %></td>
         <td><%= h run.provider_model_used %></td>

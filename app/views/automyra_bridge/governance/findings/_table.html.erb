@@ -8,7 +8,7 @@
         <td><%= link_to "##{finding.governance_run_id}", automyra_bridge_governance_run_path(finding.governance_run, { project_id: finding.governance_policy.project_id }.compact) %></td>
         <td><%= link_to "#{finding.object_type} ##{finding.object_id}", automyra_bridge_governance_finding_path(finding, { project_id: finding.governance_policy.project_id }.compact) %></td>
         <td><%= h finding.finding_type %></td>
-        <td><span class="badge"><%= h finding.status %></span></td>
+        <td><span class="hub-badge"><%= h finding.status %></span></td>
         <td><%= finding.confidence %></td>
         <td><%= h finding.recommended_value.to_s.truncate(80) %></td>
         <td>

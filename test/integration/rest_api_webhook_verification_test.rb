@@ -21,8 +21,8 @@ class AutomyraBridgeRestApiWebhookVerificationTest < Redmine::ApiTest::Base
     Setting.plugin_redmine_automyra_bridge = Setting.plugin_redmine_automyra_bridge.merge(
       'auto_close_enabled' => '1',
       'auto_close_trigger_status_name' => 'Resolved',
-      'hermes_webhook_url' => 'https://automyra.sbg-server.com/webhooks/redmica-mentions',
-      'hermes_webhook_url_auto_close' => 'https://automyra.sbg-server.com/webhooks/redmica-auto-close',
+      'hermes_webhook_url' => 'https://automyra.bundecca.co.uk/webhooks/redmica-mentions',
+      'hermes_webhook_url_auto_close' => 'https://automyra.bundecca.co.uk/webhooks/redmica-auto-close',
       'hermes_webhook_secret' => 'test-secret'
     )
   end

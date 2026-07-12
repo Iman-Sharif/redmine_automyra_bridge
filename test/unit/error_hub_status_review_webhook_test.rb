@@ -15,8 +15,8 @@ class AutomyraBridgeErrorHubStatusReviewWebhookTest < ActiveSupport::TestCase
 
     Setting.plugin_redmine_automyra_bridge = Setting.plugin_redmine_automyra_bridge.merge(
       'webhook_user_login' => 'admin',
-      'hermes_webhook_url' => 'https://automyra.sbg-server.com/webhooks/redmica-mentions',
-      'hermes_webhook_url_error_status_changed' => 'https://automyra.sbg-server.com/webhooks/redmica-error-status',
+      'hermes_webhook_url' => 'https://automyra.bundecca.co.uk/webhooks/redmica-mentions',
+      'hermes_webhook_url_error_status_changed' => 'https://automyra.bundecca.co.uk/webhooks/redmica-error-status',
       'hermes_webhook_secret' => 'test-secret'
     )
 

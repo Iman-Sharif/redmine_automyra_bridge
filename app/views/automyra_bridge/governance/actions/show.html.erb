@@ -31,7 +31,7 @@
         </tr>
         <tr>
           <th>Status</th>
-          <td><span class="badge <%= @action.applied? ? 'badge-status-closed' : (@action.failed? ? 'badge-status-open' : 'badge-status-locked') %>"><%= h @action.status %></span></td>
+          <td><span class="hub-badge hub-badge--<%= @action.applied? ? 'success' : (@action.failed? ? 'danger' : 'warning') %>"><%= h @action.status %></span></td>
         </tr>
         <tr>
           <th>Created</th>

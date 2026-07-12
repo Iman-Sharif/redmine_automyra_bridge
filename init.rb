@@ -24,7 +24,7 @@ Redmine::Plugin.register :redmine_automyra_bridge do
              'memory_lancedb_redmine_table' => 'redmine-memories',
              'webhook_secret' => '',
              'webhook_user_login' => '',
-             'hermes_webhook_url' => 'https://automyra.sbg-server.com/webhooks/redmica-mentions',
+             'hermes_webhook_url' => 'https://automyra.bundecca.co.uk/webhooks/redmica-mentions',
              'hermes_webhook_url_mentions' => '',
              'hermes_webhook_url_creation_review' => '',
              'hermes_webhook_url_auto_close' => '',

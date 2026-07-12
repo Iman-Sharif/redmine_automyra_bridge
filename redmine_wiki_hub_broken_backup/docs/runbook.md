@@ -82,7 +82,7 @@ bundle exec rails runner "exit WikiHub::Healthcheck.call[:status] == 'ok' ? 0 : 
 touch /opt/redmine/tmp/restart.txt
 
 # Step 10: Verify Public Endpoint (unauthenticated returns 302 to login)
-curl -s -o /dev/null -w "%{http_code}" https://redmica.sbg-server.com/knowledge_hub
+curl -s -o /dev/null -w "%{http_code}" https://redmica.bundecca.co.uk/knowledge_hub
 # Expected: 302 (redirect to login) or 200 (if already authenticated)
 
 # Step 11: Final Health Check
@@ -135,11 +135,11 @@ bundle exec rails runner "exit WikiHub::Healthcheck.call[:status] == 'ok' ? 0 : 
 touch /opt/redmine/tmp/restart.txt
 
 # Step 9: Verify Public Endpoint
-curl -s -o /dev/null -w "%{http_code}" https://redmica.sbg-server.com/knowledge_hub
+curl -s -o /dev/null -w "%{http_code}" https://redmica.bundecca.co.uk/knowledge_hub
 # Expected: 302 (redirect to login) or 200 (if already authenticated)
 
 # Optional: follow redirects and confirm login page or Wiki Hub content
-curl -sL https://redmica.sbg-server.com/knowledge_hub | grep -q "Wiki Hub\|Login"
+curl -sL https://redmica.bundecca.co.uk/knowledge_hub | grep -q "Wiki Hub\|Login"
 # Expected: Exit code 0
 
 # Step 10: Post-Rollback Verification
@@ -198,7 +198,7 @@ bundle exec rails runner "exit WikiHub::Healthcheck.call[:status] == 'ok' ? 0 : 
 
 # Step 10: Restart and Verify
 touch /opt/redmine/tmp/restart.txt
-curl -s -o /dev/null -w "%{http_code}" https://redmica.sbg-server.com/knowledge_hub
+curl -s -o /dev/null -w "%{http_code}" https://redmica.bundecca.co.uk/knowledge_hub
 ```
 
 **Promotion Rules**:
@@ -646,15 +646,15 @@ Verify the public endpoint responds correctly:
 
 ```bash
 # Check HTTP status (unauthenticated returns 302 to login)
-curl -s -o /dev/null -w "%{http_code}" https://redmica.sbg-server.com/knowledge_hub
+curl -s -o /dev/null -w "%{http_code}" https://redmica.bundecca.co.uk/knowledge_hub
 # Expected: 302 (redirect to login) or 200 (if already authenticated)
 
 # Follow redirects and check for content (if checking anonymously)
-curl -sL https://redmica.sbg-server.com/knowledge_hub | grep -q "Wiki Hub\|Login"
+curl -sL https://redmica.bundecca.co.uk/knowledge_hub | grep -q "Wiki Hub\|Login"
 # Expected: Exit code 0 (found "Wiki Hub" if auth'd, or "Login" if redirected)
 
 # Verify JSON API responds
-curl -s https://redmica.sbg-server.com/knowledge_hub.json | head -1
+curl -s https://redmica.bundecca.co.uk/knowledge_hub.json | head -1
 # Expected: Valid JSON response
 ```
 
@@ -712,10 +712,10 @@ pg_dump -h localhost -U redmine -d redmine | gzip > /backup/pre_maintenance_$(da
 bundle exec rails runner "exit WikiHub::Healthcheck.call[:status] == 'ok' ? 0 : 1" RAILS_ENV=production
 
 # 2. Public endpoint
-curl -s -o /dev/null -w "%{http_code}" https://redmica.sbg-server.com/knowledge_hub
+curl -s -o /dev/null -w "%{http_code}" https://redmica.bundecca.co.uk/knowledge_hub
 
 # 3. Search functionality
-curl -s "https://redmica.sbg-server.com/knowledge_hub/search?q=test" | grep -q "results"
+curl -s "https://redmica.bundecca.co.uk/knowledge_hub/search?q=test" | grep -q "results"
 
 # 4. No recent errors in logs
 tail -100 /opt/redmine/log/production.log | grep -i "wiki_hub.*error" || echo "No errors found"

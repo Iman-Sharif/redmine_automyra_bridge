@@ -15,8 +15,8 @@ class AutomyraBridgeIssueCreationReviewWebhookTest < ActiveSupport::TestCase
 
     Setting.plugin_redmine_automyra_bridge = Setting.plugin_redmine_automyra_bridge.merge(
       'webhook_user_login' => 'automyra',
-      'hermes_webhook_url' => 'https://automyra.sbg-server.com/webhooks/redmica-mentions',
-      'hermes_webhook_url_creation_review' => 'https://automyra.sbg-server.com/webhooks/redmica-creation-review',
+      'hermes_webhook_url' => 'https://automyra.bundecca.co.uk/webhooks/redmica-mentions',
+      'hermes_webhook_url_creation_review' => 'https://automyra.bundecca.co.uk/webhooks/redmica-creation-review',
       'hermes_webhook_secret' => 'test-secret'
     )
 
