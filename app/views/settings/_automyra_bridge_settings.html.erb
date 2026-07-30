@@ -77,6 +77,22 @@
     <%= text_field_tag 'settings[hermes_webhook_url_mentions]', @settings['hermes_webhook_url_mentions'], size: 80 %>
     <em class="info">URL for @automyra mention events (redmica.issue_mention, redmica.task_comment_mention). Falls back to legacy URL if blank.</em>
   </p>
+  <h4>Mr T mentions</h4>
+  <p>
+    <label>Mr T mention pattern</label>
+    <%= text_field_tag 'settings[mr_t_mention_pattern]', @settings['mr_t_mention_pattern'], size: 30, placeholder: 'mrt' %>
+    <em class="info">Trigger word for Mr T mentions (e.g. "mrt" matches @mrt). Default: mrt.</em>
+  </p>
+  <p>
+    <label>Mr T user login</label>
+    <%= text_field_tag 'settings[mr_t_user_login]', @settings['mr_t_user_login'], size: 30 %>
+    <em class="info">Redmine login of the Mr T user. Journals/comments authored by this user are skipped to prevent loops.</em>
+  </p>
+  <p>
+    <label>Mr T mentions webhook URL</label>
+    <%= text_field_tag 'settings[hermes_webhook_url_mr_t_mentions]', @settings['hermes_webhook_url_mr_t_mentions'], size: 80 %>
+    <em class="info">URL for @mrt mention events (redmica.issue_mention_mr_t, redmica.task_comment_mention_mr_t). Falls back to mentions URL if blank.</em>
+  </p>
   <p>
     <label>Creation review webhook URL</label>
     <%= text_field_tag 'settings[hermes_webhook_url_creation_review]', @settings['hermes_webhook_url_creation_review'], size: 80 %>

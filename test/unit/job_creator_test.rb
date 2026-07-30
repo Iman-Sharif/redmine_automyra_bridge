@@ -185,6 +185,96 @@ class AutomyraBridgeJobCreatorTest < ActiveSupport::TestCase
     end
   end
 
+  test 'fires Mr T webhook for task comment mention' do
+    comment = @task.comments.create!(author: @user, body: 'Hey @mrt can you look at this')
+
+    assert_enqueued_with(job: AutomyraBridge::HermesWebhookDeliverJob) do
+      result = AutomyraBridge::JobCreator.create_for_task_comment(comment)
+      assert result, 'Expected create_for_task_comment to return truthy for Mr T mention'
+    end
+
+    enqueued = enqueued_jobs.find { |entry| entry[:job] == AutomyraBridge::HermesWebhookDeliverJob }
+    event_type, payload, delivery_id = enqueued[:args]
+    assert_equal 'redmica.task_comment_mention_mr_t', event_type
+    assert_equal 'mr_t', payload['mention_target']
+    assert_equal "task-comment-#{comment.id}", delivery_id
+  end
+
+  test 'fires Mr T webhook for issue journal mention' do
+    issue = Issue.find(1)
+    grant_automyra_bridge_permission!(@user, issue.project)
+    AutomyraBridgeJob.delete_all
+    issue.init_journal(@user, '@mrt please review this')
+    issue.save!
+    journal = issue.journals.where(notes: '@mrt please review this').order(:id).last
+    clear_enqueued_jobs
+
+    assert_enqueued_with(job: AutomyraBridge::HermesWebhookDeliverJob) do
+      result = AutomyraBridge::JobCreator.create_for_issue_journal(journal)
+      assert result, 'Expected create_for_issue_journal to return truthy for Mr T mention'
+    end
+
+    enqueued = enqueued_jobs.find { |entry| entry[:job] == AutomyraBridge::HermesWebhookDeliverJob }
+    event_type, payload, delivery_id = enqueued[:args]
+    assert_equal 'redmica.issue_mention_mr_t', event_type
+    assert_equal 'mr_t', payload['mention_target']
+    assert_equal "issue-journal-#{journal.id}", delivery_id
+  end
+
+  test 'skips Mr T self-mention for loop prevention' do
+    original = Setting.plugin_redmine_automyra_bridge
+    Setting.plugin_redmine_automyra_bridge = (original.to_h || {}).merge('mr_t_user_login' => @user.login)
+
+    comment = @task.comments.create!(author: @user, body: 'I already checked @mrt')
+
+    assert_no_enqueued_jobs(only: AutomyraBridge::HermesWebhookDeliverJob) do
+      assert_nil AutomyraBridge::JobCreator.create_for_task_comment(comment)
+    end
+  ensure
+    Setting.plugin_redmine_automyra_bridge = original
+  end
+
+  test 'allows Mr T mention when author is not Mr T' do
+    original = Setting.plugin_redmine_automyra_bridge
+    Setting.plugin_redmine_automyra_bridge = (original.to_h || {}).merge('mr_t_user_login' => 'someone_else')
+
+    comment = @task.comments.create!(author: @user, body: 'Hey @mrt check this')
+
+    assert_enqueued_with(job: AutomyraBridge::HermesWebhookDeliverJob) do
+      result = AutomyraBridge::JobCreator.create_for_task_comment(comment)
+      assert result
+    end
+  ensure
+    Setting.plugin_redmine_automyra_bridge = original
+  end
+
+  test 'allows Mr T mention when mr_t_user_login is not configured' do
+    original = Setting.plugin_redmine_automyra_bridge
+    Setting.plugin_redmine_automyra_bridge = (original.to_h || {}).merge('mr_t_user_login' => '')
+
+    comment = @task.comments.create!(author: @user, body: 'Hey @mrt check this')
+
+    assert_enqueued_with(job: AutomyraBridge::HermesWebhookDeliverJob) do
+      result = AutomyraBridge::JobCreator.create_for_task_comment(comment)
+      assert result
+    end
+  ensure
+    Setting.plugin_redmine_automyra_bridge = original
+  end
+
+  test 'automyra mention still fires with automyra event type after Mr T changes' do
+    comment = @task.comments.create!(author: @user, body: 'Please help @automyra')
+
+    assert_enqueued_with(job: AutomyraBridge::HermesWebhookDeliverJob) do
+      AutomyraBridge::JobCreator.create_for_task_comment(comment)
+    end
+
+    enqueued = enqueued_jobs.find { |entry| entry[:job] == AutomyraBridge::HermesWebhookDeliverJob }
+    event_type, payload, _delivery_id = enqueued[:args]
+    assert_equal 'redmica.task_comment_mention', event_type
+    assert_equal 'automyra', payload['mention_target']
+  end
+
   private
 
   def grant_automyra_bridge_permission!(user, project)

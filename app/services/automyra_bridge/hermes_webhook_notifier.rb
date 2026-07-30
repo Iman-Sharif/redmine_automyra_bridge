@@ -79,6 +79,8 @@ module AutomyraBridge
         @settings['hermes_webhook_url_creation_review'].presence || @settings['hermes_webhook_url'].to_s.strip
       when 'redmica.issue_mention', 'redmica.task_comment_mention'
         @settings['hermes_webhook_url_mentions'].presence || @settings['hermes_webhook_url'].to_s.strip
+      when 'redmica.issue_mention_mr_t', 'redmica.task_comment_mention_mr_t'
+        @settings['hermes_webhook_url_mr_t_mentions'].presence || @settings['hermes_webhook_url_mentions'].presence || @settings['hermes_webhook_url'].to_s.strip
       when 'redmica.issue_status_changed'
         @settings['hermes_webhook_url_auto_close'].presence || @settings['hermes_webhook_url'].to_s.strip
       when 'redmica.wiki_created', 'redmica.wiki_updated'

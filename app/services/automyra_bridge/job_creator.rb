@@ -7,13 +7,18 @@ module AutomyraBridge
     def self.create_for_task_comment(comment)
       return unless defined?(TaskHub::TaskComment)
       return unless comment.is_a?(TaskHub::TaskComment)
-      return unless MentionDetector.mentioned?(comment.body)
+
+      target = MentionDetector.mention_target(comment.body)
+      return unless target
+      return if target == :mr_t && mr_t_author?(comment.author)
 
       task = comment.task
       project = task.project || task.issue&.project
+      mention_event = target == :mr_t ? 'redmica.task_comment_mention_mr_t' : 'redmica.task_comment_mention'
       payload = {
         action: 'mention_response',
         source: 'task_hub_comment',
+        mention_target: target.to_s,
         comment_id: comment.id,
         task_id: task.id,
         task_title: task.title,
@@ -36,7 +41,7 @@ module AutomyraBridge
         payload[:idempotency_key] = idempotency_key
 
         ::AutomyraBridge::HermesWebhookDeliverJob.perform_later(
-          'redmica.task_comment_mention', payload, "task-comment-#{comment.id}"
+          mention_event, payload, "task-comment-#{comment.id}"
         )
 
         AutomyraBridge::ActivityLogger.log!(
@@ -55,7 +60,7 @@ module AutomyraBridge
                          user: comment.author, project: project, payload: payload)
         write_mention_memory(task, comment.author, comment.body, job, comment.id) if job
         if job
-          enqueue_hermes_webhook(event_type: 'redmica.task_comment_mention', job: job,
+          enqueue_hermes_webhook(event_type: mention_event, job: job,
                                  delivery_id: "task-comment-#{comment.id}")
         end
         if job
@@ -77,13 +82,18 @@ module AutomyraBridge
     def self.create_for_issue_journal(journal)
       return unless journal.is_a?(Journal)
       return unless journal.journalized.is_a?(Issue)
-      return unless MentionDetector.mentioned?(journal.notes)
+
+      target = MentionDetector.mention_target(journal.notes)
+      return unless target
       return if bridge_generated?(journal.notes)
+      return if target == :mr_t && mr_t_author?(journal.user)
 
       issue = journal.journalized
+      mention_event = target == :mr_t ? 'redmica.issue_mention_mr_t' : 'redmica.issue_mention'
       payload = {
         action: 'mention_response',
         source: 'issue_journal',
+        mention_target: target.to_s,
         journal_id: journal.id,
         issue_id: issue.id,
         issue_subject: issue.subject,
@@ -104,7 +114,7 @@ module AutomyraBridge
         payload[:idempotency_key] = idempotency_key
 
         ::AutomyraBridge::HermesWebhookDeliverJob.perform_later(
-          'redmica.issue_mention', payload, "issue-journal-#{journal.id}"
+          mention_event, payload, "issue-journal-#{journal.id}"
         )
 
         AutomyraBridge::ActivityLogger.log!(
@@ -123,7 +133,7 @@ module AutomyraBridge
                          user: journal.user, project: issue.project, payload: payload)
         write_mention_memory(issue, journal.user, journal.notes, job, journal.id) if job
         if job
-          enqueue_hermes_webhook(event_type: 'redmica.issue_mention', job: job,
+          enqueue_hermes_webhook(event_type: mention_event, job: job,
                                  delivery_id: "issue-journal-#{journal.id}")
         end
         if job
@@ -192,6 +202,21 @@ module AutomyraBridge
 
     def self.handle_mentions?
       ENV['AUTOMYRA_BRIDGE_HANDLE_MENTIONS'].to_s == '1'
+    end
+
+    def self.mr_t_author?(user)
+      return false unless user
+
+      login = mr_t_user_login
+      login.present? && user.login == login
+    end
+
+    def self.mr_t_user_login
+      settings = Setting.plugin_redmine_automyra_bridge
+      value = settings.is_a?(Hash) ? settings['mr_t_user_login'] : nil
+      value.to_s.strip
+    rescue StandardError
+      ''
     end
 
     def self.enqueue_hermes_webhook(event_type:, job:, delivery_id:)

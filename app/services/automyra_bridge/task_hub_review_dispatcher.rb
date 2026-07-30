@@ -71,6 +71,8 @@ module AutomyraBridge
           author_id: task.author_id,
           author_login: author&.login,
           tags: task.tag_list,
+          strategy_alignment: task.strategy_alignment,
+          strategy_alignment_list: task.strategy_alignment_list,
           checklist: serialize_checklist(task),
           url: build_task_url(task),
           timestamp: Time.current.iso8601,
