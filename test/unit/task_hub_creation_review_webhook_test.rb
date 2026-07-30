@@ -47,13 +47,17 @@ class AutomyraBridgeTaskHubCreationReviewWebhookTest < ActiveSupport::TestCase
     assert_match(/\Atask-hub-review-\d+-[0-9a-f]{16}\z/, delivery_id)
   end
 
-  test 'does not fire create webhook when author matches configured Automyra user' do
+  test 'fires create webhook even when author matches configured Automyra user' do
     admin_user = User.find_by(login: 'admin')
     assert_not_nil admin_user, 'expected admin fixture user to exist'
 
-    assert_no_enqueued_jobs(only: AutomyraBridge::HermesWebhookDeliverJob) do
+    assert_enqueued_with(job: AutomyraBridge::HermesWebhookDeliverJob) do
       create_task(title: 'Bot-authored task', author: admin_user)
     end
+
+    job = enqueued_jobs.find { |j| j[:job] == AutomyraBridge::HermesWebhookDeliverJob }
+    assert_not_nil job, 'expected a HermesWebhookDeliverJob to be enqueued'
+    assert_equal 'redmica.task_hub.task_created', job[:args][0]
   end
 
   # --- 2. Update hook --------------------------------------------------------
@@ -119,6 +123,18 @@ class AutomyraBridgeTaskHubCreationReviewWebhookTest < ActiveSupport::TestCase
     # Changing `position` is intentionally NOT in the watched list.
     assert_no_enqueued_jobs(only: AutomyraBridge::HermesWebhookDeliverJob) do
       task.update!(position: task.position.to_i + 1)
+    end
+  end
+
+  test 'does not fire update webhook when author matches configured Automyra user' do
+    admin_user = User.find_by(login: 'admin')
+    assert_not_nil admin_user, 'expected admin fixture user to exist'
+
+    task = create_task(title: 'Update guard baseline task', author: admin_user)
+    clear_enqueued_jobs
+
+    assert_no_enqueued_jobs(only: AutomyraBridge::HermesWebhookDeliverJob) do
+      task.update!(title: 'Update guard changed title')
     end
   end
 

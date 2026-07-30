@@ -68,6 +68,7 @@ module AutomyraBridge
 
       def automyra_bridge_dispatch_task_hub_review_update
         return unless automyra_bridge_task_hub_review_relevant_change?
+        return if automyra_bridge_task_hub_review_authored_by_automyra?
 
         AutomyraBridge::TaskHubCreationHook.dispatch(self, :update)
       rescue StandardError => e
@@ -89,7 +90,6 @@ module AutomyraBridge
       return unless ENV['AUTOMYRA_BRIDGE_TASK_REVIEW'].to_s == '1'
       return unless task.is_a?(::TaskHub::Task)
       return if Thread.current[SKIP_KEY]
-      return if task.automyra_bridge_task_hub_review_authored_by_automyra?
 
       if action == :create
         AutomyraBridge::TaskHubReviewDispatcher.dispatch_created(task)
