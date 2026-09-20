@@ -25,12 +25,19 @@ class AutomyraBridgeActivityLogController < ApplicationController
   private
 
   def verify_activity_log_token!
+    render json: { error: 'Unauthorized' }, status: :unauthorized unless valid_activity_log_token?
+  end
+
+  # Fails closed: a blank configured secret rejects every request, matching
+  # AutomyraBridgeWebhooksController#valid_webhook_token?.
+  def valid_activity_log_token?
     expected = Setting.plugin_redmine_automyra_bridge['activity_log_secret'].to_s
-    supplied = request.headers['Authorization'].to_s
+    return false if expected.blank?
 
-    return unless expected.blank? || supplied != "Bearer #{expected}"
-
-    render json: { error: 'Unauthorized' }, status: :unauthorized
+    supplied = request.authorization.to_s.sub(/\ABearer\s+/i, '')
+    ActiveSupport::SecurityUtils.secure_compare(supplied, expected)
+  rescue ArgumentError
+    false
   end
 
   def activity_log_params

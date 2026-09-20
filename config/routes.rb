@@ -1,4 +1,11 @@
 RedmineApp::Application.routes.draw do
+  # App-level infrastructure routes (site favicon + health probe)
+  get 'favicon.ico', to: proc { |_env|
+    [301, { 'Location' => ActionController::Base.helpers.image_path('favicon.ico'), 'Content-Type' => 'text/html' }, []]
+  }
+  get 'health/services', to: proc { |_env|
+    [200, { 'Content-Type' => 'application/json' }, ['{"status":"ok","services":["redmine"]}']]
+  }
   post 'automyra_bridge/task/improve', to: 'automyra_bridge#improve_task', as: 'automyra_bridge_improve_task'
   post 'automyra_bridge/assistant_request', to: 'automyra_bridge#assistant_request', as: 'automyra_bridge_assistant_request'
   post 'automyra_bridge/webhooks/incoming', to: 'automyra_bridge_webhooks#incoming', as: 'automyra_bridge_incoming_webhook', defaults: { format: 'json' }
