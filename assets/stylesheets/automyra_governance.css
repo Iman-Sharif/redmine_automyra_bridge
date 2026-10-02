@@ -173,3 +173,17 @@
 .automyra-governance-page .confidence-high { color: #2a8f2a; }
 .automyra-governance-page .confidence-medium { color: #c97400; }
 .automyra-governance-page .confidence-low { color: #c91e1e; }
+
+/* OLED Dark Mode overrides for Automyra Governance */
+body.theme-oled_dark .automyra-governance-modal,
+html[data-color-scheme="dark"] .automyra-governance-modal {
+  background-color: #121212 !important;
+  border: 1px solid #303030 !important;
+  color: #f3f4f6 !important;
+}
+
+body.theme-oled_dark .automyra-proposal-changes-table,
+html[data-color-scheme="dark"] .automyra-proposal-changes-table {
+  background-color: #0a0a0a !important;
+  border: 1px solid #262626 !important;
+}

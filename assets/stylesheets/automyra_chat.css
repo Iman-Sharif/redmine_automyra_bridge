@@ -391,3 +391,68 @@
   }
   .automyra-chat-floating-button { bottom: 8px; right: 8px; }
 }
+
+/* OLED Dark Mode overrides for Automyra Chat */
+body.theme-oled_dark .automyra-chat-launch-btn,
+html[data-color-scheme="dark"] .automyra-chat-launch-btn {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.theme-oled_dark .automyra-chat-panel,
+html[data-color-scheme="dark"] .automyra-chat-panel {
+  background-color: #0a0a0a !important;
+  border: 1px solid #262626 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85) !important;
+}
+
+body.theme-oled_dark .automyra-chat-header,
+html[data-color-scheme="dark"] .automyra-chat-header {
+  background-color: #121212 !important;
+  border-bottom: 1px solid #212121 !important;
+  color: #f3f4f6 !important;
+}
+
+body.theme-oled_dark .automyra-chat-footer,
+html[data-color-scheme="dark"] .automyra-chat-footer {
+  background-color: #0e0e0e !important;
+  border-top: 1px solid #212121 !important;
+}
+
+body.theme-oled_dark .automyra-chat-footer textarea,
+html[data-color-scheme="dark"] .automyra-chat-footer textarea {
+  background-color: #0a0a0a !important;
+  border: 1px solid #2a2a2a !important;
+  color: #f3f4f6 !important;
+}
+
+body.theme-oled_dark .automyra-message-user,
+html[data-color-scheme="dark"] .automyra-message-user {
+  background-color: #1e3a8a !important;
+  border: 1px solid #2563eb !important;
+  color: #ffffff !important;
+}
+
+body.theme-oled_dark .automyra-message-assistant,
+html[data-color-scheme="dark"] .automyra-message-assistant {
+  background-color: #141414 !important;
+  border: 1px solid #262626 !important;
+  color: #f3f4f6 !important;
+}
+
+body.theme-oled_dark .automyra-tool-card,
+html[data-color-scheme="dark"] .automyra-tool-card {
+  background-color: #0e0e0e !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+body.theme-oled_dark .automyra-tool-card-header,
+html[data-color-scheme="dark"] .automyra-tool-card-header {
+  background-color: #161616 !important;
+}
+
+body.theme-oled_dark .automyra-cursor,
+html[data-color-scheme="dark"] .automyra-cursor {
+  background-color: #38bdf8 !important;
+}
