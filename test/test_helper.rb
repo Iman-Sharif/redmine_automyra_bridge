@@ -1,19 +1,17 @@
 $LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
 
-redmica_root = ENV['REDMICA_ROOT']
-if redmica_root.nil? || redmica_root.empty?
+redmica_root = ENV['REDMICA_ROOT'].to_s
+if redmica_root.empty?
   probe = __dir__
   redmica_root = loop do
     parent = File.dirname(probe)
     break nil if parent == probe
-    if File.exist?(File.join(parent, 'test', 'test_helper.rb')) && File.exist?(File.join(parent, 'Gemfile'))
-      break parent
-    end
+    break parent if File.exist?(File.join(parent, 'test', 'test_helper.rb')) && File.exist?(File.join(parent, 'Gemfile'))
 
     probe = parent
   end
 end
-raise 'Could not locate the Redmica root (test/test_helper.rb)' unless redmica_root
+raise 'Could not locate the Redmica root (test/test_helper.rb)' if redmica_root.to_s.empty?
 
 require File.expand_path('test/test_helper', redmica_root)
 
