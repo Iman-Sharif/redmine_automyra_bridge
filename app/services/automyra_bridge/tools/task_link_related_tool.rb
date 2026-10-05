@@ -11,12 +11,12 @@ module AutomyraBridge
           task_id: { type: 'integer', description: 'Source task ID' },
           related_task_id: { type: 'integer', description: 'Target related task ID' }
         },
-        required: ['task_id', 'related_task_id']
+        required: %w[task_id related_task_id]
       }.freeze
 
       def required_permission = :manage_task_hub_tasks
 
-      def call(job, user, input)
+      def call(_job, user, input)
         task_id = input['task_id'] || input[:task_id]
         related_task_id = input['related_task_id'] || input[:related_task_id]
 

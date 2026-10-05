@@ -22,7 +22,7 @@ class AutomyraBridgeMentionDetectorTest < ActiveSupport::TestCase
   end
 
   test 'does not match @mrt as substring of longer word' do
-    refute AutomyraBridge::MentionDetector.mentioned?('Hey @mrtx check this')
+    assert_not AutomyraBridge::MentionDetector.mentioned?('Hey @mrtx check this')
     assert_nil AutomyraBridge::MentionDetector.mention_target('Hey @mrtx check this')
   end
 
@@ -33,12 +33,12 @@ class AutomyraBridgeMentionDetectorTest < ActiveSupport::TestCase
   end
 
   test 'returns nil for text without any mention' do
-    refute AutomyraBridge::MentionDetector.mentioned?('No mention here')
+    assert_not AutomyraBridge::MentionDetector.mentioned?('No mention here')
     assert_nil AutomyraBridge::MentionDetector.mention_target('No mention here')
   end
 
   test 'returns nil for nil text' do
-    refute AutomyraBridge::MentionDetector.mentioned?(nil)
+    assert_not AutomyraBridge::MentionDetector.mentioned?(nil)
     assert_nil AutomyraBridge::MentionDetector.mention_target(nil)
   end
 
@@ -52,7 +52,7 @@ class AutomyraBridgeMentionDetectorTest < ActiveSupport::TestCase
 
     assert AutomyraBridge::MentionDetector.mentioned?('Hey @boss check this')
     assert_equal :mr_t, AutomyraBridge::MentionDetector.mention_target('Hey @boss check this')
-    refute AutomyraBridge::MentionDetector.mentioned?('Hey @mrt check this')
+    assert_not AutomyraBridge::MentionDetector.mentioned?('Hey @mrt check this')
   ensure
     Setting.plugin_redmine_automyra_bridge = original
   end

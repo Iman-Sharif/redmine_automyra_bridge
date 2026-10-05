@@ -110,7 +110,7 @@ class AutomyraBridgeWebhookDeliveryModelTest < ActiveSupport::TestCase
 
   test 'for_target scope filters by target_type and target_id' do
     d1 = AutomyraBridgeWebhookDelivery.create!(valid_attributes(delivery_id: 't-1', target_type: 'Issue', target_id: @issue.id))
-    d2 = AutomyraBridgeWebhookDelivery.create!(valid_attributes(delivery_id: 't-2', target_type: 'Issue', target_id: 999999))
+    d2 = AutomyraBridgeWebhookDelivery.create!(valid_attributes(delivery_id: 't-2', target_type: 'Issue', target_id: 999_999))
     d3 = AutomyraBridgeWebhookDelivery.create!(valid_attributes(delivery_id: 't-3', target_type: 'TaskHub::Task', target_id: @issue.id))
 
     results = AutomyraBridgeWebhookDelivery.for_target('Issue', @issue.id).to_a

@@ -135,7 +135,7 @@ class AutomyraBridgeRetryCheckerTest < ActiveSupport::TestCase
 
   test 'marks exhausted when failure detected and retry_count >= max_retries' do
     delivery = create_delivery(retry_count: 3, max_retries: 3)
-    fallback_journal = add_bot_journal("#{STATUS_MARKER}\nAutomyra request failed: timeout exceeded")
+    add_bot_journal("#{STATUS_MARKER}\nAutomyra request failed: timeout exceeded")
 
     AutomyraBridge::HermesWebhookNotifier.expects(:deliver).never
 
@@ -305,7 +305,7 @@ class AutomyraBridgeRetryCheckerTest < ActiveSupport::TestCase
 
     captured = {}
     original_deliver = AutomyraBridge::HermesWebhookNotifier.method(:deliver)
-    AutomyraBridge::HermesWebhookNotifier.define_singleton_method(:deliver) do |event_type:, payload:, delivery_id: nil|
+    AutomyraBridge::HermesWebhookNotifier.define_singleton_method(:deliver) do |_event_type:, _payload:, delivery_id: nil|
       captured[:delivery_id] = delivery_id
       Net::HTTPOK.new('1.1', '200', 'OK')
     end

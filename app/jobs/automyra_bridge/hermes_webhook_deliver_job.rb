@@ -43,9 +43,9 @@ module AutomyraBridge
       # On immediate HTTP success, clear any previous error. The record stays
       # pending — RetryChecker resolves it when it detects a bot-authored
       # success journal on the target.
-      if response&.is_a?(Net::HTTPSuccess) && delivery_record
-        delivery_record.update_columns(last_error: nil, updated_at: Time.current)
-      end
+      return unless response.is_a?(Net::HTTPSuccess) && delivery_record
+
+      delivery_record.update_columns(last_error: nil, updated_at: Time.current)
     end
 
     private
@@ -93,42 +93,40 @@ module AutomyraBridge
       # Task Hub events
       if p['task_id']
         project_id = nil
-        task = TaskHub::Task.find_by(id: p['task_id']) rescue nil
+        task = begin
+          TaskHub::Task.find_by(id: p['task_id'])
+        rescue StandardError
+          nil
+        end
         project_id = task&.project_id if task
         return ['TaskHub::Task', p['task_id'], project_id, p['comment_id']]
       end
 
       # Wiki events
       if p['wiki_page_id']
-        page = WikiPage.find_by(id: p['wiki_page_id']) rescue nil
+        page = begin
+          WikiPage.find_by(id: p['wiki_page_id'])
+        rescue StandardError
+          nil
+        end
         project_id = page&.wiki&.project_id
         return ['WikiPage', p['wiki_page_id'], project_id, nil]
       end
 
       # FAQ Hub events
-      if p['faq_id']
-        return ['FaqHub::Faq', p['faq_id'], p['project_id'], nil]
-      end
+      return ['FaqHub::Faq', p['faq_id'], p['project_id'], nil] if p['faq_id']
 
       # Error Hub events
-      if p['error_id']
-        return ['ErrorHub::Error', p['error_id'], p['project_id'], nil]
-      end
+      return ['ErrorHub::Error', p['error_id'], p['project_id'], nil] if p['error_id']
 
       # Contacts Hub events
-      if p['contact_id']
-        return ['ContactsHub::Contact', p['contact_id'], p['project_id'], nil]
-      end
+      return ['ContactsHub::Contact', p['contact_id'], p['project_id'], nil] if p['contact_id']
 
       # Document Hub events
-      if p['document_id']
-        return ['DocumentHub::Document', p['document_id'], p['project_id'], nil]
-      end
+      return ['DocumentHub::Document', p['document_id'], p['project_id'], nil] if p['document_id']
 
       # Repo Hub events
-      if p['repository_id']
-        return ['RepoHub::Repository', p['repository_id'], p['project_id'], nil]
-      end
+      return ['RepoHub::Repository', p['repository_id'], p['project_id'], nil] if p['repository_id']
 
       # Fallback: use project_id only
       [nil, nil, p['project_id'], nil]

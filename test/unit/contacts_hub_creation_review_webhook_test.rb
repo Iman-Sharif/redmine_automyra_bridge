@@ -237,32 +237,32 @@ class AutomyraBridgeContactsHubCreationReviewWebhookTest < ActiveSupport::TestCa
     payload = job[:args][1]
 
     # PII fields must be absent
-    refute payload.key?('email'), 'payload must not include email'
-    refute payload.key?('secondary_email'), 'payload must not include secondary_email'
-    refute payload.key?('phone'), 'payload must not include phone'
-    refute payload.key?('mobile'), 'payload must not include mobile'
-    refute payload.key?('address_line1'), 'payload must not include address_line1'
-    refute payload.key?('address_line2'), 'payload must not include address_line2'
-    refute payload.key?('city'), 'payload must not include city'
-    refute payload.key?('region'), 'payload must not include region'
-    refute payload.key?('postal_code'), 'payload must not include postal_code'
-    refute payload.key?('country'), 'payload must not include country'
-    refute payload.key?('birthday'), 'payload must not include birthday'
-    refute payload.key?('description'), 'payload must not include description'
-    refute payload.key?('notes'), 'payload must not include notes (related model)'
+    assert_not payload.key?('email'), 'payload must not include email'
+    assert_not payload.key?('secondary_email'), 'payload must not include secondary_email'
+    assert_not payload.key?('phone'), 'payload must not include phone'
+    assert_not payload.key?('mobile'), 'payload must not include mobile'
+    assert_not payload.key?('address_line1'), 'payload must not include address_line1'
+    assert_not payload.key?('address_line2'), 'payload must not include address_line2'
+    assert_not payload.key?('city'), 'payload must not include city'
+    assert_not payload.key?('region'), 'payload must not include region'
+    assert_not payload.key?('postal_code'), 'payload must not include postal_code'
+    assert_not payload.key?('country'), 'payload must not include country'
+    assert_not payload.key?('birthday'), 'payload must not include birthday'
+    assert_not payload.key?('description'), 'payload must not include description'
+    assert_not payload.key?('notes'), 'payload must not include notes (related model)'
 
     # Sanity: payload does not contain any of the secret values, even as substrings
     serialized = payload.to_s
-    refute_includes serialized, 'pii@example.com',
-                    'payload must not contain the contact email anywhere'
-    refute_includes serialized, '555-1234',
-                    'payload must not contain the contact phone anywhere'
-    refute_includes serialized, '123 Secret St',
-                    'payload must not contain the contact address anywhere'
-    refute_includes serialized, '1990-01-01',
-                    'payload must not contain the contact birthday anywhere'
-    refute_includes serialized, 'Highly sensitive description',
-                    'payload must not contain the contact description anywhere'
+    assert_not_includes serialized, 'pii@example.com',
+                        'payload must not contain the contact email anywhere'
+    assert_not_includes serialized, '555-1234',
+                        'payload must not contain the contact phone anywhere'
+    assert_not_includes serialized, '123 Secret St',
+                        'payload must not contain the contact address anywhere'
+    assert_not_includes serialized, '1990-01-01',
+                        'payload must not contain the contact birthday anywhere'
+    assert_not_includes serialized, 'Highly sensitive description',
+                        'payload must not contain the contact description anywhere'
 
     # Non-PII fields ARE present
     assert_equal 'public-nick', contact.nickname
@@ -287,13 +287,13 @@ class AutomyraBridgeContactsHubCreationReviewWebhookTest < ActiveSupport::TestCa
     assert_not_nil job
     payload = job[:args][1]
 
-    refute payload.key?('email')
-    refute payload.key?('phone')
+    assert_not payload.key?('email')
+    assert_not payload.key?('phone')
 
     serialized = payload.to_s
-    refute_includes serialized, 'after@example.com'
-    refute_includes serialized, '555-9999'
-    refute_includes serialized, 'before@example.com'
+    assert_not_includes serialized, 'after@example.com'
+    assert_not_includes serialized, '555-9999'
+    assert_not_includes serialized, 'before@example.com'
   end
 
   # --- 7. Update delivery ID format ------------------------------------------

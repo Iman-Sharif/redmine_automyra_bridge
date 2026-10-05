@@ -31,7 +31,7 @@ module AutomyraBridge
       /reviewed the page context and requested additional/i
     ].freeze
 
-    RETRY_PLACEHOLDER = "⏳ Automyra is retrying (attempt %d/%d)...".freeze
+    RETRY_PLACEHOLDER = '⏳ Automyra is retrying (attempt %d/%d)...'.freeze
     EXHAUSTED_MESSAGE = lambda do |attempts|
       "#{STATUS_MARKER}\n⚠️ Automyra could not complete this request after #{attempts} attempts (LLM provider rate-limited or timed out). Please try again later or mention @Automyra with more context."
     end
@@ -154,7 +154,7 @@ module AutomyraBridge
         delivery_id: new_delivery_id
       )
 
-      if response&.is_a?(Net::HTTPSuccess)
+      if response.is_a?(Net::HTTPSuccess)
         delivery.increment_retry!(@interval_minutes)
         Rails.logger.info(
           "[AutomyraBridge::RetryChecker] re-delivered #{delivery.event_type} " \
@@ -167,7 +167,7 @@ module AutomyraBridge
           last_error: "Re-delivery returned #{response&.class || 'nil'}"
         )
         Rails.logger.warn(
-          "[AutomyraBridge::RetryChecker] re-delivery failed for " \
+          '[AutomyraBridge::RetryChecker] re-delivery failed for ' \
           "delivery #{delivery.delivery_id}: #{delivery.last_error}"
         )
       end
@@ -177,7 +177,7 @@ module AutomyraBridge
         last_error: "#{e.class}: #{e.message}"
       )
       Rails.logger.warn(
-        "[AutomyraBridge::RetryChecker] re-delivery error for " \
+        '[AutomyraBridge::RetryChecker] re-delivery error for ' \
         "delivery #{delivery.delivery_id}: #{e.class}: #{e.message}"
       )
     end
@@ -189,13 +189,13 @@ module AutomyraBridge
 
       attempt_number = delivery.retry_count + 2
       total_attempts = delivery.max_retries + 1
-      placeholder = RETRY_PLACEHOLDER % [attempt_number, total_attempts]
+      placeholder = format(RETRY_PLACEHOLDER, attempt_number, total_attempts)
 
       journal.update_columns(notes: placeholder)
       delivery.update!(fallback_journal_id: journal.id)
 
       Rails.logger.info(
-        "[AutomyraBridge::RetryChecker] replaced fallback comment " \
+        '[AutomyraBridge::RetryChecker] replaced fallback comment ' \
         "journal #{journal.id} with retry placeholder (attempt #{attempt_number}/#{total_attempts})"
       )
     end

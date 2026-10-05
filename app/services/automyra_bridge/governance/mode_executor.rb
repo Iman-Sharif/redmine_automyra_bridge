@@ -72,7 +72,7 @@ module AutomyraBridge
 
       def max_changes_per_run
         value = @config['max_changes_per_run']
-        value.present? ? value.to_i : nil
+        value.presence&.to_i
       end
 
       def read_only_action_project?(action)

@@ -25,6 +25,10 @@ AllCops:
   NewCops: disable
   SuggestExtensions: false
   Exclude:
+    # The CI clones Redmica at ./redmica and symlinks this repo as a plugin; the
+    # working directory resolves to the repo root, so Redmica's own tree lands
+    # inside the scan. It is upstream code, not ours.
+    - 'redmica/**/*'
     # Vendored / sibling plugins that happen to live under this dir -- not ours.
     - 'plugins/**/*'
     - 'repositories/**/*'

@@ -15,7 +15,7 @@ module AutomyraBridge
 
       def required_permission = :view_task_hub_tasks
 
-      def call(job, user, input)
+      def call(_job, user, input)
         task_id = input['task_id'] || input[:task_id]
         task = TaskHub::Task.visible_to(user).find_by(id: task_id)
         return { error: 'Task not found or not visible' } unless task

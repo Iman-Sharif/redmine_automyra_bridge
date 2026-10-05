@@ -112,9 +112,9 @@ class AutomyraBridgeContactsHubStatusReviewWebhookTest < ActiveSupport::TestCase
     assert_equal '[REDACTED]', payload['city']
 
     serialized = payload.to_s
-    refute_includes serialized, 'pii-status@example.com'
-    refute_includes serialized, '555-STATUS'
-    refute_includes serialized, 'Statusville'
+    assert_not_includes serialized, 'pii-status@example.com'
+    assert_not_includes serialized, '555-STATUS'
+    assert_not_includes serialized, 'Statusville'
   end
 
   private

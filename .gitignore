@@ -84,3 +84,6 @@ login-snapshot.yml
 
 # Pre-cutover backups
 *.precutover.bak
+
+# Local Redmica clone used by CI replication
+redmica/

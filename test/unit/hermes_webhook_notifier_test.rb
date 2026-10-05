@@ -613,10 +613,9 @@ class AutomyraBridgeHermesWebhookNotifierTest < ActiveSupport::TestCase
     # retry_on, so it falls through to ActiveJob::Base.default. The default
     # retry_on (StandardError, 3 attempts, :exponentially_longer) is pinned here
     # because removing the custom retry was an intentional simplification.
-    job_class = AutomyraBridge::HermesWebhookDeliverJob
     src = File.read(File.expand_path('../../app/jobs/automyra_bridge/hermes_webhook_deliver_job.rb', __dir__))
-    refute_match(/retry_on\s+StandardError/, src,
-                 'HermesWebhookDeliverJob should NOT have a custom retry_on after F4 cleanup')
+    assert_no_match(/retry_on\s+StandardError/, src,
+                    'HermesWebhookDeliverJob should NOT have a custom retry_on after F4 cleanup')
   ensure
     ActiveJob::Base.queue_adapter = old_adapter if old_adapter
   end

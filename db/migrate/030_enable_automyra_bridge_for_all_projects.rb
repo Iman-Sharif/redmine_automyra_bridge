@@ -2,7 +2,7 @@ class EnableAutomyraBridgeForAllProjects < ActiveRecord::Migration[6.1]
   def up
     module_name = 'automyra_bridge'
 
-    execute <<-SQL.squish
+    execute <<~SQL.squish
       INSERT INTO enabled_modules (project_id, name)
       SELECT p.id, #{connection.quote(module_name)}
       FROM projects p
@@ -13,9 +13,9 @@ class EnableAutomyraBridgeForAllProjects < ActiveRecord::Migration[6.1]
     SQL
 
     default_modules = Setting[:default_projects_modules] || []
-    unless default_modules.include?(module_name)
-      Setting[:default_projects_modules] = default_modules + [module_name]
-    end
+    return if default_modules.include?(module_name)
+
+    Setting[:default_projects_modules] = default_modules + [module_name]
   end
 
   def down

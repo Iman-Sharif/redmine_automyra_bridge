@@ -28,7 +28,7 @@ module AutomyraBridge
         }.compact,
         comments: filtered_task_comments(task),
         recent_automyra_actions: AutomyraBridgeActionProposal.visible_on_task(task)
-                                                             .order(updated_at: :desc).limit(10).map do |proposal|
+                                 .order(updated_at: :desc).limit(10).map do |proposal|
           { id: proposal.id, action_type: proposal.action_type, status: proposal.status, updated_at: proposal.updated_at&.iso8601 }
         end,
         automyra_memory: AutomyraBridge::MemoryReader.recent(task),

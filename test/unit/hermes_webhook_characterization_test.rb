@@ -186,15 +186,15 @@ class AutomyraBridgeHermesWebhookCharacterizationTest < ActiveSupport::TestCase
     # After the F4 scope cleanup, the job no longer defines a custom retry_on
     # so it falls through to ActiveJob::Base.default. Verify no custom handler.
     handlers = job_class.rescue_handlers
-    refute handlers.any? { |h| h[0] == 'StandardError' || h[0] == StandardError.name },
-           'HermesWebhookDeliverJob must NOT have a custom StandardError retry_on after F4 cleanup'
+    assert_not handlers.any? { |h| h[0] == 'StandardError' || h[0] == StandardError.name },
+               'HermesWebhookDeliverJob must NOT have a custom StandardError retry_on after F4 cleanup'
 
     src_path = File.expand_path(
       '../../app/jobs/automyra_bridge/hermes_webhook_deliver_job.rb', __dir__
     )
     src = File.read(src_path)
-    refute_match(/retry_on\s+StandardError/, src,
-                 'HermesWebhookDeliverJob source must not contain a custom retry_on for StandardError')
+    assert_no_match(/retry_on\s+StandardError/, src,
+                    'HermesWebhookDeliverJob source must not contain a custom retry_on for StandardError')
   end
 
   test 'notifier timeout baseline is pinned: default 15s, clamped to [1, 30]' do

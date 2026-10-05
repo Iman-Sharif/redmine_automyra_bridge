@@ -487,7 +487,7 @@ module AutomyraBridge
 
       def max_changes_per_run
         value = @config['max_changes_per_run']
-        value.present? ? value.to_i : nil
+        value.presence&.to_i
       end
 
       def truthy?(value)

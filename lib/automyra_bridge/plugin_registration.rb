@@ -45,13 +45,13 @@ module AutomyraBridge
                    'mr_t_mention_pattern' => 'mrt',
                    'mr_t_user_login' => '',
                    'hermes_webhook_url_mr_t_mentions' => '',
-                    'hermes_webhook_secret' => '',
-                    'activity_log_secret' => 'change-me-in-production',
-                    'auto_close_enabled' => '0',
-                    'auto_close_trigger_status_name' => 'Resolved',
-                    'hermes_webhook_retry_interval_minutes' => '30',
-                    'hermes_webhook_retry_max_retries' => '3',
-                    'hermes_webhook_retry_timeout_minutes' => '60'
+                   'hermes_webhook_secret' => '',
+                   'activity_log_secret' => 'change-me-in-production',
+                   'auto_close_enabled' => '0',
+                   'auto_close_trigger_status_name' => 'Resolved',
+                   'hermes_webhook_retry_interval_minutes' => '30',
+                   'hermes_webhook_retry_max_retries' => '3',
+                   'hermes_webhook_retry_timeout_minutes' => '60'
                  },
                  partial: 'settings/automyra_bridge_settings'
 

@@ -268,7 +268,7 @@ class AutomyraBridgeToolRegistryTest < ActiveSupport::TestCase
   end
 
   test 'task.related returns weighted candidates for a task' do
-    related_task = TaskHub::Task.create!(title: 'Related candidate', user: @user, author: @user, project: @project, status: 'todo')
+    TaskHub::Task.create!(title: 'Related candidate', user: @user, author: @user, project: @project, status: 'todo')
     tool = AutomyraBridge::ToolRegistry.find('task.related')
 
     result = tool.call(@job, @user, { 'task_id' => @task.id })
