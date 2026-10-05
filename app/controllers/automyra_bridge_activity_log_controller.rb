@@ -1,6 +1,6 @@
 class AutomyraBridgeActivityLogController < ApplicationController
   skip_before_action :verify_authenticity_token, raise: false
-  skip_before_action :check_if_login_required
+  skip_before_action :check_if_login_required, raise: false
 
   before_action :verify_activity_log_token!
 

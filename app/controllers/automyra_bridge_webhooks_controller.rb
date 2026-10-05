@@ -2,7 +2,7 @@ require 'zlib'
 
 class AutomyraBridgeWebhooksController < ApplicationController
   skip_before_action :verify_authenticity_token, raise: false
-  skip_before_action :check_if_login_required
+  skip_before_action :check_if_login_required, raise: false
 
   def incoming
     return render_unauthorized unless valid_webhook_token?
