@@ -86,7 +86,7 @@ module AutomyraBridge
 
       # Issue-related events
       if p['issue_id']
-        project_id = Issue.where(id: p['issue_id']).pluck(:project_id).first
+        project_id = Issue.where(id: p['issue_id']).pick(:project_id)
         return ['Issue', p['issue_id'], project_id, p['journal_id']]
       end
 

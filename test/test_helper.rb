@@ -8,11 +8,9 @@ redmica_root = ENV['REDMICA_ROOT']
 if redmica_root.nil? || redmica_root.empty?
   probe = __dir__
   redmica_root = loop do
-    break nil if probe.nil?
-    break probe if File.exist?(File.join(probe, 'test', 'test_helper.rb'))
-
     parent = File.dirname(probe)
     break nil if parent == probe
+    break parent if File.exist?(File.join(parent, 'test', 'test_helper.rb'))
 
     probe = parent
   end
