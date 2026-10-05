@@ -1,6 +1,25 @@
 $LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
 
-require File.expand_path('../../../test/test_helper', __dir__)
+# Resolve Redmine/Redmica's own test_helper regardless of where the plugin is
+# mounted. This plugin is symlinked into redmica/plugins/<name> in CI, and
+# Ruby resolves __dir__ through the symlink to the repo root, so a hardcoded
+# ../../../ climb would escape the checkout.
+redmica_root = ENV['REDMICA_ROOT']
+if redmica_root.nil? || redmica_root.empty?
+  probe = __dir__
+  redmica_root = loop do
+    break nil if probe.nil?
+    break probe if File.exist?(File.join(probe, 'test', 'test_helper.rb'))
+
+    parent = File.dirname(probe)
+    break nil if parent == probe
+
+    probe = parent
+  end
+end
+raise 'Could not locate the Redmica root (test/test_helper.rb)' unless redmica_root
+
+require File.expand_path('test/test_helper', redmica_root)
 
 if defined?(Rails::LineFiltering)
   module Rails
