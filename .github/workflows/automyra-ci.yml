@@ -39,12 +39,6 @@ jobs:
           # Place this plugin inside Redmica's plugins directory
           ln -s "$(pwd)" redmica/plugins/redmine_automyra_bridge
 
-      - name: Install dependencies
-        working-directory: redmica
-        run: |
-          gem install bundler
-          bundle install --jobs 4 --retry 3
-
       - name: Configure database
         working-directory: redmica
         run: |
@@ -58,6 +52,12 @@ jobs:
             username: postgres
             password: postgres
           YAML
+
+      - name: Install dependencies
+        working-directory: redmica
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
 
       - name: Run plugin migrations
         working-directory: redmica
@@ -96,7 +96,7 @@ jobs:
       - name: Run rubocop
         working-directory: redmica/plugins/redmine_automyra_bridge
         run: |
-          BUNDLE_GEMFILE="$(pwd)/../../Gemfile" bundle exec rubocop --config .rubocop.yml --force-exclusion
+          BUNDLE_GEMFILE="$GITHUB_WORKSPACE/redmica/Gemfile" bundle exec rubocop --config .rubocop.yml --force-exclusion
 
   migration-guard:
     runs-on: ubuntu-latest
