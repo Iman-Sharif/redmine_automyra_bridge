@@ -1,6 +1,6 @@
 class AutomyraBridgeController < ApplicationController
   accept_api_auth :improve_task
-  skip_before_action :verify_authenticity_token, only: :improve_task
+  skip_before_action :verify_authenticity_token, only: :improve_task, raise: false
 
   before_action :require_login
   before_action :find_project

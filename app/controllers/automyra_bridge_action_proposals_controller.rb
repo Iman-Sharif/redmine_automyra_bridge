@@ -1,6 +1,6 @@
 class AutomyraBridgeActionProposalsController < ApplicationController
   accept_api_auth :index, :create, :status, :approve, :reject
-  skip_before_action :verify_authenticity_token, only: %i[create status approve reject]
+  skip_before_action :verify_authenticity_token, only: %i[create status approve reject], raise: false
 
   before_action :require_login
   before_action :find_proposal, except: %i[index create]
