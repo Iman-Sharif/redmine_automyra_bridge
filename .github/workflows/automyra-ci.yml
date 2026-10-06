@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout plugin
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Set up Ruby 3.3.11
         uses: ruby/setup-ruby@v1
@@ -78,6 +80,8 @@ jobs:
     steps:
       - name: Checkout plugin
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Set up Ruby 3.3.11
         uses: ruby/setup-ruby@v1
@@ -98,7 +102,7 @@ jobs:
       - name: Run rubocop
         working-directory: redmica/plugins/redmine_automyra_bridge
         run: |
-          BUNDLE_GEMFILE="$GITHUB_WORKSPACE/redmica/Gemfile" bundle exec rubocop --config .rubocop.yml --force-exclusion
+          BUNDLE_GEMFILE="$GITHUB_WORKSPACE/redmica/Gemfile" bundle exec rubocop --config .rubocop.yml --force-exclusion app/ lib/ db/ config/ test/
 
   migration-guard:
     runs-on: ubuntu-latest
@@ -106,6 +110,8 @@ jobs:
     steps:
       - name: Checkout plugin
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Check for gitignored migrations
         run: |
